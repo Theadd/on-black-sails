@@ -1,2 +1,2 @@
-hashin
-======
+# hashin
+### a Sails application
