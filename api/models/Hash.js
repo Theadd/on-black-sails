@@ -60,6 +60,16 @@ module.exports = {
       defaultsTo: 0
     },
 
+    seeders: {
+      type: 'integer',
+      defaultsTo: 0
+    },
+
+    leechers: {
+      type: 'integer',
+      defaultsTo: 0
+    },
+
     status: {
       type: 'integer',
       defaultsTo: 0

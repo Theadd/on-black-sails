@@ -11,7 +11,8 @@
     "optimist": "0.3.4",
     "sails-mongo": "^0.9.8",
     "requestify": "^0.1.16",
-    "nt": "^0.4.0"
+    "nt": "^0.4.0",
+    "bittorrent-tracker": "^1.0.1"
   },
   "scripts": {
     "start": "node app.js",

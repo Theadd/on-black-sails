@@ -9,6 +9,7 @@
  FAKE = -2*/
 var status2value = { 'VERIFIED': 2, 'GOOD': 1, 'NONE': 0, 'ERROR': 0, 'NOTFOUND': 0, 'BAD': -1, 'FAKE': -2 };
 var requestify = require('requestify');
+var trackerClient = require('bittorrent-tracker').Client;
 
 exports.run = function() {
 
@@ -117,6 +118,7 @@ var updateMetadata = function() {
                 }
               });
             }
+            //connect to tracker
 
           }
         });
@@ -125,7 +127,7 @@ var updateMetadata = function() {
 
 }
 
-
+var hashOfActiveUpdateStatus = '';
 
 var updateStatus = function() {
 
@@ -135,15 +137,58 @@ var updateStatus = function() {
     .limit(1)
     .exec(function(err, entries) {
       if (!err && entries.length) {
-        //Update fake status
-        requestify.get('http://bitsnoop.com/api/fakeskan.php?hash=' + entries[0].id.toUpperCase()).then(function(response) {
-          response.getBody();
-          console.log("FAKESCAN=#" + response.body + "# for "+entries[0].title);
-          var value = status2value[response.body];
-          if (value > -10 && value < 10) {
-            Hash.update({ id: entries[0].id },{ status: value }, function(err, hashes) { });
+        //avoid overlap
+        if (entries[0].id != hashOfActiveUpdateStatus) {
+          hashOfActiveUpdateStatus = entries[0].id;
+
+          //Update fake status
+          requestify.get('http://bitsnoop.com/api/fakeskan.php?hash=' + entries[0].id.toUpperCase()).then(function(response) {
+            response.getBody();
+            console.log("FAKESCAN=#" + response.body + "# for "+entries[0].title);
+            var value = status2value[response.body];
+            if (value > -10 && value < 10) {
+              Hash.update({ id: entries[0].id },{ status: value }, function(err, hashes) { });
+            }
+          });
+          //update peers from trackers
+          /*"trackers": [
+           "udp://tracker.openbittorrent.com:80/announce",
+           "udp://tracker.publicbt.com:80/announce",
+           "udp://tracker.openbittorrent.com:80/announce"
+           ],*/
+          var peerId = new Buffer('01234567890123456789');
+          var port = 6881;
+          var data = { announce: [], infoHash: entries[0].id };
+          for (var t in entries[0].trackers) {
+            data.announce.push(entries[0].trackers[t]);
           }
-        });
+          //console.log(data);
+          //console.log("New trackerClient");
+          var client = new trackerClient(peerId, port, data);
+          client.on('error', function (err) {
+            //console.log("ERROR: " + err.message);
+            // a tracker was unavailable or sent bad data to the client. you can probably ignore it
+          });
+
+          client.once('update', function (data) {
+            /*console.log('got an announce response from tracker: ' + data.announce);
+            console.log('number of seeders in the swarm: ' + data.complete);
+            console.log('number of leechers in the swarm: ' + data.incomplete);
+            console.log(data);*/
+            Hash.update({ id: entries[0].id },{ seeders: data.complete, leechers: data.incomplete }, function(err, hashes) { });
+          });
+
+          client.update();
+
+          /*client.once('scrape', function (data) {
+            console.log('got a scrape response from tracker: ' + data.announce);
+            console.log('number of seeders in the swarm: ' + data.complete);
+            console.log('number of leechers in the swarm: ' + data.incomplete);
+            console.log('number of total downloads of this torrent: ' + data.incomplete);
+          });
+
+          client.scrape();*/
+        }
       }
     });
 }
