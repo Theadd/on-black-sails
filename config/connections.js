@@ -54,7 +54,7 @@ module.exports.connections = {
     host: 'localhost',
     port: 27017,
     //database: 'hashindb'
-    database: 'onblacksails'
+    database: 'blacksails'
     // user: 'username',
     // password: 'password',
     // database: 'your_mongo_db_name_here'
