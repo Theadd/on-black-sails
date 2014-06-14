@@ -6,6 +6,22 @@
  */
 
 module.exports = {
-	
+
+  /**
+   * HashController.count()
+   */
+  count: function (req, res) {
+
+    Hash.count({}).exec(function countCB(err,found){
+      if (err) return res.send(err,500);
+
+      res.json({
+        total: found
+      });
+
+    });
+
+  }
+
 };
 

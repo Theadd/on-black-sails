@@ -85,7 +85,7 @@ module.exports = {
       obj.link = "http://torrage.com/torrent/" + obj.id.toUpperCase() + ".torrent";
       obj.magnet = "magnet:?xt=urn:btih:" + obj.id.toLowerCase() + "&dn=" + encodeURI(obj.title);
       obj.category = obj.category.toLowerCase();
-      delete obj.downloaded;
+      //delete obj.downloaded;
       return obj;
     }
 
