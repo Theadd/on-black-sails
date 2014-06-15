@@ -9,7 +9,6 @@ var Task = require('tasker').Task;
 
 
 exports.run = function() {
-  //var wQueries = QueryHelpers.getWaterlineQueryFromString('these words "this phrase" | "exactword" blue | "red hair" alsothis', 'title')
 
   createTask('http://bitsnoop.com/api/latest_tz.php?t=all', 60000, indexSiteAPI) //10min = 600000
 

@@ -23,46 +23,29 @@ module.exports = {
 
   },
 
-  //Model.find({ class: { 'contains': 'history' }})
-  //req.param('id')
-
   /**
    * HashController.search()
+   * @example: http://localhost:1337/hash/search?query=2014%20720%20|%201080&category=movie%20|%20tv
    */
   search: function (req, res) {
+    var i,
+      query = Hash.find(),
+      queries = QueryHelpers.getWaterlineQueryFromString(req.param('query'), 'title'),
+      categories = (typeof req.param('category') !== "undefined" && req.param('category').length) ? QueryHelpers.getWaterlineQueryFromString(req.param('category'), 'category') : []
 
-    /*Hash.find({ title: { 'contains': req.param('title') }}).exec(function searchCB(err, hashes){
-      if (err) return res.send(err,500);
+    for (i = 0; i < queries.length; ++i) {
+      query = query.where(queries[i])
+    }
+    for (i = 0; i < categories.length; ++i) {
+      query = query.where(categories[i])
+    }
 
-      res.json(hashes);
-
-    });*/
-
-    Hash.find().where({
-      or: [
-        {title: { contains: req.param('query') }},
-        {category: { contains: req.param('query') }}
-      ]
-    }).exec(function searchCB(err, hashes){
+    query.exec(function searchCB(err, hashes){
       if (err) return res.send(err,500);
 
       res.json(hashes);
 
     });
-
   }
 
 };
-
-/*
- User.find()
- .where({
- or: [
- {username: { contains: req.body.search }},
- {email: { contains: req.body.search }},
- {firstName: { contains: firstName }},
- {lastName: { contains: lastName }},
- {firstName: {startsWith: firstName}, lastName: lastName}
- ]
- }).exec(...)
- */
