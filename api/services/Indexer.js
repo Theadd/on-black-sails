@@ -1,12 +1,15 @@
 /**
- * Created by Admin on 5/30/14.
+ * Created by Theadd on 5/30/14.
  */
 
 //var status2value = { 'VERIFIED': 2, 'GOOD': 1, 'NONE': 0, 'ERROR': 0, 'NOTFOUND': 0, 'BAD': -1, 'FAKE': -2 };
 var Task = require('tasker').Task;
 //var trackerClient = require('bittorrent-tracker').Client;
 
+
+
 exports.run = function() {
+  //var wQueries = QueryHelpers.getWaterlineQueryFromString('these words "this phrase" | "exactword" blue | "red hair" alsothis', 'title')
 
   createTask('http://bitsnoop.com/api/latest_tz.php?t=all', 60000, indexSiteAPI) //10min = 600000
 
