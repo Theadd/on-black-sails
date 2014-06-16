@@ -4,7 +4,7 @@
 
 var status2value = { 'VERIFIED': 2, 'GOOD': 1, 'NONE': 0, 'ERROR': 0, 'NOTFOUND': 0, 'BAD': -1, 'FAKE': -2 };
 var Task = require('tasker').Task;
-//var trackerClient = require('bittorrent-tracker').Client;
+var trackerClient = require('bittorrent-tracker');
 
 
 
@@ -98,6 +98,36 @@ var createTask = function(target, interval, dataCb) {
   task.start()
 }
 
+function ignore(err) {
+  //console.log("ERROR: " + err.message);
+}
+
+var updateTrackersFromHash = function(hash) {
+  console.log("\tREQUESTING TRACKERS DATA OF " + hash)
+  Hash.find()
+    .where({ id: hash })
+    .limit(1)
+    .exec(function(err, entries) {
+      if (!err && entries.length) {
+        //update peers from trackers
+        var peerId = new Buffer('01234567890123456789');
+        var port = 6881;
+        var data = { announce: [], infoHash: entries[0].id };
+        for (var t in entries[0].trackers) {
+          data.announce.push(entries[0].trackers[t]);
+        }
+        //console.log(JSON.stringify(data))
+        var client = new trackerClient(peerId, port, data);
+        client.on('error', ignore);
+        client.once('update', function (data) {
+          Hash.update({ id: entries[0].id },{ seeders: data.complete, leechers: data.incomplete }, function(err, hashes) { });
+          console.log("\tTRACKERS DATA OF " + hash + ": " + JSON.stringify(data))
+        });
+        client.update();
+      }
+    });
+}
+
 var indexSiteAPI = function(content) {
   //console.log("call indexSiteAPI(), content.length: " + content.length)
   //console.log(this)
@@ -176,6 +206,7 @@ var updateStatus = function(content) {
 
   if (value > -10 && value < 10) {
     Hash.update({ id: task.hash },{ status: value }, function(err, hashes) { });
+    updateTrackersFromHash(task.hash)
   }
 }
 
