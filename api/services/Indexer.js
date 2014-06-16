@@ -2,7 +2,7 @@
  * Created by Theadd on 5/30/14.
  */
 
-//var status2value = { 'VERIFIED': 2, 'GOOD': 1, 'NONE': 0, 'ERROR': 0, 'NOTFOUND': 0, 'BAD': -1, 'FAKE': -2 };
+var status2value = { 'VERIFIED': 2, 'GOOD': 1, 'NONE': 0, 'ERROR': 0, 'NOTFOUND': 0, 'BAD': -1, 'FAKE': -2 };
 var Task = require('tasker').Task;
 //var trackerClient = require('bittorrent-tracker').Client;
 
@@ -27,6 +27,23 @@ exports.run = function() {
         }
       })
   }, 5000, updateMetadata)
+
+  createTask(function () {
+    var task = this
+    Hash.find()
+      .where({ downloaded: true })
+      .sort('updatedAt ASC')
+      .limit(1)
+      .exec(function(err, entries) {
+        if (!err && entries.length) {
+          task.hash = entries[0].id.toUpperCase()
+          task.title = entries[0].title
+          task.use('http://bitsnoop.com/api/fakeskan.php?hash=' + entries[0].id.toUpperCase())
+        }
+      })
+  }, 1000, updateStatus)
+
+
 
   /*var timerMetadata = later.setInterval(updateMetadata, schedule5sec);
    var timerProcess = later.setInterval(process, schedule10min);
@@ -69,9 +86,9 @@ var createTask = function(target, interval, dataCb) {
     }
   })
 
-  task.on('status', function (msg) {
+  /*task.on('status', function (msg) {
     console.log("status: " + msg)
-  })
+  })*/
 
   /*task.on('data', function (data) {
     dataCb(data)
@@ -118,15 +135,6 @@ var indexSiteAPI = function(content) {
 
 var updateMetadata = function(content) {
   var task = this
-  /*console.log("------------------CALL updateMetadata()!------------------")
-  console.log(content)
-  console.log("----------------------------------------------------------")
-  console.log(this)
-  console.log("----------------------------------------------------------")
-  console.log("----------------------------------------------------------")
-  console.log("----------------------------------------------------------")*/
-
-  //console.log(typeof content)
   //Update Hash model
   Hash.update({ id: task.hash },{
     size: content.size,
@@ -139,78 +147,41 @@ var updateMetadata = function(content) {
       console.log("ERROR UPDATING METADATA OF " + task.hash)
       console.log(err)
     }
-  });
+  })
   //Update File model
   for (var i in content.files) {
     var data = {};
-    data['hash'] = task.hash; //hash, file, title, category, added, size
-    data['file'] = content.files[i].name;
-    data['title'] = task.title;
-    data['category'] = task.category;
-    data['added'] = new Date(content.creationDate);
+    data['hash'] = task.hash
+    data['file'] = content.files[i].name
+    data['title'] = task.title
+    data['category'] = task.category
+    data['added'] = new Date(content.creationDate)
     data['size'] = content.files[i].size;
     File.create(data).exec(function(err, fileentry) {
       if (!err) {
-        console.log("File added: ", fileentry.file);
+        console.log("File added: ", fileentry.file)
       } else {
-        console.log(err);
+        console.log(err)
       }
-    });
+    })
+  }
+}
+
+
+var updateStatus = function(content) {
+  var task = this,
+    value = status2value[content]
+
+  console.log("FAKESCAN=#" + content + "# for " + task.title);
+
+  if (value > -10 && value < 10) {
+    Hash.update({ id: task.hash },{ status: value }, function(err, hashes) { });
   }
 }
 
 /*
 
-var updateMetadata = function() {
 
-  Hash.find()
-    .where({ downloaded: false })
-    .sort('updatedAt ASC')
-    .limit(1)
-    .exec(function(err, entries) {
-      if (!err && entries.length) {
-        var nt = require('nt');
-        nt.read('http://torrage.com/torrent/' + entries[0].id.toUpperCase() + '.torrent', function(err, torrent) {
-          if (err) {
-            Hash.update({ id: entries[0].id },{ size: 0 }, function(err, hashes) { });
-          } else {
-            var metadata = TorrentUtils.getEverything(torrent.metadata);
-            //Update Hash model
-            Hash.update({ id: entries[0].id },{
-              size: metadata.size,
-              trackers: metadata.trackers,
-              files: metadata.files,
-              downloaded: true,
-              added: new Date(metadata.creationDate)
-            }, function(err, hashes) {
-              if (err) {
-                console.log(err);
-              }
-            });
-            //Update File model
-            for (var i in metadata.files) {
-              var data = {};
-              data['hash'] = entries[0].id; //hash, file, title, category, added, size
-              data['file'] = metadata.files[i].name;
-              data['title'] = entries[0].title;
-              data['category'] = entries[0].category;
-              data['added'] = new Date(metadata.creationDate);
-              data['size'] = metadata.files[i].size;
-              File.create(data).done(function(err, fileentry) {
-                if (!err) {
-                  console.log("File added: ", fileentry.file);
-                } else {
-                  console.log(err);
-                }
-              });
-            }
-
-          }
-        });
-      }
-    });
-
-}
 
 var hashOfActiveUpdateStatus = '';
 
