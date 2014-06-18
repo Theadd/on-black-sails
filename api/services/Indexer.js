@@ -6,8 +6,6 @@ var status2value = { 'VERIFIED': 2, 'GOOD': 1, 'NONE': 0, 'ERROR': 0, 'NOTFOUND'
 var Task = require('tasker').Task;
 var trackerClient = require('bittorrent-tracker');
 
-
-
 exports.run = function() {
 
   createTask('http://bitsnoop.com/api/latest_tz.php?t=all', 60000, indexSiteAPI) //10min = 600000
@@ -44,32 +42,32 @@ exports.run = function() {
   }, 1000, updateStatus)
 
 
+  createTask(function () {
+    var task = this
+    Hash.find()
+      .where({ downloaded: true })
+      .where({category: { contains: "movies" } })
+      .where({status: {'>': 0}})
+      .sort('updatedAt ASC')
+      .limit(1)
+      .exec(function(err, entries) {
+        if (!err && entries.length) {
+          task.hash = entries[0].id.toUpperCase()
+          task.mediaField = entries[0].media || {}
+          task.imdb = ''
+          task.rate = entries[0].rate || 0
+          if (typeof entries[0].imdb !== "undefined" && entries[0].imdb.length) {
+            task.imdb = entries[0].imdb
+            task.use('http://www.omdbapi.com/?i=' +  entries[0].imdb)
+          } else {
+            var media = MediaHelpers.guessMedia(entries[0].title)
+            task.media = media
+            task.use('http://www.omdbapi.com/?i=&t=' + media.name + ((media.year > 0) ? '&y=' + media.year : ''))
+          }
+        }
+      })
+  }, 500, updateMovie)
 
-  /*var timerMetadata = later.setInterval(updateMetadata, schedule5sec);
-   var timerProcess = later.setInterval(process, schedule10min);
-   var timerStatus = later.setInterval(updateStatus, scheduleUpdateStatus);
-   process();*/
-  //parser = new Parser('http://ext.bitsnoop.com/export/b3_e003_trackers.txt.gz', later.parse.text('every 30 sec'))
-  //parser = new Parser('http://ext.bitsnoop.com/export/b3_e003_trackers.txt.gz', 10000)
-  /*parser = new Helpers.Parser(function () {
-   var obj = this
-   Hash.find()
-   .where({ downloaded: true })
-   .sort('updatedAt ASC')
-   .limit(1)
-   .exec(function(err, entries) {
-   if (!err && entries.length) {
-   obj.use('http://ext.bitsnoop.com/export/b3_e003_trackers.txt.gz')
-   }
-   })
-   }, 10000)
-   parser.on('error', function (err) {
-   console.log(err);
-   })
-   parser.on('data', function (data) {
-   console.log("PARSER GOT DATA!! " + data.substring(0, 32));
-   })
-   parser.start()*/
 }
 
 
@@ -202,59 +200,32 @@ var updateStatus = function(content) {
   var task = this,
     value = status2value[content]
 
-  console.log("FAKESCAN=#" + content + "# for " + task.title);
-
   if (value > -10 && value < 10) {
     Hash.update({ id: task.hash },{ status: value }, function(err, hashes) { });
     updateTrackersFromHash(task.hash)
   }
 }
 
-/*
+var updateMovie = function(content) {
+  var task = this,
+    res = JSON.parse(content)
 
+  if (res['Response'] == 'True' && res['Type'] == 'movie' && (task.imdb.length || res['Title'].toLowerCase() == task.media['name'].toLowerCase())) {
+    var data = {genre: res['Genre'], media: task.mediaField}
+    data['media']['imdb'] = res['imdbID']
+    data['media']['imdbRating'] = parseFloat(res['imdbRating'])
+    data['media']['imdbVotes'] = parseInt(res['imdbVotes'].replace(/,/, ''))
+    data['media']['metascore'] = parseInt(res['Metascore'])
+    data['media']['title'] = res['Title']
+    data['rate'] = (data['media']['imdbVotes'] >= 500) ? data['media']['imdbRating'] * 10 : task.rate
 
-
-var hashOfActiveUpdateStatus = '';
-
-var updateStatus = function() {
-
-  Hash.find()
-    .where({ downloaded: true })
-    .sort('updatedAt ASC')
-    .limit(1)
-    .exec(function(err, entries) {
-      if (!err && entries.length) {
-        //avoid overlap
-        if (entries[0].id != hashOfActiveUpdateStatus) {
-          hashOfActiveUpdateStatus = entries[0].id;
-
-          //Update fake status
-          requestify.get('http://bitsnoop.com/api/fakeskan.php?hash=' + entries[0].id.toUpperCase()).then(function(response) {
-            response.getBody();
-            console.log("FAKESCAN=#" + response.body + "# for "+entries[0].title);
-            var value = status2value[response.body];
-            if (value > -10 && value < 10) {
-              Hash.update({ id: entries[0].id },{ status: value }, function(err, hashes) { });
-            }
-          });
-          //update peers from trackers
-          var peerId = new Buffer('01234567890123456789');
-          var port = 6881;
-          var data = { announce: [], infoHash: entries[0].id };
-          for (var t in entries[0].trackers) {
-            data.announce.push(entries[0].trackers[t]);
-          }
-          var client = new trackerClient(peerId, port, data);
-          client.on('error', function (err) {
-            //console.log("ERROR: " + err.message);
-          });
-          client.once('update', function (data) {
-            Hash.update({ id: entries[0].id },{ seeders: data.complete, leechers: data.incomplete }, function(err, hashes) { });
-          });
-          client.update();
-        }
-      }
-    });
+    Hash.update({ id: task.hash }, data, function(err, hashes) { })
+  } else {
+    Hash.update({ id: task.hash },{ rate: task.rate }, function(err, hashes) { }) //avoid overlapping
+    MediaHelpers.matchingIMDBIDFromTMDB(task.media['name'], task.media['year'], updateHashIMDB, { hash: task.hash })
+  }
 }
 
-*/
+function updateHashIMDB (opts) {
+  Hash.update({ id: opts['hash'] },{ imdb: opts['imdb'] }, function(err, hashes) { });
+}

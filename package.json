@@ -25,7 +25,8 @@
     "tasker": "git+https://git@github.com/Theadd/tasker.git",
     "later": "^1.1.6",
     "sails-mongo": "^0.10.0-rc5",
-    "bittorrent-tracker": "^1.5.0"
+    "bittorrent-tracker": "^1.5.0",
+    "moviedb": "^0.1.4"
   },
   "scripts": {
     "start": "node app.js",

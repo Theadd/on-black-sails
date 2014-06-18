@@ -78,6 +78,26 @@ module.exports = {
        BAD = -1
        FAKE = -2*/
     },
+
+    media: {
+      type: 'json',
+      defaultsTo: {}
+    },
+
+    genre: {
+      type: 'string'
+    },
+
+    rate: {
+      type: 'integer',
+      defaultsTo: 0
+    },
+
+    imdb: {
+      type: 'string'
+    },
+
+
     //http:\/\/torrage.com\/torrent\/CAAB3CB4B58116733397934793F869EBFF8E14EA.torrent
     //magnet:?xt=urn:btih:2c76d7b989b9dc2daecfd4f3764ba445b6f08b45&dn=Mafia%20II-SKIDROW%20%28Mafia%202%29
     toJSON: function() {
