@@ -218,6 +218,7 @@ var updateMovie = function(content) {
     data['media']['metascore'] = parseInt(res['Metascore'])
     data['media']['title'] = res['Title']
     data['rate'] = (data['media']['imdbVotes'] >= 500) ? data['media']['imdbRating'] * 10 : task.rate
+    data['imdb'] = res['imdbID']
 
     Hash.update({ id: task.hash }, data, function(err, hashes) { })
   } else {
