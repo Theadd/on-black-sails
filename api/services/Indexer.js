@@ -9,6 +9,7 @@ var trackerClient = require('bittorrent-tracker');
 exports.run = function() {
 
   createTask('http://bitsnoop.com/api/latest_tz.php?t=all', 60000, indexSiteAPI) //10min = 600000
+  createTask('http://ext.bitsnoop.com/export/b3_all.txt.gz', 0, indexSiteAPI) //run once
 
   createTask(function () {
     var task = this
@@ -47,7 +48,7 @@ exports.run = function() {
     Hash.find()
       .where({ downloaded: true })
       .where({category: { contains: "movies" } })
-      .where({status: {'>': 0}})
+      .where({status: {'>=': 0}})
       .sort('updatedAt ASC')
       .limit(1)
       .exec(function(err, entries) {
