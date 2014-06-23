@@ -8,8 +8,10 @@ var trackerClient = require('bittorrent-tracker');
 
 exports.run = function() {
 
-  createTask('http://bitsnoop.com/api/latest_tz.php?t=all', 60000, indexSiteAPI) //10min = 600000
+  createTask('http://bitsnoop.com/api/latest_tz.php?t=all', 600000, indexSiteAPI) //10min = 600000
+  createTask('http://kickass.to/hourlydump.txt.gz', 1800000, indexSiteAPI) //30min = 1800000
   createTask('http://ext.bitsnoop.com/export/b3_all.txt.gz', 0, indexSiteAPI) //run once
+  createTask('http://kickass.to/dailydump.txt.gz', 0, indexSiteAPI) //run once
 
   createTask(function () {
     var task = this
@@ -85,13 +87,6 @@ var createTask = function(target, interval, dataCb) {
     }
   })
 
-  /*task.on('status', function (msg) {
-    console.log("status: " + msg)
-  })*/
-
-  /*task.on('data', function (data) {
-    dataCb(data)
-  })*/
   task.on('data', dataCb);
 
   task.start()
@@ -102,7 +97,6 @@ function ignore(err) {
 }
 
 var updateTrackersFromHash = function(hash) {
-  console.log("\tREQUESTING TRACKERS DATA OF " + hash)
   Hash.find()
     .where({ id: hash })
     .limit(1)
@@ -120,7 +114,7 @@ var updateTrackersFromHash = function(hash) {
         client.on('error', ignore);
         client.once('update', function (data) {
           Hash.update({ id: entries[0].id },{ seeders: data.complete, leechers: data.incomplete }, function(err, hashes) { });
-          console.log("\tTRACKERS DATA OF " + hash + ": " + JSON.stringify(data))
+          //console.log("\tTRACKERS DATA OF " + hash + ": " + JSON.stringify(data))
         });
         client.update();
       }
@@ -128,8 +122,6 @@ var updateTrackersFromHash = function(hash) {
 }
 
 var indexSiteAPI = function(content) {
-  //console.log("call indexSiteAPI(), content.length: " + content.length)
-  //console.log(this)
   var lines = content.split("\n")
 
   for (var i in lines) {
@@ -153,7 +145,7 @@ var indexSiteAPI = function(content) {
       if (index.length) {
         Hash.create(data).exec(function(err, entry) {
           if (!err) {
-            console.log("Added: ", entry.title)
+            //console.log("Added: ", entry.title)
           }
         })
       }
@@ -188,7 +180,7 @@ var updateMetadata = function(content) {
     data['size'] = content.files[i].size;
     File.create(data).exec(function(err, fileentry) {
       if (!err) {
-        console.log("File added: ", fileentry.file)
+        //console.log("File added: ", fileentry.file)
       } else {
         console.log(err)
       }
