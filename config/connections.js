@@ -49,15 +49,26 @@ module.exports.connections = {
   // Run:
   // npm install sails-mongo
   //
-  mongo: {
+  /*mongo: {
     adapter: 'sails-mongo',
     host: 'localhost',
     port: 27017,
-    //database: 'hashindb'
     database: 'blacksails'
-    // user: 'username',
-    // password: 'password',
-    // database: 'your_mongo_db_name_here'
+  },*/
+  mongo: {
+    adapter: 'sails-mongo',
+    host: '192.168.1.10',
+    port: 27017,
+    database: 'blacksails',
+    replSet: {
+      servers: [
+        {
+          host: '192.168.1.12',
+          port: 27017
+        }
+      ],
+      options: {}
+    }
   },
 
   // PostgreSQL is another officially supported relational database.

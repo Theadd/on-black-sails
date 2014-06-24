@@ -8,69 +8,95 @@ var trackerClient = require('bittorrent-tracker');
 
 exports.run = function() {
 
-  createTask('http://bitsnoop.com/api/latest_tz.php?t=all', 600000, indexSiteAPI) //10min = 600000
-  createTask('http://kickass.to/hourlydump.txt.gz', 1800000, indexSiteAPI) //30min = 1800000
-  createTask('http://ext.bitsnoop.com/export/b3_all.txt.gz', 0, indexSiteAPI) //run once
-  createTask('http://kickass.to/dailydump.txt.gz', 0, indexSiteAPI) //run once
+  var role = {
+    'full-index': sails.config['full-index'] || false,
+    'update-index': sails.config['update-index'] || true,
+    'update-metadata': sails.config['update-metadata'] || true,
+    'update-status': sails.config['update-status'] || false,
+    'update-media': sails.config['update-media'] || true
+  }
 
-  createTask(function () {
-    var task = this
-    Hash.find()
-      .where({ downloaded: false })
-      .sort('updatedAt ASC')
-      .limit(1)
-      .exec(function(err, entries) {
-        if (!err && entries.length) {
-          task.hash = entries[0].id.toUpperCase()
-          task.title = entries[0].title
-          task.category = entries[0].category
-          task.use('http://torrage.com/torrent/' + entries[0].id.toUpperCase() + '.torrent')
-        }
-      })
-  }, 5000, updateMetadata)
+  /*
+  --full-index=false
+  --update-index=true
+  --update-metadata=true
+  --update-status=false
+  --update-media=true
+  */
 
-  createTask(function () {
-    var task = this
-    Hash.find()
-      .where({ downloaded: true })
-      .sort('updatedAt ASC')
-      .limit(1)
-      .exec(function(err, entries) {
-        if (!err && entries.length) {
-          task.hash = entries[0].id.toUpperCase()
-          task.title = entries[0].title
-          task.use('http://bitsnoop.com/api/fakeskan.php?hash=' + entries[0].id.toUpperCase())
-        }
-      })
-  }, 1000, updateStatus)
+  if (role['update-index']) {
+    createTask('http://bitsnoop.com/api/latest_tz.php?t=all', 600000, indexSiteAPI) //10min = 600000
+    createTask('http://kickass.to/hourlydump.txt.gz', 1800000, indexSiteAPI) //30min = 1800000
+  }
+  if (role['full-index']) {
+    createTask('http://ext.bitsnoop.com/export/b3_all.txt.gz', 0, indexSiteAPI) //run once
+    createTask('http://kickass.to/dailydump.txt.gz', 0, indexSiteAPI) //run once
+  }
 
-
-  createTask(function () {
-    var task = this
-    Hash.find()
-      .where({ downloaded: true })
-      .where({category: { contains: "movies" } })
-      .where({status: {'>=': 0}})
-      .sort('updatedAt ASC')
-      .limit(1)
-      .exec(function(err, entries) {
-        if (!err && entries.length) {
-          task.hash = entries[0].id.toUpperCase()
-          task.mediaField = entries[0].media || {}
-          task.imdb = ''
-          task.rate = entries[0].rate || 0
-          if (typeof entries[0].imdb !== "undefined" && entries[0].imdb.length) {
-            task.imdb = entries[0].imdb
-            task.use('http://www.omdbapi.com/?i=' +  entries[0].imdb)
-          } else {
-            var media = MediaHelpers.guessMedia(entries[0].title)
-            task.media = media
-            task.use('http://www.omdbapi.com/?i=&t=' + media.name + ((media.year > 0) ? '&y=' + media.year : ''))
+  if (role['update-metadata']) {
+    createTask(function () {
+      var task = this
+      Hash.find()
+        .where({ downloaded: false })
+        .sort('updatedAt ASC')
+        .limit(1)
+        .exec(function(err, entries) {
+          if (!err && entries.length) {
+            task.hash = entries[0].id.toUpperCase()
+            task.title = entries[0].title
+            task.category = entries[0].category
+            task.use('http://torrage.com/torrent/' + entries[0].id.toUpperCase() + '.torrent')
           }
-        }
-      })
-  }, 500, updateMovie)
+        })
+    }, 5000, updateMetadata)
+  }
 
+  if (role['update-status']) {
+    createTask(function () {
+      var task = this
+      Hash.find()
+        .where({ downloaded: true })
+        .sort('updatedAt ASC')
+        .limit(1)
+        .exec(function(err, entries) {
+          if (!err && entries.length) {
+            task.hash = entries[0].id.toUpperCase()
+            task.title = entries[0].title
+            task.use('http://bitsnoop.com/api/fakeskan.php?hash=' + entries[0].id.toUpperCase())
+          }
+        })
+    }, 1000, updateStatus)
+  }
+
+  if (role['update-media']) {
+    createTask(function () {
+      var task = this
+      Hash.find()
+        .where({ downloaded: true })
+        .where({category: { contains: "movies" } })
+        .where({status: {'>=': 0}})
+        .sort('updatedAt ASC')
+        .limit(1)
+        .exec(function(err, entries) {
+          if (!err && entries.length) {
+            task.hash = entries[0].id.toUpperCase()
+            task.mediaField = entries[0].media || {}
+            task.imdb = ''
+            task.rate = entries[0].rate || 0
+            if (typeof entries[0].imdb !== "undefined" && entries[0].imdb.length) {
+              task.imdb = entries[0].imdb
+              task.use('http://www.omdbapi.com/?i=' +  entries[0].imdb)
+            } else {
+              var media = MediaHelpers.guessMedia(entries[0].title)
+              task.media = media
+              task.use('http://www.omdbapi.com/?i=&t=' + media.name + ((media.year > 0) ? '&y=' + media.year : ''))
+            }
+          }
+        })
+    }, 500, updateMovie)
+  }
+
+  console.log(role)
 }
 
 
@@ -122,7 +148,8 @@ var updateTrackersFromHash = function(hash) {
 }
 
 var indexSiteAPI = function(content) {
-  var lines = content.split("\n")
+  var lines = content.split("\n"),
+    added = 0
 
   for (var i in lines) {
     if (lines.hasOwnProperty(i)) {
@@ -145,12 +172,14 @@ var indexSiteAPI = function(content) {
       if (index.length) {
         Hash.create(data).exec(function(err, entry) {
           if (!err) {
+            ++added
             //console.log("Added: ", entry.title)
           }
         })
       }
     }
   }
+  console.log("indexSiteAPI[" + this.url + "] " + added + "/" + lines.length + "/" + (this._totalNumLines || 0))
 }
 
 
