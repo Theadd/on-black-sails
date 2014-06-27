@@ -15,7 +15,7 @@
  *  ]},
  *  {"or": [
  *   {"title": { "contains": "blue" } },
- *   { "title": { "contains": "red hair" } }
+ *   {"title": { "contains": "red hair" } }
  *  ]}
  * ]
  *

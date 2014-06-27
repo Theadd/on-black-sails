@@ -10,10 +10,10 @@ exports.run = function() {
 
   var role = {
     'full-index': sails.config['full-index'] || false,
-    'update-index': sails.config['update-index'] || true,
-    'update-metadata': sails.config['update-metadata'] || true,
+    'update-index': sails.config['update-index'] || false,
+    'update-metadata': sails.config['update-metadata'] || false,
     'update-status': sails.config['update-status'] || false,
-    'update-media': sails.config['update-media'] || true
+    'update-media': sails.config['update-media'] || false
   }
 
   /*
