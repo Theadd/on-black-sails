@@ -11,15 +11,44 @@ module.exports = {
    * HashController.count()
    */
   count: function (req, res) {
+    var type = req.param('type') || 'all'
 
-    Hash.count({}).exec(function countCB(err, found){
-      if (err) return res.send(err,500);
+    if (type == 'all') {
+      Hash.count({}).exec(function countCB(err, found){
+        if (err) return res.send(err, 500)
 
-      res.json({
-        total: found
-      });
+        res.json({
+          total: found
+        })
 
-    });
+      })
+    } else if (type == 'movie') {
+      Hash.count({
+        downloaded: true,
+        category: { contains: "movies" },
+        status: {'>=': 0}
+      }).exec(function countCB(err, found){
+        if (err) return res.send(err, 500)
+
+        res.json({
+          total: found
+        })
+
+      })
+    } else if (type == 'downloaded') {
+      Hash.count({
+        downloaded: true
+      }).exec(function countCB(err, found){
+        if (err) return res.send(err, 500)
+
+        res.json({
+          total: found
+        })
+
+      })
+    }else {
+      res.send("Unknown type " + type, 500)
+    }
 
   },
 
@@ -39,6 +68,8 @@ module.exports = {
     for (i = 0; i < categories.length; ++i) {
       query = query.where(categories[i])
     }
+
+    query = query.limit(20)
 
     query.exec(function searchCB(err, hashes){
       if (err) return res.send(err,500);

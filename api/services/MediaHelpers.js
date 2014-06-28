@@ -2,8 +2,6 @@
  * Created by Theadd on 6/16/14.
  */
 
-var delimiters = ['720p', '1080p', 'hdtv']
-
 exports.guessMedia = function (input) {
   input = input.replace(/\./g, ' ')
   var title = input.toLowerCase(),

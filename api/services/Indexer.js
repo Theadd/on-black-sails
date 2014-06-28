@@ -6,6 +6,9 @@ var status2value = { 'VERIFIED': 2, 'GOOD': 1, 'NONE': 0, 'ERROR': 0, 'NOTFOUND'
 var Task = require('tasker').Task;
 var trackerClient = require('bittorrent-tracker');
 
+var updateMediaPool = [],
+  updatingMediaPool = false
+
 exports.run = function() {
 
   var role = {
@@ -71,34 +74,64 @@ exports.run = function() {
   if (role['update-media']) {
     createTask(function () {
       var task = this
-      Hash.find()
-        .where({ downloaded: true })
-        .where({category: { contains: "movies" } })
-        .where({status: {'>=': 0}})
-        .sort('updatedAt ASC')
-        .limit(1)
-        .exec(function(err, entries) {
-          if (!err && entries.length) {
-            task.hash = entries[0].id.toUpperCase()
-            task.mediaField = entries[0].media || {}
-            task.imdb = ''
-            task.rate = entries[0].rate || 0
-            if (typeof entries[0].imdb !== "undefined" && entries[0].imdb.length) {
-              task.imdb = entries[0].imdb
-              task.use('http://www.omdbapi.com/?i=' +  entries[0].imdb)
-            } else {
-              var media = MediaHelpers.guessMedia(entries[0].title)
-              task.media = media
-              task.use('http://www.omdbapi.com/?i=&t=' + media.name + ((media.year > 0) ? '&y=' + media.year : ''))
+      if (updateMediaPool.length < 50) {
+        if (!updatingMediaPool) {
+          updatePoolOfMedia()
+        }
+      }
+      if (updateMediaPool.length) {
+        var hash = updateMediaPool.pop()
+        Hash.find()
+          .where({ id: hash })
+          .exec(function(err, entries) {
+            if (!err && entries.length) {
+              task.hash = entries[0].id.toUpperCase()
+              task.mediaField = entries[0].media || {}
+              task.imdb = ''
+              task.rate = entries[0].rate || 0
+              if (typeof entries[0].imdb !== "undefined" && entries[0].imdb.length) {
+                task.imdb = entries[0].imdb
+                task.use('http://www.omdbapi.com/?i=' +  entries[0].imdb)
+              } else {
+                var media = MediaHelpers.guessMedia(entries[0].title)
+                task.media = media
+                task.use('http://www.omdbapi.com/?i=&t=' + media.name + ((media.year > 0) ? '&y=' + media.year : ''))
+              }
             }
-          }
-        })
+          })
+      } else {
+        task.status = 'standby'
+      }
+
     }, 500, updateMovie)
   }
 
   console.log(role)
 }
 
+
+var updatePoolOfMedia = function() {
+  updatingMediaPool = true
+  Hash.find()
+    .where({ downloaded: true })
+    .where({category: { contains: "movies" } })
+    .where({status: {'>=': 0}})
+    .sort('updatedAt ASC')
+    .limit(120)
+    .exec(function(err, entries) {
+      if (!err && entries.length) {
+        for (var i = 0; i < entries.length; ++i) {
+          if (updateMediaPool.indexOf(entries[i].id) == -1) {
+            updateMediaPool.push(entries[i].id)
+          }
+        }
+        updatingMediaPool = false
+      } else {
+        console.log("ERROR updating media pool!")
+        updatingMediaPool = false
+      }
+    })
+}
 
 var createTask = function(target, interval, dataCb) {
   var task = new Task(target, interval)
