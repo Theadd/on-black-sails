@@ -69,7 +69,7 @@ module.exports = {
       query = query.where(categories[i])
     }
 
-    query = query.limit(20)
+    query = query.paginate()
 
     query.exec(function searchCB(err, hashes){
       if (err) return res.send(err,500);

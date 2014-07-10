@@ -39,6 +39,7 @@ exports.run = function() {
   if (role['update-metadata']) {
     createTask(function () {
       var task = this
+      task.status = 'targeting'
       Hash.find()
         .where({ downloaded: false })
         .sort('updatedAt ASC')
@@ -48,15 +49,17 @@ exports.run = function() {
             task.hash = entries[0].id.toUpperCase()
             task.title = entries[0].title
             task.category = entries[0].category
+            task.status = 'standby'
             task.use('http://torrage.com/torrent/' + entries[0].id.toUpperCase() + '.torrent')
           }
         })
-    }, 5000, updateMetadata)
+    }, 500, updateMetadata)
   }
 
   if (role['update-status']) {
     createTask(function () {
       var task = this
+      task.status = 'targeting'
       Hash.find()
         .where({ downloaded: true })
         .sort('updatedAt ASC')
@@ -65,6 +68,7 @@ exports.run = function() {
           if (!err && entries.length) {
             task.hash = entries[0].id.toUpperCase()
             task.title = entries[0].title
+            task.status = 'standby'
             task.use('http://bitsnoop.com/api/fakeskan.php?hash=' + entries[0].id.toUpperCase())
           }
         })
