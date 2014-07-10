@@ -8,7 +8,9 @@ var trackerClient = require('bittorrent-tracker');
 
 var updateMediaPool = [],
   updatingMediaPool = false,
-  updateStatusPool = []
+  updateStatusPool = [],
+  session = {'movies': 0, 'status': 0, 'metadata': 0},
+  statisticsTimer = setInterval( function() { showStatistics() }, 10000)
 
 exports.run = function() {
 
@@ -249,6 +251,8 @@ var updateMetadata = function(content) {
     if (err) {
       console.log("ERROR UPDATING METADATA OF " + task.hash)
       console.log(err)
+    } else {
+      ++session.metadata
     }
   })
   //Update File model
@@ -277,6 +281,7 @@ var updateStatus = function(content) {
 
   if (value > -10 && value < 10) {
     Hash.update({ id: task.hash },{ status: value }, function(err, hashes) { });
+    ++session.status
     updateTrackersFromHash(task.hash)
   }
 }
@@ -303,6 +308,7 @@ var updateMovie = function(content) {
     data['rate'] = (data['media']['imdbVotes'] >= 500) ? data['media']['imdbRating'] * 10 : task.rate
     data['imdb'] = res['imdbID']
 
+    ++session.movies
     Hash.update({ id: task.hash }, data, function(err, hashes) { })
   } else {
     Hash.update({ id: task.hash },{ rate: task.rate }, function(err, hashes) { }) //avoid overlapping
@@ -311,5 +317,13 @@ var updateMovie = function(content) {
 }
 
 function updateHashIMDB (opts) {
+  ++session.movies
   Hash.update({ id: opts['hash'] },{ imdb: opts['imdb'] }, function(err, hashes) { });
+}
+
+function showStatistics() {
+  console.log("\n" + new Date())
+  console.log(session)
+  console.log("\n")
+  session = {'movies': 0, 'status': 0, 'metadata': 0}
 }
