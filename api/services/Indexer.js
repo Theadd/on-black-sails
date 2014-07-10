@@ -283,9 +283,15 @@ var updateStatus = function(content) {
 
 var updateMovie = function(content) {
   var task = this,
-    res = JSON.parse(content)
+    res = {}
 
   updateStatusPool.push(task.hash)
+  try {
+    res = JSON.parse(content)
+  } catch (e) {
+    Hash.update({ id: task.hash },{ rate: task.rate }, function(err, hashes) { })
+    return  //not a valid json
+  }
 
   if (res['Response'] == 'True' && res['Type'] == 'movie' && (task.imdb.length || res['Title'].toLowerCase() == task.media['name'].toLowerCase())) {
     var data = {genre: res['Genre'], media: task.mediaField}
