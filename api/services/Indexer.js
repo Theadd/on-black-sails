@@ -7,7 +7,8 @@ var Task = require('tasker').Task;
 var trackerClient = require('bittorrent-tracker');
 
 var updateMediaPool = [],
-  updatingMediaPool = false
+  updatingMediaPool = false,
+  updateStatusPool = []
 
 exports.run = function() {
 
@@ -60,19 +61,34 @@ exports.run = function() {
     createTask(function () {
       var task = this
       task.status = 'targeting'
-      Hash.find()
-        .where({ downloaded: true })
-        .sort('updatedAt ASC')
-        .limit(1)
-        .exec(function(err, entries) {
-          if (!err && entries.length) {
-            task.hash = entries[0].id.toUpperCase()
-            task.title = entries[0].title
-            task.status = 'standby'
-            task.use('http://bitsnoop.com/api/fakeskan.php?hash=' + entries[0].id.toUpperCase())
-          }
-        })
-    }, 1000, updateStatus)
+      if (updateStatusPool.length) {
+        var hash = updateStatusPool.pop()
+        Hash.find()
+          .where({ id: hash })
+          .exec(function(err, entries) {
+            if (!err && entries.length) {
+              task.hash = entries[0].id.toUpperCase()
+              task.title = entries[0].title
+              task.status = 'standby'
+              task.use('http://bitsnoop.com/api/fakeskan.php?hash=' + entries[0].id.toUpperCase())
+            }
+          })
+      } else {
+        Hash.find()
+          .where({ downloaded: true })
+          .sort('updatedAt ASC')
+          .where({category: { not: { contains: "movies" } } })
+          .limit(1)
+          .exec(function(err, entries) {
+            if (!err && entries.length) {
+              task.hash = entries[0].id.toUpperCase()
+              task.title = entries[0].title
+              task.status = 'standby'
+              task.use('http://bitsnoop.com/api/fakeskan.php?hash=' + entries[0].id.toUpperCase())
+            }
+          })
+      }
+    }, 335, updateStatus)
   }
 
   if (role['update-media']) {
@@ -119,7 +135,7 @@ var updatePoolOfMedia = function() {
   Hash.find()
     .where({ downloaded: true })
     .where({category: { contains: "movies" } })
-    .where({status: {'>=': 0}})
+    //.where({status: {'>=': 0}})
     .sort('updatedAt ASC')
     .limit(120)
     .exec(function(err, entries) {
@@ -268,6 +284,8 @@ var updateStatus = function(content) {
 var updateMovie = function(content) {
   var task = this,
     res = JSON.parse(content)
+
+  updateStatusPool.push(task.hash)
 
   if (res['Response'] == 'True' && res['Type'] == 'movie' && (task.imdb.length || res['Title'].toLowerCase() == task.media['name'].toLowerCase())) {
     var data = {genre: res['Genre'], media: task.mediaField}
