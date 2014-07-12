@@ -53,7 +53,7 @@ exports.run = function() {
             task.title = entries[0].title
             task.category = entries[0].category
             task.status = 'standby'
-            task.use('http://torrage.com/torrent/' + entries[0].id.toUpperCase() + '.torrent')
+            task.use(getDownloadLink(entries[0].id, entries[0].source))
           }
         })
     }, 500, updateMetadata)
@@ -326,4 +326,8 @@ function showStatistics() {
   console.log(session)
   console.log("\n")
   session = {'movies': 0, 'status': 0, 'metadata': 0}
+}
+
+var getDownloadLink = exports.getDownloadLink = function(hash, source) {
+  return ((source.indexOf('bitsnoop.com') == -1) ? 'http://torcache.net/torrent/' + hash.toUpperCase() + '.torrent' : 'http://torrage.com/torrent/' + hash.toUpperCase() + '.torrent')
 }
