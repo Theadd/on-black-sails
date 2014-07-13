@@ -53,10 +53,10 @@ exports.run = function() {
             task.title = entries[0].title
             task.category = entries[0].category
             task.status = 'standby'
-            task.use(getDownloadLink(entries[0].id, entries[0].source))
+            task.use(getDownloadLink(entries[0].id, entries[0].cache || '', entries[0].source))
           }
         })
-    }, 500, updateMetadata)
+    }, 500, updateMetadata, errorOnUpdateMetadata)
   }
 
   if (role['update-status']) {
@@ -155,18 +155,22 @@ var updatePoolOfMedia = function() {
     })
 }
 
-var createTask = function(target, interval, dataCb) {
+var createTask = function(target, interval, dataCb, errorCb) {
   var task = new Task(target, interval)
 
-  task.on('error', function (err) {
-    console.log(err)
-    console.log(this.url)
-    var self = this
-    if (typeof self.hash !== "undefined") {
-      console.log("SKIP UPDATING " + self.hash)
-      Hash.update({ id: self.hash }, { size: 0 }, function(err, hashes) { })
-    }
-  })
+  if (typeof errorCb !== "undefined") {
+    task.on('error', errorCb);
+  } else {
+    task.on('error', function (err) {
+      console.log(err)
+      console.log(this.url)
+      var self = this
+      if (typeof self.hash !== "undefined") {
+        console.log("SKIP UPDATING " + self.hash)
+        Hash.update({ id: self.hash }, { size: 0 }, function(err, hashes) { })
+      }
+    })
+  }
 
   task.on('data', dataCb);
 
@@ -222,6 +226,9 @@ var indexSiteAPI = function(content) {
           data['category'] = line[p].toLowerCase()
         } else if (p == 3) {
           data['source'] = line[p]
+        } else if (p == 4) {
+          var tmp = line[p].match(/^http:\/\/(.*?)\//)
+          data['cache'] = (tmp) ? tmp[1] : ''
         }
       }
       if (index.length) {
@@ -272,6 +279,25 @@ var updateMetadata = function(content) {
       }
     })
   }
+}
+
+var errorOnUpdateMetadata = function(error) {
+  //Probably, download link unavailable
+  var task = this
+
+  Hash.update({ id: task.hash },{
+    cache: ''
+  }, function(err, hashes) {
+    console.log("\n# Probably, download link unavailable for " + task.hash)
+    console.log("\t" + task.url)
+    console.log("\t" + error)
+    if (err) {
+      console.log("[In errorOnUpdateMetadata()]: ERROR UPDATING METADATA OF " + task.hash)
+      console.log(err)
+    } else {
+      ++session.metadata
+    }
+  })
 }
 
 
@@ -328,6 +354,10 @@ function showStatistics() {
   session = {'movies': 0, 'status': 0, 'metadata': 0}
 }
 
-var getDownloadLink = exports.getDownloadLink = function(hash, source) {
-  return ((source.indexOf('bitsnoop.com') == -1) ? 'http://torcache.net/torrent/' + hash.toUpperCase() + '.torrent' : 'http://torrage.com/torrent/' + hash.toUpperCase() + '.torrent')
+var getDownloadLink = exports.getDownloadLink = function(hash, cache, source) {
+  if (cache.length) {
+    return 'http://' + cache + '/torrent/' + hash.toUpperCase() + '.torrent'
+  } else {
+    return ((source.indexOf('bitsnoop.com') == -1) ? 'http://torcache.net/torrent/' + hash.toUpperCase() + '.torrent' : 'http://torrage.com/torrent/' + hash.toUpperCase() + '.torrent')
+  }
 }
