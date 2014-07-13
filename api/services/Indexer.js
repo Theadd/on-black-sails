@@ -10,11 +10,15 @@ var updateMediaPool = [],
   updatingMediaPool = false,
   updateStatusPool = [],
   session = {'movies': 0, 'status': 0, 'metadata': 0},
-  statisticsTimer = setInterval( function() { showStatistics() }, 60000)
+  statisticsTimer = null
 
 exports.run = function() {
   var role = CommandLineHelpers.getValues()
 
+  if (!role['quiet']) {
+    statisticsTimer = setInterval( function() { showStatistics() }, 60000)
+  }
+  console.log(CommandLineHelpers.usage())
   console.log(role)
 
   if (role['update-index']) {

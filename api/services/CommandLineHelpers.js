@@ -3,12 +3,23 @@
  */
 
 exports.usage = function () {
-  //Usage: program [-aDde] [-f | -g] [-n number] [-b b_arg | -c c_arg] req1 req2 [opt1 [opt2]]
-  return " \
-  ";
-  /*
-   [--full-index] [--update-index] [--update-metadata[=number]] [--update-status[=number] --update-media[=number]]
-   */
+  return "\n  Usage: sails lift [options]\n       forever start app.js [options]\n\n\
+  Options syntax:\n\t[--full-index] [--update-index] [--update-metadata[=number]]\n\t[--update-status[=number] [--update-media[=number]]] [--quiet]\n\t[--port=number]\n\n\
+  Options:\n\
+  \t--full-index\n\
+  \t\tIndexes all torrents from bitsnoop.com and kickass.to\n\t\tThis should only be set the first time or after a downtime\n\t\tbigger than an hour.\n\n\
+  \t--update-index\n\
+  \t\tPeriodically indexes latest torrents from bitsnoop.com and\n\t\tkickass.to\n\n\
+  \t--update-metadata[=number]\n\
+  \t\tIndexes metadata of *.torrent files by downloading them from\n\t\tpublic torrent cache sites like torcache.net or torrage.com\n\
+  \t\t* The interval between requests, in milliseconds, is optional\n\t\t  and defaults to 250ms.\n\n\
+  \t--update-status[=number]\n\
+  \t\tUpdates fake status of indexed torrents and peers information\n\t\tfrom announce trackers.\n\
+  \t\t* The interval between requests, in milliseconds, is optional\n\t\t  and defaults to 335ms.\n\n\
+  \t--update-media[=number]\n\
+  \t\tUpdates media related information such as the IMDB ID or the\n\t\taverage rate.\n\
+  \t\t* The interval between requests, in milliseconds, is optional\n\t\t  and defaults to 500ms.\n\n\
+  \t\t\033[36mNote:\033[0m Should be used in conjunction with --update-status\n\n";
 }
 
 exports.getValues = function() {
@@ -20,6 +31,7 @@ exports.getValues = function() {
     'update-status': Boolean(sails.config['update-status']),
     'update-status-interval': (typeof sails.config['update-status'] === 'number') ? sails.config['update-status'] : 335,
     'update-media': Boolean(sails.config['update-media']),
-    'update-media-interval': (typeof sails.config['update-media'] === 'number') ? sails.config['update-media'] : 500
+    'update-media-interval': (typeof sails.config['update-media'] === 'number') ? sails.config['update-media'] : 500,
+    'quiet': Boolean(sails.config['quiet'])
   }
 }
