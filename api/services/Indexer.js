@@ -10,25 +10,12 @@ var updateMediaPool = [],
   updatingMediaPool = false,
   updateStatusPool = [],
   session = {'movies': 0, 'status': 0, 'metadata': 0},
-  statisticsTimer = setInterval( function() { showStatistics() }, 10000)
+  statisticsTimer = setInterval( function() { showStatistics() }, 60000)
 
 exports.run = function() {
+  var role = CommandLineHelpers.getValues()
 
-  var role = {
-    'full-index': sails.config['full-index'] || false,
-    'update-index': sails.config['update-index'] || false,
-    'update-metadata': sails.config['update-metadata'] || false,
-    'update-status': sails.config['update-status'] || false,
-    'update-media': sails.config['update-media'] || false
-  }
-
-  /*
-  --full-index=false
-  --update-index=true
-  --update-metadata=true
-  --update-status=false
-  --update-media=true
-  */
+  console.log(role)
 
   if (role['update-index']) {
     createTask('http://bitsnoop.com/api/latest_tz.php?t=all', 600000, indexSiteAPI) //10min = 600000
@@ -56,7 +43,7 @@ exports.run = function() {
             task.use(getDownloadLink(entries[0].id, entries[0].cache || '', entries[0].source))
           }
         })
-    }, 500, updateMetadata, errorOnUpdateMetadata)
+    }, role['update-metadata-interval'], updateMetadata, errorOnUpdateMetadata)
   }
 
   if (role['update-status']) {
@@ -90,7 +77,7 @@ exports.run = function() {
             }
           })
       }
-    }, 335, updateStatus)
+    }, role['update-status-interval'], updateStatus)
   }
 
   if (role['update-media']) {
@@ -125,10 +112,9 @@ exports.run = function() {
         task.status = 'standby'
       }
 
-    }, 500, updateMovie)
+    }, role['update-media-interval'], updateMovie)
   }
 
-  console.log(role)
 }
 
 
