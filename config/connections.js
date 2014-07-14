@@ -53,13 +53,13 @@ module.exports.connections = {
     adapter: 'sails-mongo',
     host: 'localhost',
     port: 27017,
-    database: 'blacksails'
+    database: 'onblacksails'
   },*/
   mongo: {
     adapter: 'sails-mongo',
     host: '192.168.1.10',
     port: 27017,
-    database: 'blacksails',
+    database: 'onblacksails',
     replSet: {
       servers: [
         {
