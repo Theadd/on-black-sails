@@ -93,7 +93,7 @@ module.exports = {
         res.json(mdbres);
       })
     } else if (typeof req.param('id') !== "undefined") {
-      MovieDB.movieInfo({uuid: req.param('id') }, function(err, mdbres){
+      MovieDB.movieInfo({id: req.param('id') }, function(err, mdbres){
         console.log(mdbres);
         if (err) return res.send(err,500);
 

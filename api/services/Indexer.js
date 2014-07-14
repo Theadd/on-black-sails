@@ -11,7 +11,7 @@ var updateMediaPool = [],
   updateStatusPool = [],
   session = {'movies': 0, 'status': 0, 'metadata': 0},
   statisticsTimer = null,
-  workers = {'update-metadata': 0, 'update-status': 0, 'update-media': [], 'index-file': 0, 'update-tracker': 0 },
+  workers = exports.workers = {'update-metadata': 0, 'update-status': 0, 'update-media': [], 'index-file': 0, 'update-tracker': 0 },
   role = {}
 
 exports.run = function() {
