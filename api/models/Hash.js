@@ -5,18 +5,22 @@
 * @docs        :: http://sailsjs.org/#!documentation/models
 */
 
+//var ObjectID = require('mongodb').ObjectID;
+
 module.exports = {
 
   //adapter: 'mongo',
   migrate: 'alter', // adds and/or removes columns on changes to the schema
   //migrate: 'drop', // drops all your tables and then re-creates them. All data is deleted.
   //migrate: 'safe', doesn't do anything on sails lift- for use in production.
+  autoPK: false,
 
   attributes: {
 
-    id: {
+    uuid: {
       type: 'string',
-      unique: true,
+      //unique: true,
+      primaryKey: true,
       required: true/*,
        len: 40,
        alphanumeric: true,
@@ -42,9 +46,14 @@ module.exports = {
       defaultsTo: []
     },
 
-    files: {
+    /*files: {
       type: 'array',
       defaultsTo: []
+    },*/
+
+    files: {
+      type: 'integer',
+      defaultsTo: 0
     },
 
     downloaded: {
@@ -111,10 +120,10 @@ module.exports = {
     toJSON: function() {
       var obj = this.toObject();
       if (typeof obj.cache !== "undefined" && obj.cache.length) {
-        obj.link = Indexer.getDownloadLink(obj.id, obj.cache, obj.source);
-        obj.magnet = "magnet:?xt=urn:btih:" + obj.id.toLowerCase() + "&dn=" + encodeURI(obj.title);
+        obj.link = Indexer.getDownloadLink(obj.uuid, obj.cache, obj.source);
+        obj.magnet = "magnet:?xt=urn:btih:" + obj.uuid.toLowerCase() + "&dn=" + encodeURI(obj.title);
       } else {
-        obj.magnet = "magnet:?xt=urn:btih:" + obj.id.toLowerCase() + "&dn=" + encodeURI(obj.title);
+        obj.magnet = "magnet:?xt=urn:btih:" + obj.uuid.toLowerCase() + "&dn=" + encodeURI(obj.title);
         obj.link = obj.magnet;
       }
       obj.category = obj.category.toLowerCase();

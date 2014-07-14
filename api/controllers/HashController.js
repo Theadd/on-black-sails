@@ -81,7 +81,6 @@ module.exports = {
 
   /**
    * HashController.movie()
-   * @example: http://localhost:1337/hash/search?query=2014%20720%20|%201080&category=movie%20|%20tv
    */
   movie: function (req, res) {
 
@@ -94,7 +93,7 @@ module.exports = {
         res.json(mdbres);
       })
     } else if (typeof req.param('id') !== "undefined") {
-      MovieDB.movieInfo({id: req.param('id') }, function(err, mdbres){
+      MovieDB.movieInfo({uuid: req.param('id') }, function(err, mdbres){
         console.log(mdbres);
         if (err) return res.send(err,500);
 

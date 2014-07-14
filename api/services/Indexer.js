@@ -5,6 +5,7 @@
 var status2value = { 'VERIFIED': 2, 'GOOD': 1, 'NONE': 0, 'ERROR': 0, 'NOTFOUND': 0, 'BAD': -1, 'FAKE': -2 };
 var Task = require('tasker').Task;
 var trackerClient = require('bittorrent-tracker');
+//var ObjectID = require('mongodb').ObjectID;
 
 var updateMediaPool = [],
   updatingMediaPool = false,
@@ -40,11 +41,11 @@ exports.run = function() {
         .limit(1)
         .exec(function(err, entries) {
           if (!err && entries.length) {
-            task.hash = entries[0].id.toUpperCase()
+            task.hash = entries[0].uuid.toUpperCase()
             task.title = entries[0].title
             task.category = entries[0].category
             task.status = 'standby'
-            task.use(getDownloadLink(entries[0].id, entries[0].cache || '', entries[0].source))
+            task.use(getDownloadLink(entries[0].uuid, entries[0].cache || '', entries[0].source))
           }
         })
     }, role['update-metadata-interval'], updateMetadata, errorOnUpdateMetadata)
@@ -60,10 +61,10 @@ exports.run = function() {
           .where({ id: hash })
           .exec(function(err, entries) {
             if (!err && entries.length) {
-              task.hash = entries[0].id.toUpperCase()
+              task.hash = entries[0].uuid.toUpperCase()
               task.title = entries[0].title
               task.status = 'standby'
-              task.use('http://bitsnoop.com/api/fakeskan.php?hash=' + entries[0].id.toUpperCase())
+              task.use('http://bitsnoop.com/api/fakeskan.php?hash=' + entries[0].uuid.toUpperCase())
             }
           })
       } else {
@@ -74,10 +75,10 @@ exports.run = function() {
           .limit(1)
           .exec(function(err, entries) {
             if (!err && entries.length) {
-              task.hash = entries[0].id.toUpperCase()
+              task.hash = entries[0].uuid.toUpperCase()
               task.title = entries[0].title
               task.status = 'standby'
-              task.use('http://bitsnoop.com/api/fakeskan.php?hash=' + entries[0].id.toUpperCase())
+              task.use('http://bitsnoop.com/api/fakeskan.php?hash=' + entries[0].uuid.toUpperCase())
             }
           })
       }
@@ -98,7 +99,7 @@ exports.run = function() {
           .where({ id: hash })
           .exec(function(err, entries) {
             if (!err && entries.length) {
-              task.hash = entries[0].id.toUpperCase()
+              task.hash = entries[0].uuid.toUpperCase()
               task.mediaField = entries[0].media || {}
               task.imdb = ''
               task.rate = entries[0].rate || 0
@@ -133,8 +134,8 @@ var updatePoolOfMedia = function() {
     .exec(function(err, entries) {
       if (!err && entries.length) {
         for (var i = 0; i < entries.length; ++i) {
-          if (updateMediaPool.indexOf(entries[i].id) == -1) {
-            updateMediaPool.push(entries[i].id)
+          if (updateMediaPool.indexOf(entries[i].uuid) == -1) {
+            updateMediaPool.push(entries[i].uuid)
           }
         }
         updatingMediaPool = false
@@ -157,7 +158,7 @@ var createTask = function(target, interval, dataCb, errorCb) {
       var self = this
       if (typeof self.hash !== "undefined") {
         console.log("SKIP UPDATING " + self.hash)
-        Hash.update({ id: self.hash }, { size: 0 }, function(err, hashes) { })
+        Hash.update({ uuid: self.hash }, { size: 0 }, function(err, hashes) { })
       }
     })
   }
@@ -173,14 +174,14 @@ function ignore(err) {
 
 var updateTrackersFromHash = function(hash) {
   Hash.find()
-    .where({ id: hash })
+    .where({ uuid: hash })
     .limit(1)
     .exec(function(err, entries) {
       if (!err && entries.length) {
         //update peers from trackers
         var peerId = new Buffer('01234567890123456789');
         var port = 6881;
-        var data = { announce: [], infoHash: entries[0].id };
+        var data = { announce: [], infoHash: entries[0].uuid };
         for (var t in entries[0].trackers) {
           data.announce.push(entries[0].trackers[t]);
         }
@@ -188,7 +189,7 @@ var updateTrackersFromHash = function(hash) {
         var client = new trackerClient(peerId, port, data);
         client.on('error', ignore);
         client.once('update', function (data) {
-          Hash.update({ id: entries[0].id },{ seeders: data.complete, leechers: data.incomplete }, function(err, hashes) { });
+          Hash.update({ uuid: entries[0].uuid },{ seeders: data.complete, leechers: data.incomplete }, function(err, hashes) { });
           //console.log("\tTRACKERS DATA OF " + hash + ": " + JSON.stringify(data))
         });
         client.update();
@@ -209,7 +210,7 @@ var indexSiteAPI = function(content) {
       for (var p = 0; p < line.length; ++p) {
         if (p == 0) {
           index = line[p]
-          data['id'] = line[p].toUpperCase()
+          data['uuid'] = line[p]
         } else if (p == 1) {
           data['title'] = line[p]
         } else if (p == 2) {
@@ -238,10 +239,10 @@ var indexSiteAPI = function(content) {
 var updateMetadata = function(content) {
   var task = this
   //Update Hash model
-  Hash.update({ id: task.hash },{
+  Hash.update({ uuid: task.hash },{
     size: content.size,
     trackers: content.trackers,
-    files: content.files,
+    files: content.files.length,
     downloaded: true,
     added: new Date(content.creationDate)
   }, function(err, hashes) {
@@ -275,7 +276,7 @@ var errorOnUpdateMetadata = function(error) {
   //Probably, download link unavailable
   var task = this
 
-  Hash.update({ id: task.hash },{
+  Hash.update({ uuid: task.hash },{
     cache: ''
   }, function(err, hashes) {
     console.log("\n# Probably, download link unavailable for " + task.hash)
@@ -296,7 +297,7 @@ var updateStatus = function(content) {
     value = status2value[content]
 
   if (value > -10 && value < 10) {
-    Hash.update({ id: task.hash },{ status: value }, function(err, hashes) { });
+    Hash.update({ uuid: task.hash },{ status: value }, function(err, hashes) { });
     ++session.status
     updateTrackersFromHash(task.hash)
   }
@@ -310,7 +311,7 @@ var updateMovie = function(content) {
   try {
     res = JSON.parse(content)
   } catch (e) {
-    Hash.update({ id: task.hash },{ rate: task.rate }, function(err, hashes) { })
+    Hash.update({ uuid: task.hash },{ rate: task.rate }, function(err, hashes) { })
     return  //not a valid json
   }
 
@@ -325,16 +326,16 @@ var updateMovie = function(content) {
     data['imdb'] = res['imdbID']
 
     ++session.movies
-    Hash.update({ id: task.hash }, data, function(err, hashes) { })
+    Hash.update({ uuid: task.hash }, data, function(err, hashes) { })
   } else {
-    Hash.update({ id: task.hash },{ rate: task.rate }, function(err, hashes) { }) //avoid overlapping
+    Hash.update({ uuid: task.hash },{ rate: task.rate }, function(err, hashes) { }) //avoid overlapping
     MediaHelpers.matchingIMDBIDFromTMDB(task.media['name'], task.media['year'], updateHashIMDB, { hash: task.hash })
   }
 }
 
 function updateHashIMDB (opts) {
   ++session.movies
-  Hash.update({ id: opts['hash'] },{ imdb: opts['imdb'] }, function(err, hashes) { });
+  Hash.update({ uuid: opts['hash'] },{ imdb: opts['imdb'] }, function(err, hashes) { });
 }
 
 function showStatistics() {
