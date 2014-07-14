@@ -4,7 +4,7 @@
 
 exports.usage = function () {
   return "\n  Usage: sails lift [options]\n       forever start app.js [options]\n\n\
-  Options syntax:\n\t[--full-index] [--update-index] [--update-metadata[=number]]\n\t[--update-status[=number] [--update-media[=number]]] [--quiet]\n\t[--port=number]\n\n\
+  Options syntax:\n\t[--full-index] [--update-index] [--update-metadata[=number]]\n\t[--update-status[=number] [--update-media[=number]]] [--quiet]\n\t[--port=number] [--verbose]\n\n\
   Options:\n\
   \t--full-index\n\
   \t\tIndexes all torrents from bitsnoop.com and kickass.to\n\t\tThis should only be set the first time or after a downtime\n\t\tbigger than an hour.\n\n\
@@ -32,6 +32,7 @@ exports.getValues = function() {
     'update-status-interval': (typeof sails.config['update-status'] === 'number') ? sails.config['update-status'] : 335,
     'update-media': Boolean(sails.config['update-media']),
     'update-media-interval': (typeof sails.config['update-media'] === 'number') ? sails.config['update-media'] : 500,
-    'quiet': Boolean(sails.config['quiet'])
+    'quiet': Boolean(sails.config['quiet']),
+    'verbose': Boolean(sails.config['verbose'])
   }
 }

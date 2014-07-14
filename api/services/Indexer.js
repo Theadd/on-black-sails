@@ -10,13 +10,15 @@ var updateMediaPool = [],
   updatingMediaPool = false,
   updateStatusPool = [],
   session = {'movies': 0, 'status': 0, 'metadata': 0},
-  statisticsTimer = null
+  statisticsTimer = null,
+  workers = {'update-metadata': 0, 'update-status': 0, 'update-media': [], 'index-file': 0, 'update-tracker': 0 },
+  role = {}
 
 exports.run = function() {
-  var role = CommandLineHelpers.getValues()
+  role = CommandLineHelpers.getValues()
 
   if (!role['quiet']) {
-    statisticsTimer = setInterval( function() { showStatistics() }, 60000)
+    statisticsTimer = setInterval( function() { showStatistics() }, 10000)
   }
   console.log(CommandLineHelpers.usage())
   console.log(role)
@@ -43,7 +45,9 @@ exports.run = function() {
             task.hash = entries[0].uuid.toUpperCase()
             task.title = entries[0].title
             task.category = entries[0].category
-            task.status = 'standby'
+            task.role = 'update-metadata'
+            workers[task.role]++
+            //task.status = 'standby'
             task.use(getDownloadLink(entries[0].uuid, entries[0].cache || '', entries[0].source))
           }
         })
@@ -62,7 +66,9 @@ exports.run = function() {
             if (!err && entries.length) {
               task.hash = entries[0].uuid.toUpperCase()
               task.title = entries[0].title
-              task.status = 'standby'
+              task.role = 'update-status'
+              workers[task.role]++
+              //task.status = 'standby'
               task.use('http://bitsnoop.com/api/fakeskan.php?hash=' + entries[0].uuid.toUpperCase())
             }
           })
@@ -76,7 +82,9 @@ exports.run = function() {
             if (!err && entries.length) {
               task.hash = entries[0].uuid.toUpperCase()
               task.title = entries[0].title
-              task.status = 'standby'
+              task.role = 'update-status'
+              workers[task.role]++
+              //task.status = 'standby'
               task.use('http://bitsnoop.com/api/fakeskan.php?hash=' + entries[0].uuid.toUpperCase())
             }
           })
@@ -94,7 +102,6 @@ exports.run = function() {
       }
       if (updateMediaPool.length) {
         var hash = updateMediaPool.pop()
-        console.log("-- updating media of "+hash)
         Hash.find()
           .where({ uuid: hash })
           .exec(function(err, entries) {
@@ -103,6 +110,8 @@ exports.run = function() {
               task.mediaField = entries[0].media || {}
               task.imdb = ''
               task.rate = entries[0].rate || 0
+              task.role = 'update-media'
+              workers[task.role][task.hash] = new Date()
               if (typeof entries[0].imdb !== "undefined" && entries[0].imdb.length) {
                 task.imdb = entries[0].imdb
                 task.use('http://www.omdbapi.com/?i=' +  entries[0].imdb)
@@ -125,23 +134,19 @@ exports.run = function() {
 
 var updatePoolOfMedia = function() {
   updatingMediaPool = true
-  console.log("updatePoolOfMedia()")
   Hash.find()
     .where({ downloaded: true })
     .where({category: { contains: "movies" } })
-    //.where({status: {'>=': 0}})
     .sort('updatedAt ASC')
     .limit(120)
     .exec(function(err, entries) {
       if (!err && entries.length) {
-        console.log("updatePoolOfMedia()> #entries: " + entries.length)
         for (var i = 0; i < entries.length; ++i) {
           if (updateMediaPool.indexOf(entries[i].uuid) == -1) {
             updateMediaPool.push(entries[i].uuid)
           }
         }
         updatingMediaPool = false
-        console.log("\tupdateMediaPool.length = " + updateMediaPool.length)
       } else {
         console.log("ERROR updating media pool!")
         updatingMediaPool = false
@@ -157,6 +162,9 @@ var createTask = function(target, interval, dataCb, errorCb) {
   } else {
     task.on('error', function (err) {
       console.log(err)
+      if (typeof task.role !== "undefined") {
+        workers[task.role]--
+      }
       console.log(this.url)
       var self = this
       if (typeof self.hash !== "undefined") {
@@ -176,6 +184,8 @@ function ignore(err) {
 }
 
 var updateTrackersFromHash = function(hash) {
+
+  workers['update-tracker']++
   Hash.find()
     .where({ uuid: hash })
     .limit(1)
@@ -188,12 +198,10 @@ var updateTrackersFromHash = function(hash) {
         for (var t in entries[0].trackers) {
           data.announce.push(entries[0].trackers[t]);
         }
-        //console.log(JSON.stringify(data))
         var client = new trackerClient(peerId, port, data);
         client.on('error', ignore);
         client.once('update', function (data) {
-          Hash.update({ uuid: entries[0].uuid },{ seeders: data.complete, leechers: data.incomplete }, function(err, hashes) { });
-          //console.log("\tTRACKERS DATA OF " + hash + ": " + JSON.stringify(data))
+          Hash.update({ uuid: entries[0].uuid },{ seeders: data.complete, leechers: data.incomplete }, function(err, hashes) { workers['update-tracker']-- });
         });
         client.update();
       }
@@ -229,7 +237,6 @@ var indexSiteAPI = function(content) {
         Hash.create(data).exec(function(err, entry) {
           if (!err) {
             ++added
-            //console.log("Added: ", entry.title)
           }
         })
       }
@@ -241,6 +248,7 @@ var indexSiteAPI = function(content) {
 
 var updateMetadata = function(content) {
   var task = this
+  workers[task.role]--
   //Update Hash model
   Hash.update({ uuid: task.hash },{
     size: content.size,
@@ -249,6 +257,7 @@ var updateMetadata = function(content) {
     downloaded: true,
     added: new Date(content.creationDate)
   }, function(err, hashes) {
+    //console.log("\t\tDONE: "+task.role)
     if (err) {
       console.log("ERROR UPDATING METADATA OF " + task.hash)
       console.log(err)
@@ -258,6 +267,7 @@ var updateMetadata = function(content) {
   })
   //Update File model
   for (var i in content.files) {
+    workers['index-file']++
     var data = {};
     data['hash'] = task.hash
     data['file'] = content.files[i].name
@@ -266,9 +276,11 @@ var updateMetadata = function(content) {
     data['added'] = new Date(content.creationDate)
     data['size'] = content.files[i].size;
     File.create(data).exec(function(err, fileentry) {
+      workers['index-file']--
       if (!err) {
         //console.log("File added: ", fileentry.file)
       } else {
+        console.log("!ERROR in file.create()")
         console.log(err)
       }
     })
@@ -278,6 +290,7 @@ var updateMetadata = function(content) {
 var errorOnUpdateMetadata = function(error) {
   //Probably, download link unavailable
   var task = this
+  workers[task.role]--
 
   Hash.update({ uuid: task.hash },{
     cache: ''
@@ -298,6 +311,8 @@ var errorOnUpdateMetadata = function(error) {
 var updateStatus = function(content) {
   var task = this,
     value = status2value[content]
+
+  workers[task.role]--
 
   if (value > -10 && value < 10) {
     Hash.update({ uuid: task.hash },{ status: value }, function(err, hashes) { });
@@ -329,6 +344,7 @@ var updateMovie = function(content) {
     data['imdb'] = res['imdbID']
 
     ++session.movies
+    delete workers['update-media'][task.hash]
     Hash.update({ uuid: task.hash }, data, function(err, hashes) { })
   } else {
     Hash.update({ uuid: task.hash },{ rate: task.rate }, function(err, hashes) { }) //avoid overlapping
@@ -338,12 +354,16 @@ var updateMovie = function(content) {
 
 function updateHashIMDB (opts) {
   ++session.movies
+  delete workers['update-media'][opts['hash']]
   Hash.update({ uuid: opts['hash'] },{ imdb: opts['imdb'] }, function(err, hashes) { });
 }
 
 function showStatistics() {
   console.log("\n" + new Date())
   console.log(session)
+  if (role['verbose']) {
+    console.log(workers)
+  }
   console.log("\n")
   session = {'movies': 0, 'status': 0, 'metadata': 0}
 }
