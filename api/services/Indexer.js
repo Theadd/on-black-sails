@@ -28,8 +28,11 @@ exports.run = function() {
     createTask('http://kickass.to/hourlydump.txt.gz', 1800000, indexSiteAPI) //30min = 1800000
   }
   if (role['full-index']) {
-    createTask('http://ext.bitsnoop.com/export/b3_all.txt.gz', 0, indexSiteAPI) //run once
-    createTask('http://kickass.to/dailydump.txt.gz', 0, indexSiteAPI) //run once
+    if (role['full-index-bitsnoop']) {
+      createTask('http://ext.bitsnoop.com/export/b3_all.txt.gz', 0, indexSiteAPI)
+    } else if (role['full-index']) {
+      createTask('http://kickass.to/dailydump.txt.gz', 0, indexSiteAPI)
+    }
   }
 
   if (role['update-metadata']) {

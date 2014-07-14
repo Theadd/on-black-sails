@@ -25,6 +25,8 @@ exports.usage = function () {
 exports.getValues = function() {
   return {
     'full-index': Boolean(sails.config['full-index']),
+    'full-index-kickass': (!(typeof sails.config['full-index'] === 'string' && sails.config['full-index'] == 'bitsnoop')),
+    'full-index-bitsnoop': (!(typeof sails.config['full-index'] === 'string' && sails.config['full-index'] == 'kickass')),
     'update-index': Boolean(sails.config['update-index']),
     'update-metadata': Boolean(sails.config['update-metadata']),
     'update-metadata-interval': (typeof sails.config['update-metadata'] === 'number') ? sails.config['update-metadata'] : 250,
