@@ -19,7 +19,7 @@ module.exports = {
 
     uuid: {
       type: 'string',
-      //unique: true,
+      unique: true,
       primaryKey: true,
       required: true/*,
        len: 40,

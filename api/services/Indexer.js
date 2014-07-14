@@ -58,7 +58,7 @@ exports.run = function() {
       if (updateStatusPool.length) {
         var hash = updateStatusPool.pop()
         Hash.find()
-          .where({ id: hash })
+          .where({ uuid: hash })
           .exec(function(err, entries) {
             if (!err && entries.length) {
               task.hash = entries[0].uuid.toUpperCase()
@@ -95,8 +95,9 @@ exports.run = function() {
       }
       if (updateMediaPool.length) {
         var hash = updateMediaPool.pop()
+        console.log("-- updating media of "+hash)
         Hash.find()
-          .where({ id: hash })
+          .where({ uuid: hash })
           .exec(function(err, entries) {
             if (!err && entries.length) {
               task.hash = entries[0].uuid.toUpperCase()
@@ -125,6 +126,7 @@ exports.run = function() {
 
 var updatePoolOfMedia = function() {
   updatingMediaPool = true
+  console.log("updatePoolOfMedia()")
   Hash.find()
     .where({ downloaded: true })
     .where({category: { contains: "movies" } })
@@ -133,12 +135,14 @@ var updatePoolOfMedia = function() {
     .limit(120)
     .exec(function(err, entries) {
       if (!err && entries.length) {
+        console.log("updatePoolOfMedia()> #entries: " + entries.length)
         for (var i = 0; i < entries.length; ++i) {
           if (updateMediaPool.indexOf(entries[i].uuid) == -1) {
             updateMediaPool.push(entries[i].uuid)
           }
         }
         updatingMediaPool = false
+        console.log("\tupdateMediaPool.length = " + updateMediaPool.length)
       } else {
         console.log("ERROR updating media pool!")
         updatingMediaPool = false
