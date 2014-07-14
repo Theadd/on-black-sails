@@ -26,8 +26,7 @@
     "later": "^1.1.6",
     "sails-mongo": "^0.10.0-rc5",
     "bittorrent-tracker": "^1.8.0",
-    "moviedb": "^0.1.4",
-    "mongodb": "^1.4.7"
+    "moviedb": "^0.1.4"
   },
   "scripts": {
     "start": "node app.js",

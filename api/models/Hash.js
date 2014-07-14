@@ -5,8 +5,6 @@
 * @docs        :: http://sailsjs.org/#!documentation/models
 */
 
-//var ObjectID = require('mongodb').ObjectID;
-
 module.exports = {
 
   //adapter: 'mongo',

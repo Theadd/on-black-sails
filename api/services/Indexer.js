@@ -5,7 +5,6 @@
 var status2value = { 'VERIFIED': 2, 'GOOD': 1, 'NONE': 0, 'ERROR': 0, 'NOTFOUND': 0, 'BAD': -1, 'FAKE': -2 };
 var Task = require('tasker').Task;
 var trackerClient = require('bittorrent-tracker');
-//var ObjectID = require('mongodb').ObjectID;
 
 var updateMediaPool = [],
   updatingMediaPool = false,
