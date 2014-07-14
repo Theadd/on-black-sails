@@ -117,13 +117,13 @@ module.exports = {
 
     toJSON: function() {
       var obj = this.toObject();
-      if (typeof obj.cache !== "undefined" && obj.cache.length) {
+      /*if (typeof obj.cache !== "undefined" && obj.cache.length) {
         obj.link = Indexer.getDownloadLink(obj.uuid, obj.cache, obj.source);
         obj.magnet = "magnet:?xt=urn:btih:" + obj.uuid.toLowerCase() + "&dn=" + encodeURI(obj.title);
       } else {
         obj.magnet = "magnet:?xt=urn:btih:" + obj.uuid.toLowerCase() + "&dn=" + encodeURI(obj.title);
         obj.link = obj.magnet;
-      }
+      }*/
       obj.category = obj.category.toLowerCase();
       //delete obj.downloaded;
       return obj;
