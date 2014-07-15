@@ -201,6 +201,7 @@ var updateTrackersFromHash = function(hash) {
         var port = 6881;
         var data = { announce: [], infoHash: entries[0].uuid };
         for (var t in entries[0].trackers) {
+          if (entries[0].trackers[t].indexOf('dht://') != -1) { console.log(entries[0]); return; }
           data.announce.push(entries[0].trackers[t]);
         }
         var client = new trackerClient(peerId, port, data);
