@@ -201,15 +201,20 @@ var updateTrackersFromHash = function(hash) {
         var port = 6881;
         var data = { announce: [], infoHash: entries[0].uuid };
         for (var t in entries[0].trackers) {
-          if (entries[0].trackers[t].indexOf('dht://') != -1) { console.log(entries[0]); return; }
-          data.announce.push(entries[0].trackers[t]);
+          if (entries[0].trackers[t].indexOf('dht://') == -1) {
+            data.announce.push(entries[0].trackers[t]);
+          }
         }
-        var client = new trackerClient(peerId, port, data);
-        client.on('error', ignore);
-        client.once('update', function (data) {
-          Hash.update({ uuid: entries[0].uuid },{ seeders: data.complete, leechers: data.incomplete }, function(err, hashes) { workers['update-tracker']-- });
-        });
-        client.update();
+        if (data.announce.length) {
+          var client = new trackerClient(peerId, port, data);
+          client.on('error', ignore);
+          client.once('update', function (data) {
+            Hash.update({ uuid: entries[0].uuid },{ seeders: data.complete, leechers: data.incomplete }, function(err, hashes) { workers['update-tracker']-- });
+          });
+          client.update();
+        } else {
+          workers['update-tracker']--
+        }
       }
     });
 }
