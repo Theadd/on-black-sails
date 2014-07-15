@@ -18,7 +18,7 @@ exports.run = function() {
   role = CommandLineHelpers.getValues()
 
   if (!role['quiet']) {
-    statisticsTimer = setInterval( function() { showStatistics() }, 5000)
+    statisticsTimer = setInterval( function() { showStatistics() }, 10000)
   }
   console.log(CommandLineHelpers.usage())
   console.log(role)
@@ -45,7 +45,7 @@ exports.run = function() {
         .limit(1)
         .exec(function(err, entries) {
           if (!err && entries.length) {
-            task.hash = entries[0].uuid //.toUpperCase()
+            task.hash = entries[0].uuid
             task.title = entries[0].title
             task.category = entries[0].category
             task.role = 'update-metadata'
@@ -67,11 +67,10 @@ exports.run = function() {
           .where({ uuid: hash })
           .exec(function(err, entries) {
             if (!err && entries.length) {
-              task.hash = entries[0].uuid.toUpperCase()
+              task.hash = entries[0].uuid
               task.title = entries[0].title
               task.role = 'update-status'
               workers[task.role]++
-              //task.status = 'standby'
               task.use('http://bitsnoop.com/api/fakeskan.php?hash=' + entries[0].uuid.toUpperCase())
             }
           })
@@ -79,15 +78,14 @@ exports.run = function() {
         Hash.find()
           .where({ downloaded: true })
           .sort('updatedAt ASC')
-          .where({category: { not: { contains: "movies" } } })
+          .where({category: { not: ["movies", "video movies"] } })
           .limit(1)
           .exec(function(err, entries) {
             if (!err && entries.length) {
-              task.hash = entries[0].uuid //.toUpperCase()
+              task.hash = entries[0].uuid
               task.title = entries[0].title
               task.role = 'update-status'
               workers[task.role]++
-              //task.status = 'standby'
               task.use('http://bitsnoop.com/api/fakeskan.php?hash=' + entries[0].uuid.toUpperCase())
             }
           })
@@ -139,7 +137,7 @@ var updatePoolOfMedia = function() {
   updatingMediaPool = true
   Hash.find()
     .where({ downloaded: true })
-    .where({category: { contains: "movies" } })
+    .where({category: ["movies", "video movies"] })
     .sort('updatedAt ASC')
     .limit(120)
     .exec(function(err, entries) {
