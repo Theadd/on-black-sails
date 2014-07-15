@@ -96,8 +96,12 @@ exports.run = function() {
   if (role['update-media']) {
     createTask(function () {
       var task = this
+      if (!task._useCache) {
+        task.setCache(7200, 1200) // 2h, 20m
+      }
       if (updateMediaPool.length < 50) {
         if (!updatingMediaPool) {
+          if (role['verbose']) console.log(task.requestsCache.getStats())
           updatePoolOfMedia()
         }
       }
