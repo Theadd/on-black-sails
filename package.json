@@ -24,7 +24,7 @@
     "grunt-contrib-coffee": "~0.10.1",
     "tasker": "git+https://git@github.com/Theadd/tasker.git",
     "later": "^1.1.6",
-    "sails-mongo": "^0.10.0-rc5",
+    "sails-mongo": "git+https://git@github.com/Theadd/sails-mongo.git",
     "bittorrent-tracker": "^1.8.0",
     "moviedb": "^0.1.6"
   },

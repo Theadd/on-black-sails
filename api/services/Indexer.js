@@ -18,7 +18,7 @@ exports.run = function() {
   role = CommandLineHelpers.getValues()
 
   if (!role['quiet']) {
-    statisticsTimer = setInterval( function() { showStatistics() }, 10000)
+    statisticsTimer = setInterval( function() { showStatistics() }, 5000)
   }
   console.log(CommandLineHelpers.usage())
   console.log(role)
@@ -45,7 +45,7 @@ exports.run = function() {
         .limit(1)
         .exec(function(err, entries) {
           if (!err && entries.length) {
-            task.hash = entries[0].uuid.toUpperCase()
+            task.hash = entries[0].uuid //.toUpperCase()
             task.title = entries[0].title
             task.category = entries[0].category
             task.role = 'update-metadata'
@@ -83,7 +83,7 @@ exports.run = function() {
           .limit(1)
           .exec(function(err, entries) {
             if (!err && entries.length) {
-              task.hash = entries[0].uuid.toUpperCase()
+              task.hash = entries[0].uuid //.toUpperCase()
               task.title = entries[0].title
               task.role = 'update-status'
               workers[task.role]++
@@ -224,7 +224,7 @@ var indexSiteAPI = function(content) {
       for (var p = 0; p < line.length; ++p) {
         if (p == 0) {
           index = line[p]
-          data['uuid'] = line[p]
+          data['uuid'] = line[p].toUpperCase()
         } else if (p == 1) {
           data['title'] = line[p]
         } else if (p == 2) {
