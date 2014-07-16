@@ -109,7 +109,7 @@ module.exports = {
           }
         })
         .skip(Number(req.param('skip')))
-        .limit(20)
+        .limit((Number(req.param('limit')) > 0) ? ((Number(req.param('limit')) < 100) ? Number(req.param('limit')) : 100) : 20)
         .toArray(function (err, results) {
           if (err) return res.send(err, 500);
           if (typeof req.param('define') !== "undefined" && req.param('define').length) {
