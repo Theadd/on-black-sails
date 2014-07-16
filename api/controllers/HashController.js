@@ -84,16 +84,15 @@ module.exports = {
 
     });
   },
+
   /**
    * HashController.search()
    * @example: http://localhost:1337/hash/search?title=2014 720p -subs -screener -cam
    */
   search: function (req, res) {
-    Hash.native(function(err, collection) {
+    Hash.native(function (err, collection) {
       var title = req.param('title')
-
-      collection.find(
-      {
+      collection.find({
         $text: {
           $search: title
         }
@@ -104,24 +103,22 @@ module.exports = {
       }, {
         explain: Boolean(req.param('explain'))
       })
-      .sort(
-      {
-        score: {
-          $meta: "textScore"
-        }
-      })
-      .limit(20)
-      .toArray(function(err, results){
-        if (err) return res.send(err,500);
-
-        if (typeof req.param('define') !== "undefined" && req.param('define').length) {
-          results = applyResultsModifier(results, req.param('define'))
-          //{link:%20(%27$item.cache%27.length)%20?%20%27http://$item.cache/torrent/$item.uuid.torrent%27%20:%20%27magnet:?xt=urn:btih:%27%20%2B%20%27$item.uuid%27.toLowerCase()%20%2B%20%27%26dn=%27%20%2B%20encodeURIComponent(%27$item.title%27)%20}
-          //{link: ('$item.cache'.length) ? 'http://$item.cache/torrent/$item.uuid.torrent' : 'magnet:?xt=urn:btih:' + '$item.uuid'.toLowerCase() + '&dn=' + encodeURI('$item.title') }
-        }
-
-        res.json(results);
-      });
+        .sort({
+          score: {
+            $meta: "textScore"
+          }
+        })
+        .skip(Number(req.param('skip')))
+        .limit(20)
+        .toArray(function (err, results) {
+          if (err) return res.send(err, 500);
+          if (typeof req.param('define') !== "undefined" && req.param('define').length) {
+            results = applyResultsModifier(results, req.param('define'))
+            //{link:%20(%27$item.cache%27.length)%20?%20%27http://$item.cache/torrent/$item.uuid.torrent%27%20:%20%27magnet:?xt=urn:btih:%27%20%2B%20%27$item.uuid%27.toLowerCase()%20%2B%20%27%26dn=%27%20%2B%20encodeURIComponent(%27$item.title%27)%20}
+            //{link: ('$item.cache'.length) ? 'http://$item.cache/torrent/$item.uuid.torrent' : 'magnet:?xt=urn:btih:' + '$item.uuid'.toLowerCase() + '&dn=' + encodeURI('$item.title') }
+          }
+          res.json(results)
+        });
     });
   },
 
