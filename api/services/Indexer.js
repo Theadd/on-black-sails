@@ -2,9 +2,8 @@
  * Created by Theadd on 5/30/14.
  */
 
-var status2value = { 'VERIFIED': 2, 'GOOD': 1, 'NONE': 0, 'ERROR': 0, 'NOTFOUND': 0, 'BAD': -1, 'FAKE': -2 };
-var Task = require('tasker').Task;
-var trackerClient = require('bittorrent-tracker');
+var status2value = { 'VERIFIED': 2, 'GOOD': 1, 'NONE': 0, 'ERROR': 0, 'NOTFOUND': 0, 'BAD': -1, 'FAKE': -2 }
+var Task = require('tasker').Task
 
 var updateMediaPool = [],
   updatingMediaPool = false,
@@ -184,41 +183,6 @@ var createTask = function(target, interval, dataCb, errorCb) {
   task.start()
 }
 
-function ignore(err) {
-  //console.log("ERROR: " + err.message);
-}
-
-var updateTrackersFromHash = function(hash) {
-
-  workers['update-tracker']++
-  Hash.find()
-    .where({ uuid: hash })
-    .limit(1)
-    .exec(function(err, entries) {
-      if (!err && entries.length) {
-        //update peers from trackers
-        var peerId = new Buffer('01234567890123456789');
-        var port = 6881;
-        var data = { announce: [], infoHash: entries[0].uuid };
-        for (var t in entries[0].trackers) {
-          if (entries[0].trackers[t].indexOf('dht://') == -1) {
-            data.announce.push(entries[0].trackers[t]);
-          }
-        }
-        if (data.announce.length) {
-          var client = new trackerClient(peerId, port, data);
-          client.on('error', ignore);
-          client.once('update', function (data) {
-            Hash.update({ uuid: entries[0].uuid },{ seeders: data.complete, leechers: data.incomplete }, function(err, hashes) { workers['update-tracker']-- });
-          });
-          client.update();
-        } else {
-          workers['update-tracker']--
-        }
-      }
-    });
-}
-
 var indexSiteAPI = function(content) {
   var lines = content.split("\n"),
     added = 0
@@ -328,7 +292,7 @@ var updateStatus = function(content) {
   if (value > -10 && value < 10) {
     Hash.update({ uuid: task.hash },{ status: value }, function(err, hashes) { });
     ++session.status
-    updateTrackersFromHash(task.hash)
+    TrackerManager.updateTrackersFromHash(task.hash)
   }
 }
 
@@ -374,6 +338,7 @@ function showStatistics() {
   console.log(session)
   if (role['verbose']) {
     console.log(workers)
+    console.log(TrackerManager.announce)
   }
   console.log("\n")
   session = {'movies': 0, 'status': 0, 'metadata': 0}
