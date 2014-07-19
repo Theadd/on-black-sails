@@ -7,16 +7,19 @@ var ipc = require('node-ipc')
 var pool = [],
   localPool = []
 
+ipc.config.appspace = 'metadata.'
 ipc.config.id = 'metadata'
 ipc.config.retry = 1500
 ipc.config.silent = true
+ipc.config.networkHost = 'localhost'
+ipc.config.networkPort = 8018
 
 /**
  * Initialize IPC server
  */
 exports.init = function () {
-  console.log("Initializing IPC server")
-  ipc.serveNet (
+  console.log("Initializing metadata IPC server")
+  ipc.serveNet ('localhost', 8018,
     function () {
       ipc.server.on (
         'hash',
@@ -47,12 +50,12 @@ exports.add = function (hash) {
  */
 exports.connect = function () {
   ipc.connectToNet(
-    'metadata',
+    'metadata', 'localhost', 8018,
     function(){
       ipc.of.metadata.on(
         'connect',
         function(){
-          console.log("connected to ipc server")
+          console.log("Connected to metadata IPC server")
           ipc.of.metadata.connected = true
         }
       )
@@ -124,6 +127,9 @@ var updateMetadata = exports.updateMetadata = function(content) {
       console.log(err)
     } else {
       Indexer.session.metadata++
+      if (Indexer.role['live']) {
+        TrackerManager.add(hashes[0].uuid)
+      }
     }
   })
   //Update File model

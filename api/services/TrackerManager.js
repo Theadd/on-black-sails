@@ -7,20 +7,24 @@ var ipc = require('node-ipc')
 
 var totalResponses = 0,
   rawAnnounceItem = {'requests': 0, 'responses': 0, 'timeouts': 0, 'last-request': new Date().getTime()/*, 'active': false*/},
-  localPool = []
+  localPool = [],
+  isClientEnabled = false
 
 var announce = exports.announce = []
 
+ipc.config.appspace = 'trackers.'
 ipc.config.id = 'trackers'
 ipc.config.retry = 1500
 ipc.config.silent = true
+ipc.config.networkHost = 'localhost'
+ipc.config.networkPort = 8010
 
 /**
  * Initialize IPC server
  */
 exports.init = function () {
   console.log("Initializing IPC server")
-  ipc.serveNet(
+  ipc.serveNet('localhost', 8010,
     function () {
       ipc.server.on (
         'hash',
@@ -36,6 +40,10 @@ exports.init = function () {
 
 exports.add = function (hash) {
   localPool.push(hash)
+  if (!isClientEnabled) {
+    this.connect()
+    return
+  }
   if (ipc.of.trackers.connected || false) {
     while (localPool.length) {
       ipc.of.trackers.emit(
@@ -50,14 +58,16 @@ exports.add = function (hash) {
  * Connect client to IPC server
  */
 exports.connect = function () {
+  isClientEnabled = true
   ipc.connectToNet(
-    'trackers',
+    'trackers', 'localhost', 8010,
     function(){
       ipc.of.trackers.on(
         'connect',
         function(){
-          console.log("connected to ipc server")
+          console.log("Connected to trackers IPC server")
           ipc.of.trackers.connected = true
+
         }
       )
       ipc.of.trackers.on(
