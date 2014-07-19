@@ -6,7 +6,8 @@ var TrackerClient = require('bittorrent-tracker')
 var ipc = require('node-ipc')
 
 var totalResponses = 0,
-  rawAnnounceItem = {'requests': 0, 'responses': 0, 'timeouts': 0, 'last-request': new Date().getTime()/*, 'active': false*/}
+  rawAnnounceItem = {'requests': 0, 'responses': 0, 'timeouts': 0, 'last-request': new Date().getTime()/*, 'active': false*/},
+  localPool = []
 
 var announce = exports.announce = []
 
@@ -19,7 +20,7 @@ ipc.config.silent = true
  */
 exports.init = function () {
   console.log("Initializing IPC server")
-  ipc.serveNet (
+  ipc.serveNet(
     function () {
       ipc.server.on (
         'hash',
@@ -34,10 +35,15 @@ exports.init = function () {
 }
 
 exports.add = function (hash) {
-  ipc.of.trackers.emit(
-    'hash',
-    hash
-  )
+  localPool.push(hash)
+  if (ipc.of.trackers.connected || false) {
+    while (localPool.length) {
+      ipc.of.trackers.emit(
+        'hash',
+        localPool.pop()
+      )
+    }
+  }
 }
 
 /**
@@ -51,12 +57,14 @@ exports.connect = function () {
         'connect',
         function(){
           console.log("connected to ipc server")
+          ipc.of.trackers.connected = true
         }
       )
       ipc.of.trackers.on(
         'disconnect',
         function(){
-          console.log('disconnected from world')
+          console.log('Not connected to trackers IPC server')
+          ipc.of.trackers.connected = false
         }
       )
     }

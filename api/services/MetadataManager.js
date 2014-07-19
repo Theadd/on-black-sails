@@ -4,7 +4,8 @@
 
 var ipc = require('node-ipc')
 
-var pool = []
+var pool = [],
+  localPool = []
 
 ipc.config.id = 'metadata'
 ipc.config.retry = 1500
@@ -30,10 +31,15 @@ exports.init = function () {
 }
 
 exports.add = function (hash) {
-  ipc.of.metadata.emit(
-    'hash',
-    hash
-  )
+  localPool.push(hash)
+  if (ipc.of.metadata.connected || false) {
+    while (localPool.length) {
+      ipc.of.metadata.emit(
+        'hash',
+        localPool.pop()
+      )
+    }
+  }
 }
 
 /**
@@ -47,12 +53,14 @@ exports.connect = function () {
         'connect',
         function(){
           console.log("connected to ipc server")
+          ipc.of.metadata.connected = true
         }
       )
       ipc.of.metadata.on(
         'disconnect',
         function(){
-          console.log('disconnected from metadata IPC server')
+          console.log('Not connected to metadata IPC server')
+          ipc.of.metadata.connected = false
         }
       )
     }
