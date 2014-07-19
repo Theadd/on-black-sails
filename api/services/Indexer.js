@@ -16,11 +16,14 @@ var updateMediaPool = [],
 exports.run = function() {
   role = CommandLineHelpers.getValues()
 
+  if (role['tracker']) {
+    TrackerManager.init()
+  }
+
   if (!role['quiet']) {
     statisticsTimer = setInterval( function() { showStatistics() }, 10000)
   }
   console.log(CommandLineHelpers.usage())
-  console.log(role)
 
   if (role['update-index']) {
     createTask('http://bitsnoop.com/api/latest_tz.php?t=all', 600000, indexSiteAPI) //10min = 600000
@@ -57,6 +60,7 @@ exports.run = function() {
   }
 
   if (role['update-status']) {
+    TrackerManager.connect()
     createTask(function () {
       var task = this
       task.status = 'targeting'
@@ -292,7 +296,8 @@ var updateStatus = function(content) {
   if (value > -10 && value < 10) {
     Hash.update({ uuid: task.hash },{ status: value }, function(err, hashes) { });
     ++session.status
-    TrackerManager.updateTrackersFromHash(task.hash)
+    //TrackerManager.updateTrackersFromHash(task.hash)
+    TrackerManager.add(task.hash)
   }
 }
 
@@ -338,8 +343,9 @@ function showStatistics() {
   console.log(session)
   if (role['verbose']) {
     console.log(workers)
-    console.log(TrackerManager.announce)
+
   }
+  if (role['tracker']) console.log(TrackerManager.announce) //TODO: remove
   console.log("\n")
   session = {'movies': 0, 'status': 0, 'metadata': 0}
 }
