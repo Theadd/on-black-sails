@@ -128,7 +128,13 @@ var updateMetadata = exports.updateMetadata = function(content) {
     } else {
       Indexer.session.metadata++
       if (Indexer.role['live']) {
-        TrackerManager.add(hashes[0].uuid)
+        if (hashes[0].category.indexOf("movies") != -1) {
+          MediaManager.add(hashes[0].uuid)
+        } else {
+          StatusManager.add(hashes[0].uuid)
+          TrackerManager.add(hashes[0].uuid)
+        }
+
       }
     }
   })
