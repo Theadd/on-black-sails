@@ -10,10 +10,6 @@ var totalResponses = 0,
 
 var announce = exports.announce = []
 
-
-
-
-
 ipc.config.id = 'trackers'
 ipc.config.retry = 1500
 ipc.config.silent = true
@@ -66,10 +62,6 @@ exports.connect = function () {
     }
   )
 }
-
-
-
-
 
 var getProperAnnounceUrls = exports.getProperAnnounceUrls = function (trackers) {
   var announceUrls = [],
@@ -133,6 +125,7 @@ var registerAnnounceResponse = exports.registerAnnounceResponse = function (url)
 
   announce[url] = item
   ++totalResponses
+  Indexer.session.peers++
 }
 
 function ignore(err) {

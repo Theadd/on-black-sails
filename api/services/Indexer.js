@@ -8,13 +8,13 @@ var Task = require('tasker').Task
 var updateMediaPool = [],
   updatingMediaPool = false,
   updateStatusPool = [],
-  session = {'movies': 0, 'status': 0, 'metadata': 0},
+  session = exports.session = {'movies': 0, 'status': 0, 'metadata': 0, 'files': 0, 'peers': 0},
   statisticsTimer = null,
   workers = exports.workers = {'update-metadata': 0, 'update-status': 0, 'update-media': [], 'index-file': 0, 'update-tracker': 0 },
-  role = {}
+  role = exports.role = {}
 
 exports.run = function() {
-  role = CommandLineHelpers.getValues()
+  role = Indexer.role = CommandLineHelpers.getValues()
 
   if (role['tracker']) {
     TrackerManager.init()
@@ -26,6 +26,9 @@ exports.run = function() {
   console.log(CommandLineHelpers.usage())
 
   if (role['update-index']) {
+    if (role['live']) {
+      MetadataManager.connect()
+    }
     createTask('http://bitsnoop.com/api/latest_tz.php?t=all', 600000, indexSiteAPI) //10min = 600000
     createTask('http://kickass.to/hourlydump.txt.gz', 1800000, indexSiteAPI) //30min = 1800000
   }
@@ -38,25 +41,8 @@ exports.run = function() {
   }
 
   if (role['update-metadata']) {
-    createTask(function () {
-      var task = this
-      task.status = 'targeting'
-      Hash.find()
-        .where({ downloaded: false })
-        .sort('updatedAt ASC')
-        .limit(1)
-        .exec(function(err, entries) {
-          if (!err && entries.length) {
-            task.hash = entries[0].uuid
-            task.title = entries[0].title
-            task.category = entries[0].category
-            task.role = 'update-metadata'
-            workers[task.role]++
-            //task.status = 'standby'
-            task.use(getDownloadLink(entries[0].uuid, entries[0].cache || '', entries[0].source))
-          }
-        })
-    }, role['update-metadata-interval'], updateMetadata, errorOnUpdateMetadata)
+    MetadataManager.init()
+    MetadataManager.start()
   }
 
   if (role['update-status']) {
@@ -162,7 +148,7 @@ var updatePoolOfMedia = function() {
     })
 }
 
-var createTask = function(target, interval, dataCb, errorCb) {
+var createTask = exports.createTask = function(target, interval, dataCb, errorCb, logStatus) {
   var task = new Task(target, interval)
 
   if (typeof errorCb !== "undefined") {
@@ -179,6 +165,12 @@ var createTask = function(target, interval, dataCb, errorCb) {
         console.log("SKIP UPDATING " + self.hash)
         Hash.update({ uuid: self.hash }, { size: 0 }, function(err, hashes) { })
       }
+    })
+  }
+
+  if (logStatus || false) {
+    task.on('status', function (msg) {
+      console.log("Status: " + msg)
     })
   }
 
@@ -221,6 +213,9 @@ var indexSiteAPI = function(content) {
           ++addAttempts
           if (!err) {
             ++added
+            if (role['live']) {
+              MetadataManager.add(entry.uuid)
+            }
           }
           if (addAttempts == contentLength) {
             console.log("[" + task.url + "] Indexed " + added + " out of " + contentLength + " in " + ((new Date().getTime() - startTime)) + "ms (" + (task._totalNumLines || 0) + " lines so far)")
@@ -235,66 +230,7 @@ var indexSiteAPI = function(content) {
 }
 
 
-var updateMetadata = function(content) {
-  var task = this
-  workers[task.role]--
-  //Update Hash model
-  Hash.update({ uuid: task.hash },{
-    size: content.size,
-    trackers: content.trackers,
-    files: content.files.length,
-    downloaded: true,
-    added: new Date(content.creationDate)
-  }, function(err, hashes) {
-    //console.log("\t\tDONE: "+task.role)
-    if (err) {
-      console.log("ERROR UPDATING METADATA OF " + task.hash)
-      console.log(err)
-    } else {
-      ++session.metadata
-    }
-  })
-  //Update File model
-  for (var i in content.files) {
-    workers['index-file']++
-    var data = {};
-    data['hash'] = task.hash
-    data['file'] = content.files[i].name
-    data['title'] = task.title
-    data['category'] = task.category
-    data['added'] = new Date(content.creationDate)
-    data['size'] = content.files[i].size;
-    File.create(data).exec(function(err, fileentry) {
-      workers['index-file']--
-      if (!err) {
-        //console.log("File added: ", fileentry.file)
-      } else {
-        console.log("!ERROR in file.create()")
-        console.log(err)
-      }
-    })
-  }
-}
 
-var errorOnUpdateMetadata = function(error) {
-  //Probably, download link unavailable
-  var task = this
-  workers[task.role]--
-
-  Hash.update({ uuid: task.hash },{
-    cache: ''
-  }, function(err, hashes) {
-    console.log("\n# Probably, download link unavailable for " + task.hash)
-    console.log("\t" + task.url)
-    console.log("\t" + error)
-    if (err) {
-      console.log("[In errorOnUpdateMetadata()]: ERROR UPDATING METADATA OF " + task.hash)
-      console.log(err)
-    } else {
-      ++session.metadata
-    }
-  })
-}
 
 
 var updateStatus = function(content) {
@@ -353,11 +289,10 @@ function showStatistics() {
   console.log(session)
   if (role['verbose']) {
     console.log(workers)
-
+    if (role['tracker']) console.log(TrackerManager.announce) //TODO: remove
   }
-  if (role['tracker']) console.log(TrackerManager.announce) //TODO: remove
   console.log("\n")
-  session = {'movies': 0, 'status': 0, 'metadata': 0}
+  session = Indexer.session = {'movies': 0, 'status': 0, 'metadata': 0, 'files': 0, 'peers': 0}
 }
 
 var getDownloadLink = exports.getDownloadLink = function(hash, cache, source) {

@@ -36,6 +36,7 @@ exports.getValues = function() {
     'update-media-interval': (typeof sails.config['update-media'] === 'number') ? sails.config['update-media'] : 500,
     'quiet': Boolean(sails.config['quiet']),
     'verbose': Boolean(sails.config['verbose']),
-    'tracker': Boolean(sails.config['tracker'])
+    'tracker': Boolean(sails.config['tracker']),
+    'live': Boolean(sails.config['live'])
   }
 }
