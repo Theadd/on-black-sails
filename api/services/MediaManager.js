@@ -109,7 +109,7 @@ exports.start = function () {
             Indexer.workers[task.role][task.hash] = new Date()
             //propagate update to other IPC handlers
             StatusManager.add(task.hash)
-            TrackersManager.add(task.hash)
+            TrackerManager.add(task.hash)
             if (typeof entries[0].imdb !== "undefined" && entries[0].imdb.length) {
               task.imdb = entries[0].imdb
               task.use('http://www.omdbapi.com/?i=' +  entries[0].imdb)
@@ -183,6 +183,6 @@ var updateMovie = function(content) {
 
 function updateHashIMDB (opts) {
   Indexer.session.movies++
-  delete workers['update-media'][opts['hash']]
+  delete Indexer.workers['update-media'][opts['hash']]
   Hash.update({ uuid: opts['hash'] },{ imdb: opts['imdb'] }, function(err, hashes) { });
 }

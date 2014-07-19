@@ -23,7 +23,7 @@ ipc.config.networkPort = 8010
  * Initialize IPC server
  */
 exports.init = function () {
-  console.log("Initializing IPC server")
+  console.log("Initializing trackers IPC server")
   ipc.serveNet('localhost', 8010,
     function () {
       ipc.server.on (

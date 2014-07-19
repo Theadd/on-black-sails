@@ -37,6 +37,7 @@ exports.getValues = function() {
     'quiet': Boolean(sails.config['quiet']),
     'verbose': Boolean(sails.config['verbose']),
     'tracker': Boolean(sails.config['tracker']),
-    'live': Boolean(sails.config['live'])
+    'live': Boolean(sails.config['live']),
+    'output-handler': Boolean(sails.config['output-handler'])
   }
 }

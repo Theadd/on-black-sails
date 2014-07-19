@@ -2,7 +2,6 @@
  * Created by Theadd on 5/30/14.
  */
 
-
 var Task = require('tasker').Task
 
 var session = exports.session = {'movies': 0, 'status': 0, 'metadata': 0, 'files': 0, 'peers': 0},
@@ -10,24 +9,24 @@ var session = exports.session = {'movies': 0, 'status': 0, 'metadata': 0, 'files
   workers = exports.workers = {'update-metadata': 0, 'update-status': 0, 'update-media': [], 'index-file': 0, 'update-tracker': 0 },
   role = exports.role = {}
 
-
-
 exports.run = function() {
   role = Indexer.role = CommandLineHelpers.getValues()
+  console.log(CommandLineHelpers.usage())
 
   if (role['tracker']) {
     TrackerManager.init()
   }
 
-  if (!role['quiet']) {
-    statisticsTimer = setInterval( function() { showStatistics() }, 10000)
+  if (role['output-handler']) {
+    OutputHandler.init()
+  } else {
+    statisticsTimer = setInterval( function() { sendStatistics() }, 5000)
   }
-  console.log(CommandLineHelpers.usage())
 
   if (role['update-index']) {
-    if (role['live']) {
+    /*if (role['live']) {
       MetadataManager.connect() //~
-    }
+    }*/
     createTask('http://bitsnoop.com/api/latest_tz.php?t=all', 600000, indexSiteAPI) //10min = 600000
     createTask('http://kickass.to/hourlydump.txt.gz', 1800000, indexSiteAPI) //30min = 1800000
   }
@@ -55,9 +54,6 @@ exports.run = function() {
   }
 
 }
-
-
-
 
 var createTask = exports.createTask = function(target, interval, dataCb, errorCb, logStatus) {
   var task = new Task(target, interval)
@@ -140,22 +136,14 @@ var indexSiteAPI = function(content) {
   }
 }
 
-
-
-
-
-
-
-
-function showStatistics() {
-  console.log("\n" + new Date())
-  console.log(session)
-  if (role['verbose']) {
-    console.log(workers)
-    if (role['tracker']) console.log(TrackerManager.announce) //TODO: remove
-    if (role['update-media']) console.log(MediaManager.cacheStats)
+function sendStatistics() {
+  var statistics = {
+    'session': session,
+    'workers': workers,
+    'announce': (role['tracker']) ? TrackerManager.announce : [],
+    'media-cache-stats': (role['update-media']) ? MediaManager.cacheStats : {}
   }
-  console.log("\n")
+  OutputHandler.add(statistics)
   session = Indexer.session = {'movies': 0, 'status': 0, 'metadata': 0, 'files': 0, 'peers': 0}
 }
 
