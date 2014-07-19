@@ -2,7 +2,7 @@
  * Created by Theadd on 5/30/14.
  */
 
-var status2value = { 'VERIFIED': 2, 'GOOD': 1, 'NONE': 0, 'ERROR': 0, 'NOTFOUND': 0, 'BAD': -1, 'FAKE': -2 }
+
 var Task = require('tasker').Task
 
 var updateMediaPool = [],
@@ -27,7 +27,7 @@ exports.run = function() {
 
   if (role['update-index']) {
     if (role['live']) {
-      MetadataManager.connect()
+      MetadataManager.connect() //~
     }
     createTask('http://bitsnoop.com/api/latest_tz.php?t=all', 600000, indexSiteAPI) //10min = 600000
     createTask('http://kickass.to/hourlydump.txt.gz', 1800000, indexSiteAPI) //30min = 1800000
@@ -46,40 +46,7 @@ exports.run = function() {
   }
 
   if (role['update-status']) {
-    TrackerManager.connect()
-    createTask(function () {
-      var task = this
-      task.status = 'targeting'
-      if (updateStatusPool.length) {
-        var hash = updateStatusPool.pop()
-        Hash.find()
-          .where({ uuid: hash })
-          .exec(function(err, entries) {
-            if (!err && entries.length) {
-              task.hash = entries[0].uuid
-              task.title = entries[0].title
-              task.role = 'update-status'
-              workers[task.role]++
-              task.use('http://bitsnoop.com/api/fakeskan.php?hash=' + entries[0].uuid.toUpperCase())
-            }
-          })
-      } else {
-        Hash.find()
-          .where({ downloaded: true })
-          .sort('updatedAt ASC')
-          .where({category: { not: ["movies", "video movies"] } })
-          .limit(1)
-          .exec(function(err, entries) {
-            if (!err && entries.length) {
-              task.hash = entries[0].uuid
-              task.title = entries[0].title
-              task.role = 'update-status'
-              workers[task.role]++
-              task.use('http://bitsnoop.com/api/fakeskan.php?hash=' + entries[0].uuid.toUpperCase())
-            }
-          })
-      }
-    }, role['update-status-interval'], updateStatus)
+    asfasf
   }
 
   if (role['update-media']) {
@@ -233,19 +200,7 @@ var indexSiteAPI = function(content) {
 
 
 
-var updateStatus = function(content) {
-  var task = this,
-    value = status2value[content]
 
-  workers[task.role]--
-
-  if (value > -10 && value < 10) {
-    Hash.update({ uuid: task.hash },{ status: value }, function(err, hashes) { });
-    ++session.status
-    //TrackerManager.updateTrackersFromHash(task.hash)
-    TrackerManager.add(task.hash)
-  }
-}
 
 var updateMovie = function(content) {
   var task = this,
