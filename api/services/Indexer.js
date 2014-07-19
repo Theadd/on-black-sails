@@ -32,7 +32,7 @@ exports.run = function() {
   if (role['full-index']) {
     if (role['full-index-bitsnoop']) {
       createTask('http://ext.bitsnoop.com/export/b3_all.txt.gz', 0, indexSiteAPI)
-    } else if (role['full-index']) {
+    } else if (role['full-index-kickass']) {
       createTask('http://kickass.to/dailydump.txt.gz', 0, indexSiteAPI)
     }
   }
@@ -188,8 +188,12 @@ var createTask = function(target, interval, dataCb, errorCb) {
 }
 
 var indexSiteAPI = function(content) {
-  var lines = content.split("\n"),
-    added = 0
+  var task = this,
+    lines = content.split("\n"),
+    added = 0,
+    addAttempts = 0,
+    contentLength = lines.length - 1,
+    startTime = new Date().getTime()
 
   for (var i in lines) {
     if (lines.hasOwnProperty(i)) {
@@ -214,14 +218,20 @@ var indexSiteAPI = function(content) {
       }
       if (index.length) {
         Hash.create(data).exec(function(err, entry) {
+          ++addAttempts
           if (!err) {
             ++added
+          }
+          if (addAttempts == contentLength) {
+            console.log("[" + task.url + "] Indexed " + added + " out of " + contentLength + " in " + ((new Date().getTime() - startTime)) + "ms (" + (task._totalNumLines || 0) + " lines so far)")
+            addAttempts = 0
+            added = 0
+            task.resume()
           }
         })
       }
     }
   }
-  console.log("indexSiteAPI[" + this.url + "] " + added + "/" + lines.length + "/" + (this._totalNumLines || 0))
 }
 
 
