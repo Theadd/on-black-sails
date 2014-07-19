@@ -2,6 +2,10 @@
  * Created by Theadd on 6/16/14.
  */
 
+var moviedbBusyState = false,
+  moviedbBusySince = new Date().getTime(),
+  MovieDB = null
+
 exports.guessMedia = function (input) {
   input = input.replace(/\./g, ' ')
   var title = input.toLowerCase(),
@@ -43,40 +47,65 @@ String.prototype.regexLastIndexOf = function(regex, startpos) {
 }
 
 exports.matchingIMDBIDFromTMDB = function (title, year, cb, opts) {
-  var MovieDB = require('moviedb')('d64e9dd43d0bc3187bb0254ccfe01257')  //TODO: config/local.js
-  opts = opts || {}
+  title = title.replace(/\W+/g," ");
 
-  MovieDB.searchMovie({query: title }, function(err, mdbres){
-    if (err) {
-      console.log(err)
-      delete Indexer.workers['update-media'][opts['hash']]
-    } else {
-      var probable = []
+  if (!moviedbBusyState) {
+    moviedbBusyState = true
+    moviedbBusySince = new Date().getTime()
 
-      if (typeof mdbres['results'] !== "undefined" && mdbres['results'].length) {
-        probable = reduceMatchingMoviesByYear(mdbres['results'], year)
-        probable = reduceMatchingMoviesByTitle(probable, title)
-        var matching = reduceMatchingMoviesByPopularity(probable)
+    if (MovieDB == null) {
+      MovieDB = require('moviedb')('d64e9dd43d0bc3187bb0254ccfe01257') //TODO: config/local.js
+    }
+    opts = opts || {}
 
-        if (typeof matching['id'] !== "undefined") {
-          MovieDB.movieInfo({id: matching['id'] }, function(error, mdbinfo){
-            if (error) {
-              console.log(error)
-              delete Indexer.workers['update-media'][opts['hash']]
-            } else {
-              opts['imdb'] = mdbinfo['imdb_id']
-              cb(opts)
-            }
-          })
+    MovieDB.on('error', function(emsg) {
+      console.log("@MOVIEDB: ", emsg)
+      moviedbBusyState = false
+    })
+
+    MovieDB.searchMovie({query: title }, function(err, mdbres){
+      if (err) {
+        moviedbBusyState = false
+        console.log(err)
+        delete Indexer.workers['update-media'][opts['hash']]
+      } else {
+        var probable = []
+
+        if (typeof mdbres['results'] !== "undefined" && mdbres['results'].length) {
+          probable = reduceMatchingMoviesByYear(mdbres['results'], year)
+          probable = reduceMatchingMoviesByTitle(probable, title)
+          var matching = reduceMatchingMoviesByPopularity(probable)
+          if (typeof matching['id'] !== "undefined") {
+            MovieDB.movieInfo({id: matching['id'] }, function(error, mdbinfo) {
+              if (error) {
+                moviedbBusyState = false
+                delete Indexer.workers['update-media'][opts['hash']]
+              } else {
+                opts['imdb'] = mdbinfo['imdb_id']
+                cb(opts)
+                moviedbBusyState = false
+              }
+            })
+          } else {
+            moviedbBusyState = false
+            delete Indexer.workers['update-media'][opts['hash']]
+          }
         } else {
+          moviedbBusyState = false
           delete Indexer.workers['update-media'][opts['hash']]
         }
-      } else {
-        delete Indexer.workers['update-media'][opts['hash']]
       }
-    }
 
-  })
+    })
+  } else {
+    setTimeout( function() {
+      if ((new Date().getTime()) - moviedbBusySince > 30000) {
+        moviedbBusyState = false
+      }
+      MediaHelpers.matchingIMDBIDFromTMDB(title, year, cb, opts)
+    }, 1000)
+
+  }
 }
 
 function reduceMatchingMoviesByYear(results, year) {
@@ -123,66 +152,3 @@ function reduceMatchingMoviesByPopularity(results) {
   return probable
 }
 
-
-
-/*
- function getMovieQualityRate($title) {
- $rate = 0;
-
- if (preg_match("/(?:dvd.?scr(?:eener)?)|(?:br.?scr(?:eener)?)|(?:bluray.?scr(?:eener)?)|(?:hdtv.?scr(?:eener)?)/", $title)) {
- $rate = 2;
- } else if (preg_match("/screener/", $title)) {
- $rate = 1;
- } else {
- if (preg_match("/(?:br.?rip)|(?:bd.?rip)|(?:bluray.?rip)|(?:bluray)/", $title)) {
- $rate = 7;
- } else if (preg_match("/(?:dvd.?rip)/", $title)) {
- $rate = 6;
- } else if (preg_match("/hdtv/", $title)) {
- $rate = 5;
- } else if (preg_match("/(?:web.?rip)/", $title)) {
- $rate = 4;
- } else if (preg_match("/rip/", $title)) {
- $rate = 3;
- }
- }
-
- return $rate;
- }
-
- function getTVShowQualityRate($title) {
-
- if (preg_match("/[[:space:]]1080p[[:space:]]/", $title)) {
- $rate = 5;
- } else if (preg_match("/[[:space:]]720p[[:space:]]/", $title)) {
- $rate = 4;
- } else if (preg_match("/[[:space:]]hdtv[[:space:]]/", $title)) {
- $rate = 3;
- } else if (preg_match("/[[:space:]]web.?(?:rip)?[[:space:]]/", $title)) {
- $rate = 2;
- } else if (preg_match("/[[:space:]]480p[[:space:]]/", $title)) {
- $rate = 1;
- } else {
- $rate = 0;
- }
-
- return $rate;
- }
-
- function getTVShowInfo($title) {
- $info = array('name' => '', 'episode' => -1);
- if (preg_match("/[[:space:]]s([0-9]+)e([0-9]+)[[:space:]]/", $title, $m, PREG_OFFSET_CAPTURE)) {
- $info['episode'] = intval($m[1][0]) * 1000 + intval($m[2][0]);
- $info['name'] = preg_replace('/[^a-z]/', '', substr($title, 0, $m[0][1]));
- } else if (preg_match("/[[:space:]]([0-9]+)x([0-9]+)[[:space:]]/", $title, $m, PREG_OFFSET_CAPTURE)) {
- $info['episode'] = intval($m[1][0]) * 1000 + intval($m[2][0]);
- $info['name'] = preg_replace('/[^a-z]/', '', substr($title, 0, $m[0][1]));
- } else if (preg_match("/[[:space:]]special[[:space:]]/", $title, $m, PREG_OFFSET_CAPTURE)) {
- $info['episode'] = 0; //special episode
- $info['name'] = 'special '.preg_replace('/[^a-z]/', '', substr($title, 0, $m[0][1]));
- } else {
- $info = false;
- }
- return $info;
- }
- */

@@ -26,8 +26,8 @@
     "later": "^1.1.6",
     "sails-mongo": "git+https://git@github.com/Theadd/sails-mongo.git",
     "bittorrent-tracker": "^2.0.0",
-    "moviedb": "^0.1.6",
-    "node-ipc": "^1.0.5"
+    "node-ipc": "^1.0.5",
+    "moviedb": "git+https://git@github.com/Theadd/moviedb.git"
   },
   "scripts": {
     "start": "node app.js",

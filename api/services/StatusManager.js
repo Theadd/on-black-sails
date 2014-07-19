@@ -11,7 +11,7 @@ var pool = [],
 
 ipc.config.appspace = 'status.'
 ipc.config.id = 'status'
-ipc.config.retry = 1500
+ipc.config.retry = 2500
 ipc.config.silent = true
 ipc.config.networkHost = 'localhost'
 ipc.config.networkPort = 8015
@@ -26,7 +26,9 @@ exports.init = function () {
       ipc.server.on (
         'hash',
         function (data, socket) {
-          pool.push(data)
+          if (pool.indexOf(data) == -1) {
+            pool.push(data)
+          }
         }
       )
     }
@@ -93,7 +95,7 @@ exports.start = function () {
             task.role = 'update-status'
             task.addToTrackerManager = false
             Indexer.workers[task.role]++
-            task.use('http://bitsnoop.com/api/fakeskan.php?hash=' + entries[0].uuid.toUpperCase())
+            task.use('http://bitsnoop.com/api/fakeskan.php?hash=' + entries[0].uuid)
           }
         })
     } else {
@@ -109,7 +111,7 @@ exports.start = function () {
             task.role = 'update-status'
             task.addToTrackerManager = true
             Indexer.workers[task.role]++
-            task.use('http://bitsnoop.com/api/fakeskan.php?hash=' + entries[0].uuid.toUpperCase())
+            task.use('http://bitsnoop.com/api/fakeskan.php?hash=' + entries[0].uuid)
           }
         })
     }

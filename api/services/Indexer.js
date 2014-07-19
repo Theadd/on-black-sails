@@ -17,16 +17,13 @@ exports.run = function() {
     TrackerManager.init()
   }
 
-  if (role['output-handler']) {
-    OutputHandler.init()
+  if (role['controller']) {
+    HandlerController.init()
   } else {
-    statisticsTimer = setInterval( function() { sendStatistics() }, 5000)
+    statisticsTimer = setInterval( function() { sendStatistics() }, 30000)
   }
 
   if (role['update-index']) {
-    /*if (role['live']) {
-      MetadataManager.connect() //~
-    }*/
     createTask('http://bitsnoop.com/api/latest_tz.php?t=all', 600000, indexSiteAPI) //10min = 600000
     createTask('http://kickass.to/hourlydump.txt.gz', 1800000, indexSiteAPI) //30min = 1800000
   }
@@ -140,10 +137,10 @@ function sendStatistics() {
   var statistics = {
     'session': session,
     'workers': workers,
-    'announce': (role['tracker']) ? TrackerManager.announce : [],
+    'announce': (role['tracker']) ? TrackerManager.getAnnounce() : [],
     'media-cache-stats': (role['update-media']) ? MediaManager.cacheStats : {}
   }
-  OutputHandler.add(statistics)
+  HandlerController.add(statistics)
   session = Indexer.session = {'movies': 0, 'status': 0, 'metadata': 0, 'files': 0, 'peers': 0}
 }
 

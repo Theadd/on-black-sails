@@ -38,6 +38,6 @@ exports.getValues = function() {
     'verbose': Boolean(sails.config['verbose']),
     'tracker': Boolean(sails.config['tracker']),
     'live': Boolean(sails.config['live']),
-    'output-handler': Boolean(sails.config['output-handler'])
+    'controller': Boolean(sails.config['controller'])
   }
 }

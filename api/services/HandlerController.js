@@ -19,14 +19,14 @@ var localPool = [],
       'update-status': 0,
       'update-media': [],
       'index-file': 0,
-      'update-tracker': 87 },
+      'update-tracker': 0 },
     announce: [],
     'media-cache-stats': {}
   }
 
 ipc.config.appspace = 'output.'
 ipc.config.id = 'output'
-ipc.config.retry = 1500
+ipc.config.retry = 2500
 ipc.config.silent = true
 ipc.config.networkHost = 'localhost'
 ipc.config.networkPort = 7891
@@ -48,7 +48,7 @@ exports.init = function () {
   )
 
   ipc.server.start()
-  setInterval( function() { console.log(statistics) }, 10000)
+  setInterval( function() { console.log(statistics) }, 30000)
 }
 
 exports.add = function (item) {
@@ -103,33 +103,15 @@ var mergeStatistics = function (values) {
     if (w != 'update-media' && values['workers'][w] != 0) {
       statistics['workers'][w] = values['workers'][w]
     } else if (w == 'update-media' && values['workers'][w].length) {
-      statistics['workers'][w] = values['workers'][w]
+      statistics['workers'][w] = JSON.parse(JSON.stringify(values['workers'][w]))
     }
   }
 
   if (values['announce'].length) {
-    statistics['announce'] = values['announce']
+    statistics['announce'] = JSON.parse(JSON.stringify(values['announce']))
   }
 
   if (typeof values['media-cache-stats']['hits'] !== "undefined") {
     statistics['media-cache-stats'] = JSON.parse(JSON.stringify(values['media-cache-stats']))
   }
 }
-
-/*{
- session: {
- movies: 0,
- status: 0,
- metadata: 0,
- files: 0,
- peers: 0
- },
- workers: {
- 'update-metadata': 0,
- 'update-status': 0,
- 'update-media': [],
- 'index-file': 0,
- 'update-tracker': 87 },
- announce: [],
- 'media-cache-stats': {}
- }*/

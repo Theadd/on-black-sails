@@ -10,11 +10,11 @@ var totalResponses = 0,
   localPool = [],
   isClientEnabled = false
 
-var announce = exports.announce = []
+var announce = []
 
 ipc.config.appspace = 'trackers.'
 ipc.config.id = 'trackers'
-ipc.config.retry = 1500
+ipc.config.retry = 2500
 ipc.config.silent = true
 ipc.config.networkHost = 'localhost'
 ipc.config.networkPort = 8010
@@ -103,10 +103,6 @@ var getProperAnnounceUrls = exports.getProperAnnounceUrls = function (trackers) 
             announce[trackers[i]]['timeouts']++
             announce[trackers[i]]['active'] = false
             announce[trackers[i]]['last-request'] = new Date().getTime()
-            /*if (candidate == null || candidate['last-request'] > item['last-request']) {
-              candidate = item
-              candidateUrl = trackers[i]
-            }*/
           }
         }
       }
@@ -181,4 +177,8 @@ var updateTrackersFromHash = exports.updateTrackersFromHash = function(hash) {
         }
       }
     })
+}
+
+exports.getAnnounce = function() {
+  return announce
 }

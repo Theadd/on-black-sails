@@ -11,7 +11,7 @@ var pool = [],
 
 ipc.config.appspace = 'media.'
 ipc.config.id = 'media'
-ipc.config.retry = 1500
+ipc.config.retry = 2500
 ipc.config.silent = true
 ipc.config.networkHost = 'localhost'
 ipc.config.networkPort = 8013
@@ -28,7 +28,9 @@ exports.init = function () {
       ipc.server.on (
         'hash',
         function (data, socket) {
-          pool.push(data)
+          if (pool.indexOf(data) == -1) {
+            pool.push(data)
+          }
         }
       )
     }
@@ -88,7 +90,6 @@ exports.start = function () {
     }
     if (pool.length < 50) {
       if (!isEnlargePoolActive) {
-        if (Indexer.role['verbose']) console.log(task.requestsCache.getStats())
         enlargePool()
       }
     }
@@ -130,8 +131,7 @@ exports.start = function () {
 var enlargePool = function() {
   isEnlargePoolActive = true
   Hash.find()
-    .where({ downloaded: true })
-    .where({category: ["movies", "video movies"] })
+    .where({downloaded: true, category: ["movies", "video movies"] })
     .sort('updatedAt ASC')
     .limit(120)
     .exec(function(err, entries) {
@@ -154,11 +154,11 @@ var updateMovie = function(content) {
   var task = this,
     res = {}
 
-  pool.push(task.hash)
   try {
     res = JSON.parse(content)
   } catch (e) {
     Hash.update({ uuid: task.hash },{ rate: task.rate }, function(err, hashes) { })
+    delete Indexer.workers['update-media'][task.hash]
     return  //not a valid json
   }
 

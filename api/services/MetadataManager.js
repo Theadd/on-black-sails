@@ -5,11 +5,12 @@
 var ipc = require('node-ipc')
 
 var pool = [],
-  localPool = []
+  localPool = [],
+  isClientEnabled = false
 
 ipc.config.appspace = 'metadata.'
 ipc.config.id = 'metadata'
-ipc.config.retry = 1500
+ipc.config.retry = 2500
 ipc.config.silent = true
 ipc.config.networkHost = 'localhost'
 ipc.config.networkPort = 8018
@@ -24,7 +25,9 @@ exports.init = function () {
       ipc.server.on (
         'hash',
         function (data, socket) {
-          pool.push(data)
+          if (pool.indexOf(data) == -1) {
+            pool.push(data)
+          }
         }
       )
     }
@@ -35,6 +38,10 @@ exports.init = function () {
 
 exports.add = function (hash) {
   localPool.push(hash)
+  if (!isClientEnabled) {
+    this.connect()
+    return
+  }
   if (ipc.of.metadata.connected || false) {
     while (localPool.length) {
       ipc.of.metadata.emit(
@@ -49,6 +56,7 @@ exports.add = function (hash) {
  * Connect client to IPC server
  */
 exports.connect = function () {
+  isClientEnabled = true
   ipc.connectToNet(
     'metadata', 'localhost', 8018,
     function(){
@@ -161,15 +169,13 @@ var updateMetadata = exports.updateMetadata = function(content) {
 }
 
 var errorOnUpdateMetadata = exports.errorOnUpdateMetadata = function(error) {
-  //Probably, download link unavailable
   var task = this
   Indexer.workers[task.role]--
 
   Hash.update({ uuid: task.hash },{
     cache: ''
   }, function(err, hashes) {
-    console.log("\n# Probably, download link unavailable for " + task.hash)
-    console.log("\t" + task.url)
+    console.log("\n# Download error: " + task.url)
     console.log("\t" + error)
     if (err) {
       console.log("[In errorOnUpdateMetadata()]: ERROR UPDATING METADATA OF " + task.hash)
