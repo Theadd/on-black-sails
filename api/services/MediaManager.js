@@ -9,9 +9,9 @@ var pool = [],
   isClientEnabled = false,
   isEnlargePoolActive = false
 
-ipc.config.appspace = 'media.'
+ipc.config.appspace = 'onblacksails.'
 ipc.config.id = 'media'
-ipc.config.retry = 2500
+ipc.config.retry = 5000
 ipc.config.silent = true
 ipc.config.networkHost = 'localhost'
 ipc.config.networkPort = 8013
@@ -22,19 +22,8 @@ exports.cacheStats = {}
  * Initialize IPC server
  */
 exports.init = function () {
-  console.log("Initializing media IPC server")
-  ipc.serveNet('localhost', 8013,
-    function () {
-      ipc.server.on (
-        'hash',
-        function (data, socket) {
-          if (pool.indexOf(data) == -1) {
-            pool.push(data)
-          }
-        }
-      )
-    }
-  )
+  console.log("Initializing metadata IPC server on platform " + sails.config['platform']);
+  ((sails.config['platform'] == 'win32') ? ipc.serveNet('localhost', 8013, ipcServeCb) : ipc.serve(ipcServeCb))
 
   ipc.server.start()
 }
@@ -59,28 +48,43 @@ exports.add = function (hash) {
  * Connect client to IPC server
  */
 exports.connect = function () {
-  isClientEnabled = true
-  ipc.connectToNet(
-    'media', 'localhost', 8013,
-    function(){
-      ipc.of.media.on(
-        'connect',
-        function(){
-          console.log("Connected to media IPC server")
-          ipc.of.media.connected = true
+  isClientEnabled = true;
+  (sails.config['platform'] == 'win32') ? ipc.connectToNet('media', 'localhost', 8013, ipcConnectCb) : ipc.connectTo('media', ipcConnectCb)
+}
 
-        }
-      )
-      ipc.of.media.on(
-        'disconnect',
-        function(){
-          console.log('Not connected to media IPC server')
-          ipc.of.media.connected = false
-        }
-      )
+/** IPC Callbacks */
+
+var ipcServeCb = function () {
+  ipc.server.on (
+    'hash',
+    function (data, socket) {
+      console.log("\tipc.media on hash: " + data)
+      if (pool.indexOf(data) == -1) {
+        pool.push(data)
+      }
     }
   )
 }
+
+var ipcConnectCb = function() {
+  ipc.of.media.on(
+    'connect',
+    function(){
+      console.log("Connected to media IPC server")
+      ipc.of.media.connected = true
+
+    }
+  )
+  ipc.of.media.on(
+    'disconnect',
+    function(){
+      console.log('Not connected to media IPC server')
+      ipc.of.media.connected = false
+    }
+  )
+}
+
+
 
 exports.start = function () {
   Indexer.createTask(function () {
