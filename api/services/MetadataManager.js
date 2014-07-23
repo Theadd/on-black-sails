@@ -8,9 +8,9 @@ var pool = [],
   localPool = [],
   isClientEnabled = false
 
-ipc.config.appspace = 'metadata.'
+ipc.config.appspace = 'onblacksails.'
 ipc.config.id = 'metadata'
-ipc.config.retry = 2500
+ipc.config.retry = 5000
 ipc.config.silent = true
 ipc.config.networkHost = 'localhost'
 ipc.config.networkPort = 8018
@@ -19,19 +19,8 @@ ipc.config.networkPort = 8018
  * Initialize IPC server
  */
 exports.init = function () {
-  console.log("Initializing metadata IPC server")
-  ipc.serveNet ('localhost', 8018,
-    function () {
-      ipc.server.on (
-        'hash',
-        function (data, socket) {
-          if (pool.indexOf(data) == -1) {
-            pool.push(data)
-          }
-        }
-      )
-    }
-  )
+  console.log("Initializing metadata IPC server on platform " + sails.config['platform']);
+  ((sails.config['platform'] == 'win32') ? ipc.serveNet('localhost', 8018, ipcServeCb) : ipc.serve(ipcServeCb))
 
   ipc.server.start()
 }
@@ -56,24 +45,37 @@ exports.add = function (hash) {
  * Connect client to IPC server
  */
 exports.connect = function () {
-  isClientEnabled = true
-  ipc.connectToNet(
-    'metadata', 'localhost', 8018,
+  isClientEnabled = true;
+  (sails.config['platform'] == 'win32') ? ipc.connectToNet('metadata', 'localhost', 8018, ipcConnectCb) : ipc.connectTo('metadata', ipcConnectCb)
+}
+
+/** IPC Callbacks */
+
+var ipcServeCb = function () {
+  ipc.server.on (
+    'hash',
+    function (data, socket) {
+      //console.log("\tipc.metadata on hash: " + data)
+      if (pool.indexOf(data) == -1) {
+        pool.push(data)
+      }
+    }
+  )
+}
+
+var ipcConnectCb = function() {
+  ipc.of.metadata.on(
+    'connect',
     function(){
-      ipc.of.metadata.on(
-        'connect',
-        function(){
-          console.log("Connected to metadata IPC server")
-          ipc.of.metadata.connected = true
-        }
-      )
-      ipc.of.metadata.on(
-        'disconnect',
-        function(){
-          console.log('Not connected to metadata IPC server')
-          ipc.of.metadata.connected = false
-        }
-      )
+      console.log("Connected to metadata IPC server")
+      ipc.of.metadata.connected = true
+    }
+  )
+  ipc.of.metadata.on(
+    'disconnect',
+    function(){
+      console.log('Not connected to metadata IPC server')
+      ipc.of.metadata.connected = false
     }
   )
 }
