@@ -10,8 +10,13 @@ var session = exports.session = {'movies': 0, 'status': 0, 'metadata': 0, 'files
   role = exports.role = {}
 
 exports.run = function() {
+  var os = require('os')
+  sails.config['platform'] = os.platform()
+
   role = Indexer.role = CommandLineHelpers.getValues()
   console.log(CommandLineHelpers.usage())
+
+
 
   if (role['tracker']) {
     TrackerManager.init()

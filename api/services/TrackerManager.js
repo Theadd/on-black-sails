@@ -12,9 +12,9 @@ var totalResponses = 0,
 
 var announce = []
 
-ipc.config.appspace = 'trackers.'
-ipc.config.id = 'trackers'
-ipc.config.retry = 2500
+ipc.config.appspace = 'onblacksails.'
+ipc.config.id = 'trackers'  //plural since it's not a tracker client but manages multiple tracker clients on each call
+ipc.config.retry = 5000
 ipc.config.silent = true
 ipc.config.networkHost = 'localhost'
 ipc.config.networkPort = 8010
@@ -23,17 +23,8 @@ ipc.config.networkPort = 8010
  * Initialize IPC server
  */
 exports.init = function () {
-  console.log("Initializing trackers IPC server")
-  ipc.serveNet('localhost', 8010,
-    function () {
-      ipc.server.on (
-        'hash',
-        function (data, socket) {
-          updateTrackersFromHash(data)
-        }
-      )
-    }
-  )
+  console.log("Initializing trackers IPC server on platform " + sails.config['platform']);
+  ((sails.config['platform'] == 'win32') ? ipc.serveNet('localhost', 8010, ipcServeCb) : ipc.serve(ipcServeCb))
 
   ipc.server.start()
 }
@@ -58,25 +49,36 @@ exports.add = function (hash) {
  * Connect client to IPC server
  */
 exports.connect = function () {
-  isClientEnabled = true
-  ipc.connectToNet(
-    'trackers', 'localhost', 8010,
-    function(){
-      ipc.of.trackers.on(
-        'connect',
-        function(){
-          console.log("Connected to trackers IPC server")
-          ipc.of.trackers.connected = true
+  isClientEnabled = true;
+  (sails.config['platform'] == 'win32') ? ipc.connectToNet('trackers', 'localhost', 8010, ipcConnectCb) : ipc.connectTo('trackers', ipcConnectCb)
+}
 
-        }
-      )
-      ipc.of.trackers.on(
-        'disconnect',
-        function(){
-          console.log('Not connected to trackers IPC server')
-          ipc.of.trackers.connected = false
-        }
-      )
+/** IPC Callbacks */
+
+var ipcServeCb = function () {
+  ipc.server.on (
+    'hash',
+    function (data, socket) {
+      console.info("Trackers - ipcServerCb on hash: " + data)
+      updateTrackersFromHash(data)
+    }
+  )
+}
+
+var ipcConnectCb = function() {
+  ipc.of.trackers.on(
+    'connect',
+    function(){
+      console.log("Connected to trackers IPC server")
+      ipc.of.trackers.connected = true
+
+    }
+  )
+  ipc.of.trackers.on(
+    'disconnect',
+    function(){
+      console.log('Not connected to trackers IPC server')
+      ipc.of.trackers.connected = false
     }
   )
 }

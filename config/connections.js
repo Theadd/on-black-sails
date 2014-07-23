@@ -27,27 +27,11 @@ module.exports.connections = {
   },
 
   //MongoDB on localhost
-  /*mongo: {
-    adapter: 'sails-mongo',
-    host: 'localhost',
-    port: 27017,
-    database: 'onblacksails'
-  }*/
-  //MongoDB on my testing environment, remove it
   mongo: {
     adapter: 'sails-mongo',
     host: '192.168.1.10',
-    port: 27017,
-    database: 'onblacksails',
-    replSet: {
-      servers: [
-        {
-          host: '192.168.1.12',
-          port: 27017
-        }
-      ],
-      options: {}
-    }
+    port: 27040,
+    database: 'onblacksails'
   }
 
 };
