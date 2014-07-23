@@ -13,7 +13,7 @@ var totalResponses = 0,
 var announce = []
 
 ipc.config.appspace = 'onblacksails.'
-ipc.config.id = 'trackers'  //plural since it's not a tracker client but manages multiple tracker clients on each call
+ipc.config.id = 'tracker'
 ipc.config.retry = 5000
 ipc.config.silent = true
 ipc.config.networkHost = 'localhost'
@@ -23,7 +23,7 @@ ipc.config.networkPort = 8010
  * Initialize IPC server
  */
 exports.init = function () {
-  console.log("Initializing trackers IPC server on platform " + sails.config['platform']);
+  console.log("Initializing tracker IPC server on platform " + sails.config['platform']);
   ((sails.config['platform'] == 'win32') ? ipc.serveNet('localhost', 8010, ipcServeCb) : ipc.serve(ipcServeCb))
 
   ipc.server.start()
@@ -35,9 +35,9 @@ exports.add = function (hash) {
     this.connect()
     return
   }
-  if (ipc.of.trackers.connected || false) {
+  if (ipc.of.tracker.connected || false) {
     while (localPool.length) {
-      ipc.of.trackers.emit(
+      ipc.of.tracker.emit(
         'hash',
         localPool.pop()
       )
@@ -50,7 +50,7 @@ exports.add = function (hash) {
  */
 exports.connect = function () {
   isClientEnabled = true;
-  (sails.config['platform'] == 'win32') ? ipc.connectToNet('trackers', 'localhost', 8010, ipcConnectCb) : ipc.connectTo('trackers', ipcConnectCb)
+  (sails.config['platform'] == 'win32') ? ipc.connectToNet('tracker', 'localhost', 8010, ipcConnectCb) : ipc.connectTo('tracker', ipcConnectCb)
 }
 
 /** IPC Callbacks */
@@ -59,31 +59,31 @@ var ipcServeCb = function () {
   ipc.server.on (
     'hash',
     function (data, socket) {
-      console.info("Trackers - ipcServerCb on hash: " + data)
-      updateTrackersFromHash(data)
+      console.info("tracker - ipcServerCb on hash: " + data)
+      updatetrackerFromHash(data)
     }
   )
 }
 
 var ipcConnectCb = function() {
-  ipc.of.trackers.on(
+  ipc.of.tracker.on(
     'connect',
     function(){
-      console.log("Connected to trackers IPC server")
-      ipc.of.trackers.connected = true
+      console.log("Connected to tracker IPC server")
+      ipc.of.tracker.connected = true
 
     }
   )
-  ipc.of.trackers.on(
+  ipc.of.tracker.on(
     'disconnect',
     function(){
-      console.log('Not connected to trackers IPC server')
-      ipc.of.trackers.connected = false
+      console.log('Not connected to tracker IPC server')
+      ipc.of.tracker.connected = false
     }
   )
 }
 
-var getProperAnnounceUrls = exports.getProperAnnounceUrls = function (trackers) {
+var getProperAnnounceUrls = exports.getProperAnnounceUrls = function (tracker) {
   var announceUrls = [],
     properFound = false
 
@@ -91,20 +91,20 @@ var getProperAnnounceUrls = exports.getProperAnnounceUrls = function (trackers) 
     var candidate = null,
       candidateUrl = ''
 
-    for (var i in trackers) {
-      if (typeof announce[trackers[i]] !== "undefined") {
-        var item = announce[trackers[i]]
+    for (var i in tracker) {
+      if (typeof announce[tracker[i]] !== "undefined") {
+        var item = announce[tracker[i]]
         if (!item['active']) {
           if (candidate == null || candidate['last-request'] > item['last-request']) {
             candidate = item
-            candidateUrl = trackers[i]
+            candidateUrl = tracker[i]
           }
         } else {
           //check for timeouts: 15s if there was  no previous timeout, 30s for second timeout, 45s for third, etc.
           if ((new Date().getTime()) - item['last-request'] > (15000 * (item['timeouts'] + 1))) {
-            announce[trackers[i]]['timeouts']++
-            announce[trackers[i]]['active'] = false
-            announce[trackers[i]]['last-request'] = new Date().getTime()
+            announce[tracker[i]]['timeouts']++
+            announce[tracker[i]]['active'] = false
+            announce[tracker[i]]['last-request'] = new Date().getTime()
           }
         }
       }
@@ -119,9 +119,9 @@ var getProperAnnounceUrls = exports.getProperAnnounceUrls = function (trackers) 
   }
 
   if (!properFound) {
-    for (var i in trackers) {
-      if (trackers[i].indexOf('dht://') == -1) {
-        announceUrls.push(trackers[i])
+    for (var i in tracker) {
+      if (tracker[i].indexOf('dht://') == -1) {
+        announceUrls.push(tracker[i])
       }
     }
   }
@@ -148,7 +148,7 @@ function ignore(err) {
   //console.log("ERROR: " + err.message)
 }
 
-var updateTrackersFromHash = exports.updateTrackersFromHash = function(hash) {
+var updatetrackerFromHash = exports.updatetrackerFromHash = function(hash) {
 
   Indexer.workers['update-tracker']++
   Hash.find()
@@ -158,7 +158,7 @@ var updateTrackersFromHash = exports.updateTrackersFromHash = function(hash) {
       if (!err && entries.length) {
         var peerId = new Buffer('01234567890123456789'),
           port = 6881,
-          data = { announce: getProperAnnounceUrls(entries[0].trackers), infoHash: entries[0].uuid }
+          data = { announce: getProperAnnounceUrls(entries[0].tracker), infoHash: entries[0].uuid }
 
         if (data.announce.length) {
           var client = new TrackerClient(peerId, port, data)

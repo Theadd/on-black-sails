@@ -140,7 +140,7 @@ var updateMetadata = exports.updateMetadata = function(content) {
           MediaManager.add(hashes[0].uuid)
         } else {
           StatusManager.add(hashes[0].uuid)
-          TrackerManager.add(hashes[0].uuid)
+          TrackerHandler.add(hashes[0].uuid)
         }
 
       }

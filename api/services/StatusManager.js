@@ -93,7 +93,7 @@ exports.start = function () {
             task.hash = entries[0].uuid
             task.title = entries[0].title
             task.role = 'update-status'
-            task.addToTrackerManager = false
+            task.addToTrackerHandler = false
             Indexer.workers[task.role]++
             task.use('http://bitsnoop.com/api/fakeskan.php?hash=' + entries[0].uuid)
           }
@@ -109,7 +109,7 @@ exports.start = function () {
             task.hash = entries[0].uuid
             task.title = entries[0].title
             task.role = 'update-status'
-            task.addToTrackerManager = true
+            task.addToTrackerHandler = true
             Indexer.workers[task.role]++
             task.use('http://bitsnoop.com/api/fakeskan.php?hash=' + entries[0].uuid)
           }
@@ -128,8 +128,8 @@ var updateStatus = function(content) {
   if (value > -10 && value < 10) {
     Hash.update({ uuid: task.hash },{ status: value }, function(err, hashes) { });
     Indexer.session.status++
-    if (task.addToTrackerManager) {
-      TrackerManager.add(task.hash)
+    if (task.addToTrackerHandler) {
+      TrackerHandler.add(task.hash)
     }
   }
 }
