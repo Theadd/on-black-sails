@@ -8,19 +8,22 @@ var pool = [],
   localPool = [],
   isClientEnabled = false
 
-ipc.config.appspace = 'onblacksails.'
-ipc.config.id = 'metadata'
-ipc.config.retry = 5000
-ipc.config.silent = true
-ipc.config.networkHost = 'localhost'
-ipc.config.networkPort = 8018
+exports.reconfig = function (ipc) {
+  ipc.config.appspace = 'onblacksails.'
+  ipc.config.id = 'metadata'
+  ipc.config.retry = 5000
+  ipc.config.silent = true
+  ipc.config.networkHost = 'localhost'
+  ipc.config.networkPort = 8018
+}
 
 /**
  * Initialize IPC server
  */
 exports.init = function () {
+  MetadataHandler.reconfig(ipc)
   console.log("Initializing metadata IPC server on platform " + sails.config['platform']);
-  ((sails.config['platform'] == 'win32') ? ipc.serveNet('localhost', 8018, ipcServeCb) : ipc.serve(ipcServeCb))
+  ((sails.config['platform'] == 'win32') ? ipc.serveNet(ipc.config.networkHost, ipc.config.networkPort, ipcServeCb) : ipc.serve(ipc.config.socketRoot + ipc.config.appspace + ipc.config.id, ipcServeCb))
 
   ipc.server.start()
 }
@@ -45,8 +48,9 @@ exports.add = function (hash) {
  * Connect client to IPC server
  */
 exports.connect = function () {
+  MetadataHandler.reconfig(ipc)
   isClientEnabled = true;
-  (sails.config['platform'] == 'win32') ? ipc.connectToNet('metadata', 'localhost', 8018, ipcConnectCb) : ipc.connectTo('metadata', ipcConnectCb)
+  (sails.config['platform'] == 'win32') ? ipc.connectToNet(ipc.config.id, ipc.config.networkHost, ipc.config.networkPort, ipcConnectCb) : ipc.connectTo(ipc.config.id, ipc.config.socketRoot + ipc.config.appspace + ipc.config.id, ipcConnectCb)
 }
 
 /** IPC Callbacks */

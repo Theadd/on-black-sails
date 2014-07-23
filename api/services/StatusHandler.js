@@ -9,19 +9,22 @@ var pool = [],
   isClientEnabled = false,
   status2value = { 'VERIFIED': 2, 'GOOD': 1, 'NONE': 0, 'ERROR': 0, 'NOTFOUND': 0, 'BAD': -1, 'FAKE': -2 }
 
-ipc.config.appspace = 'onblacksails.'
-ipc.config.id = 'status'
-ipc.config.retry = 5000
-ipc.config.silent = true
-ipc.config.networkHost = 'localhost'
-ipc.config.networkPort = 8015
+exports.reconfig = function (ipc) {
+  ipc.config.appspace = 'onblacksails.'
+  ipc.config.id = 'status'
+  ipc.config.retry = 5000
+  ipc.config.silent = true
+  ipc.config.networkHost = 'localhost'
+  ipc.config.networkPort = 8015
+}
 
 /**
  * Initialize IPC server
  */
 exports.init = function () {
+  StatusHandler.reconfig(ipc)
   console.log("Initializing status IPC server on platform " + sails.config['platform']);
-  ((sails.config['platform'] == 'win32') ? ipc.serveNet('localhost', 8015, ipcServeCb) : ipc.serve(ipcServeCb))
+  ((sails.config['platform'] == 'win32') ? ipc.serveNet(ipc.config.networkHost, ipc.config.networkPort, ipcServeCb) : ipc.serve(ipc.config.socketRoot + ipc.config.appspace + ipc.config.id, ipcServeCb))
 
   ipc.server.start()
 }
@@ -46,8 +49,9 @@ exports.add = function (hash) {
  * Connect client to IPC server
  */
 exports.connect = function () {
+  StatusHandler.reconfig(ipc)
   isClientEnabled = true;
-  (sails.config['platform'] == 'win32') ? ipc.connectToNet('status', 'localhost', 8015, ipcConnectCb) : ipc.connectTo('status', ipcConnectCb)
+  (sails.config['platform'] == 'win32') ? ipc.connectToNet(ipc.config.id, ipc.config.networkHost, ipc.config.networkPort, ipcConnectCb) : ipc.connectTo(ipc.config.id, ipc.config.socketRoot + ipc.config.appspace + ipc.config.id, ipcConnectCb)
 }
 
 /** IPC Callbacks */

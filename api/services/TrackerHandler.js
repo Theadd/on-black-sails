@@ -14,19 +14,22 @@ var totalResponses = 0,
 
 var announce = []
 
-ipc.config.appspace = 'onblacksails.'
-ipc.config.id = 'tracker'
-ipc.config.retry = 5000
-ipc.config.silent = true
-ipc.config.networkHost = 'localhost'
-ipc.config.networkPort = 8010
+exports.reconfig = function (ipc) {
+  ipc.config.appspace = 'onblacksails.'
+  ipc.config.id = 'tracker'
+  ipc.config.retry = 5000
+  ipc.config.silent = true
+  ipc.config.networkHost = 'localhost'
+  ipc.config.networkPort = 8010
+}
 
 /**
  * Initialize IPC server
  */
 exports.init = function () {
+  TrackerHandler.reconfig(ipc)
   console.log("Initializing tracker IPC server on platform " + sails.config['platform']);
-  ((sails.config['platform'] == 'win32') ? ipc.serveNet('localhost', 8010, ipcServeCb) : ipc.serve(ipcServeCb))
+  ((sails.config['platform'] == 'win32') ? ipc.serveNet(ipc.config.networkHost, ipc.config.networkPort, ipcServeCb) : ipc.serve(ipc.config.socketRoot + ipc.config.appspace + ipc.config.id, ipcServeCb))
 
   ipc.server.start()
 }
@@ -51,8 +54,9 @@ exports.add = function (hash) {
  * Connect client to IPC server
  */
 exports.connect = function () {
+  TrackerHandler.reconfig(ipc)
   isClientEnabled = true;
-  (sails.config['platform'] == 'win32') ? ipc.connectToNet('tracker', 'localhost', 8010, ipcConnectCb) : ipc.connectTo('tracker', ipcConnectCb)
+  (sails.config['platform'] == 'win32') ? ipc.connectToNet(ipc.config.id, ipc.config.networkHost, ipc.config.networkPort, ipcConnectCb) : ipc.connectTo(ipc.config.id, ipc.config.socketRoot + ipc.config.appspace + ipc.config.id, ipcConnectCb)
 }
 
 /** IPC Callbacks */
