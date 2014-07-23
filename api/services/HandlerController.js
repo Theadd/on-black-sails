@@ -48,7 +48,7 @@ exports.init = function () {
   )
 
   ipc.server.start()
-  setInterval( function() { console.log(statistics) }, 30000)
+  if (!Indexer.role['quiet']) setInterval( function() { console.log(statistics) }, 60000)
 }
 
 exports.add = function (item) {
@@ -107,7 +107,7 @@ var mergeStatistics = function (values) {
     }
   }
 
-  if (values['announce'].length) {
+  if (Object.keys(values['announce']).length) {
     statistics['announce'] = JSON.parse(JSON.stringify(values['announce']))
   }
 

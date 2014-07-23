@@ -7,7 +7,9 @@ var ipc = require('node-ipc')
 
 var totalResponses = 0,
   rawAnnounceItem = {'requests': 0, 'responses': 0, 'timeouts': 0, 'last-request': new Date().getTime()/*, 'active': false*/},
+  pool = [],
   localPool = [],
+  recentPool = [],
   isClientEnabled = false
 
 var announce = []
@@ -60,7 +62,9 @@ var ipcServeCb = function () {
     'hash',
     function (data, socket) {
       console.log("\tipc.tracker on hash: " + data)
-      updatetrackerFromHash(data)
+      if (pool.indexOf(data) == -1 && recentPool.indexOf(data) == -1) {
+        pool.push(data)
+      }
     }
   )
 }
@@ -83,7 +87,20 @@ var ipcConnectCb = function() {
   )
 }
 
-var getProperAnnounceUrls = exports.getProperAnnounceUrls = function (tracker) {
+var start = exports.start = function () {
+  if (pool.length) {
+    var hash = pool.shift()
+    if (recentPool.push(hash) > 250) {
+      recentPool.splice(0, 25)
+    }
+    console.log("["+pool.length+"/"+recentPool.length+"]["+totalResponses+"; "+Object.keys(announce).length+"] "+hash)
+    updatePeersOf(hash)
+  }
+
+  setTimeout(start, 150)
+}
+
+var getProperAnnounceUrls = exports.getProperAnnounceUrls = function (trackers) {
   var announceUrls = [],
     properFound = false
 
@@ -91,25 +108,26 @@ var getProperAnnounceUrls = exports.getProperAnnounceUrls = function (tracker) {
     var candidate = null,
       candidateUrl = ''
 
-    for (var i in tracker) {
-      if (typeof announce[tracker[i]] !== "undefined") {
-        var item = announce[tracker[i]]
+    for (var i in trackers) {
+      if (typeof announce[trackers[i]] !== "undefined") {
+        var item = announce[trackers[i]]
         if (!item['active']) {
           if (candidate == null || candidate['last-request'] > item['last-request']) {
             candidate = item
-            candidateUrl = tracker[i]
+            candidateUrl = trackers[i]
           }
         } else {
           //check for timeouts: 15s if there was  no previous timeout, 30s for second timeout, 45s for third, etc.
           if ((new Date().getTime()) - item['last-request'] > (15000 * (item['timeouts'] + 1))) {
-            announce[tracker[i]]['timeouts']++
-            announce[tracker[i]]['active'] = false
-            announce[tracker[i]]['last-request'] = new Date().getTime()
+            announce[trackers[i]]['timeouts']++
+            announce[trackers[i]]['active'] = false
+            announce[trackers[i]]['last-request'] = new Date().getTime()
           }
         }
       }
     }
     if (candidate != null) {
+      console.log("\t\tFOUND PROPER!!! "+candidateUrl)
       properFound = true
       announceUrls.push(candidateUrl)
       announce[candidateUrl]['active'] = true
@@ -119,9 +137,9 @@ var getProperAnnounceUrls = exports.getProperAnnounceUrls = function (tracker) {
   }
 
   if (!properFound) {
-    for (var i in tracker) {
-      if (tracker[i].indexOf('dht://') == -1) {
-        announceUrls.push(tracker[i])
+    for (var i in trackers) {
+      if (trackers[i].indexOf('dht://') == -1) {
+        announceUrls.push(trackers[i])
       }
     }
   }
@@ -148,7 +166,7 @@ function ignore(err) {
   //console.log("ERROR: " + err.message)
 }
 
-var updatetrackerFromHash = exports.updatetrackerFromHash = function(hash) {
+var updatePeersOf = exports.updatePeersOf = function(hash) {
 
   Indexer.workers['update-tracker']++
   Hash.find()
@@ -158,23 +176,27 @@ var updatetrackerFromHash = exports.updatetrackerFromHash = function(hash) {
       if (!err && entries.length) {
         var peerId = new Buffer('01234567890123456789'),
           port = 6881,
-          data = { announce: getProperAnnounceUrls(entries[0].tracker), infoHash: entries[0].uuid }
+          data = { announce: getProperAnnounceUrls(entries[0].trackers), infoHash: entries[0].uuid }
 
         if (data.announce.length) {
+          console.log("--> #PROPER ANNOUNCE URLS: " + data.announce.length)
           var client = new TrackerClient(peerId, port, data)
           client.on('error', ignore)
-          client.once('update', function (data) {
-            registerAnnounceResponse(data.announce)
+          client.once('update', function (res) {
+            console.log("--> GOT RESPONSE ("+entries[0].uuid+"): " + JSON.stringify(res))
+            registerAnnounceResponse(res.announce)
             Hash.update({ uuid: entries[0].uuid }, {
-              seeders: data.complete,
-              leechers: data.incomplete,
+              seeders: res.complete,
+              leechers: res.incomplete,
               updatedAt: entries[0].updatedAt
             }, function(err, hashes) {
-              Indexer.workers['update-tracker']--
-            })
+                console.log("=============================UPDATED!!!===========")
+                Indexer.workers['update-tracker']--
+              })
           })
           client.update()
         } else {
+          console.log("--> !!!!!!!!!!!!!!!!!!!NO PROPER ANNOUNCE URLS! original: " + JSON.stringify(entries[0].trackers))
           Indexer.workers['update-tracker']--
         }
       }
@@ -182,5 +204,10 @@ var updatetrackerFromHash = exports.updatetrackerFromHash = function(hash) {
 }
 
 exports.getAnnounce = function() {
-  return announce
+  var returnValue = {}
+  var keys = Object.keys(announce)
+  for (key in keys) {
+    returnValue[keys[key]] = announce[keys[key]]
+  }
+  return returnValue
 }

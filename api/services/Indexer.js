@@ -20,6 +20,7 @@ exports.run = function() {
 
   if (role['tracker']) {
     TrackerHandler.init()
+    TrackerHandler.start()
   }
 
   if (role['controller']) {
@@ -142,7 +143,7 @@ function sendStatistics() {
   var statistics = {
     'session': session,
     'workers': workers,
-    'announce': (role['tracker']) ? TrackerHandler.getAnnounce() : [],
+    'announce': (role['tracker']) ? TrackerHandler.getAnnounce() : {},
     'media-cache-stats': (role['update-media']) ? MediaHandler.cacheStats : {}
   }
   HandlerController.add(statistics)

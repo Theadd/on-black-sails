@@ -115,6 +115,7 @@ exports.start = function () {
             //propagate update to other IPC handlers
             StatusHandler.add(task.hash)
             TrackerHandler.add(task.hash)
+            console.log("\t\t"+task.hash)
             if (typeof entries[0].imdb !== "undefined" && entries[0].imdb.length) {
               task.imdb = entries[0].imdb
               task.use('http://www.omdbapi.com/?i=' +  entries[0].imdb)
