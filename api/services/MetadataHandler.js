@@ -55,7 +55,7 @@ var ipcServeCb = function () {
   ipc.server.on (
     'hash',
     function (data, socket) {
-      //console.log("\tipc.metadata on hash: " + data)
+      console.log("\tipc.metadata on hash: " + data)
       if (pool.indexOf(data) == -1) {
         pool.push(data)
       }
@@ -114,7 +114,7 @@ exports.start = function () {
             Indexer.workers[task.role]++
             task.use(Indexer.getDownloadLink(entries[0].uuid, entries[0].cache || '', entries[0].source))
           } else {
-            return new Error("Unexpected error in MetadataManager.start()")
+            return new Error("Unexpected error in MetadataHandler.start()")
           }
         })
     }
@@ -139,9 +139,9 @@ var updateMetadata = exports.updateMetadata = function(content) {
       Indexer.session.metadata++
       if (Indexer.role['live']) {
         if (hashes[0].category.indexOf("movies") != -1) {
-          MediaManager.add(hashes[0].uuid)
+          MediaHandler.add(hashes[0].uuid)
         } else {
-          StatusManager.add(hashes[0].uuid)
+          StatusHandler.add(hashes[0].uuid)
           TrackerHandler.add(hashes[0].uuid)
         }
 

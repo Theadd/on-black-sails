@@ -41,18 +41,18 @@ exports.run = function() {
   }
 
   if (role['update-metadata']) {
-    MetadataManager.init()
-    MetadataManager.start()
+    MetadataHandler.init()
+    MetadataHandler.start()
   }
 
   if (role['update-status']) {
-    StatusManager.init()
-    StatusManager.start()
+    StatusHandler.init()
+    StatusHandler.start()
   }
 
   if (role['update-media']) {
-    MediaManager.init()
-    MediaManager.start()
+    MediaHandler.init()
+    MediaHandler.start()
   }
 
 }
@@ -123,7 +123,7 @@ var indexSiteAPI = function(content) {
           if (!err) {
             ++added
             if (role['live']) {
-              MetadataManager.add(entry.uuid)
+              MetadataHandler.add(entry.uuid)
             }
           }
           if (addAttempts == contentLength) {
@@ -143,7 +143,7 @@ function sendStatistics() {
     'session': session,
     'workers': workers,
     'announce': (role['tracker']) ? TrackerHandler.getAnnounce() : [],
-    'media-cache-stats': (role['update-media']) ? MediaManager.cacheStats : {}
+    'media-cache-stats': (role['update-media']) ? MediaHandler.cacheStats : {}
   }
   HandlerController.add(statistics)
   session = Indexer.session = {'movies': 0, 'status': 0, 'metadata': 0, 'files': 0, 'peers': 0}

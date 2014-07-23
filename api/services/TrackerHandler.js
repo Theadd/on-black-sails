@@ -59,7 +59,7 @@ var ipcServeCb = function () {
   ipc.server.on (
     'hash',
     function (data, socket) {
-      console.info("tracker - ipcServerCb on hash: " + data)
+      console.log("\tipc.tracker on hash: " + data)
       updatetrackerFromHash(data)
     }
   )

@@ -99,7 +99,7 @@ exports.start = function () {
     }
     if (pool.length) {
       if (pool.length % 5 == 0) {
-        MediaManager.cacheStats = task.requestsCache.getStats()
+        MediaHandler.cacheStats = task.requestsCache.getStats()
       }
       var hash = pool.pop()
       Hash.find()
@@ -113,7 +113,7 @@ exports.start = function () {
             task.role = 'update-media'
             Indexer.workers[task.role][task.hash] = new Date()
             //propagate update to other IPC handlers
-            StatusManager.add(task.hash)
+            StatusHandler.add(task.hash)
             TrackerHandler.add(task.hash)
             if (typeof entries[0].imdb !== "undefined" && entries[0].imdb.length) {
               task.imdb = entries[0].imdb
