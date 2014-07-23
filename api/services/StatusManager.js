@@ -9,9 +9,9 @@ var pool = [],
   isClientEnabled = false,
   status2value = { 'VERIFIED': 2, 'GOOD': 1, 'NONE': 0, 'ERROR': 0, 'NOTFOUND': 0, 'BAD': -1, 'FAKE': -2 }
 
-ipc.config.appspace = 'status.'
+ipc.config.appspace = 'onblacksails.'
 ipc.config.id = 'status'
-ipc.config.retry = 2500
+ipc.config.retry = 5000
 ipc.config.silent = true
 ipc.config.networkHost = 'localhost'
 ipc.config.networkPort = 8015
@@ -20,19 +20,8 @@ ipc.config.networkPort = 8015
  * Initialize IPC server
  */
 exports.init = function () {
-  console.log("Initializing status IPC server")
-  ipc.serveNet('localhost', 8015,
-    function () {
-      ipc.server.on (
-        'hash',
-        function (data, socket) {
-          if (pool.indexOf(data) == -1) {
-            pool.push(data)
-          }
-        }
-      )
-    }
-  )
+  console.log("Initializing status IPC server on platform " + sails.config['platform']);
+  ((sails.config['platform'] == 'win32') ? ipc.serveNet('localhost', 8015, ipcServeCb) : ipc.serve(ipcServeCb))
 
   ipc.server.start()
 }
@@ -57,25 +46,37 @@ exports.add = function (hash) {
  * Connect client to IPC server
  */
 exports.connect = function () {
-  isClientEnabled = true
-  ipc.connectToNet(
-    'status', 'localhost', 8015,
-    function(){
-      ipc.of.status.on(
-        'connect',
-        function(){
-          console.log("Connected to status IPC server")
-          ipc.of.status.connected = true
+  isClientEnabled = true;
+  (sails.config['platform'] == 'win32') ? ipc.connectToNet('status', 'localhost', 8015, ipcConnectCb) : ipc.connectTo('status', ipcConnectCb)
+}
 
-        }
-      )
-      ipc.of.status.on(
-        'disconnect',
-        function(){
-          console.log('Not connected to status IPC server')
-          ipc.of.status.connected = false
-        }
-      )
+/** IPC Callbacks */
+
+var ipcServeCb = function () {
+  ipc.server.on (
+    'hash',
+    function (data, socket) {
+      if (pool.indexOf(data) == -1) {
+        pool.push(data)
+      }
+    }
+  )
+}
+
+var ipcConnectCb = function() {
+  ipc.of.status.on(
+    'connect',
+    function(){
+      console.log("Connected to status IPC server")
+      ipc.of.status.connected = true
+
+    }
+  )
+  ipc.of.status.on(
+    'disconnect',
+    function(){
+      console.log('Not connected to status IPC server')
+      ipc.of.status.connected = false
     }
   )
 }
