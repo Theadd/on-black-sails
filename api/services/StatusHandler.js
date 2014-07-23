@@ -60,7 +60,6 @@ var ipcServeCb = function () {
   ipc.server.on (
     'hash',
     function (data, socket) {
-      console.log("\tipc.status on hash: " + data)
       if (pool.indexOf(data) == -1) {
         pool.push(data)
       }

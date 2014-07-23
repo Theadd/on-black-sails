@@ -65,7 +65,6 @@ var ipcServeCb = function () {
   ipc.server.on (
     'hash',
     function (data, socket) {
-      console.log("\tipc.tracker on hash: " + data)
       if (pool.indexOf(data) == -1 && recentPool.indexOf(data) == -1) {
         pool.push(data)
       }
@@ -97,7 +96,6 @@ var start = exports.start = function () {
     if (recentPool.push(hash) > 250) {
       recentPool.splice(0, 25)
     }
-    console.log("["+pool.length+"/"+recentPool.length+"]["+totalResponses+"; "+Object.keys(announce).length+"] "+hash)
     updatePeersOf(hash)
   }
 
@@ -131,7 +129,6 @@ var getProperAnnounceUrls = exports.getProperAnnounceUrls = function (trackers) 
       }
     }
     if (candidate != null) {
-      console.log("\t\tFOUND PROPER!!! "+candidateUrl)
       properFound = true
       announceUrls.push(candidateUrl)
       announce[candidateUrl]['active'] = true
@@ -183,24 +180,20 @@ var updatePeersOf = exports.updatePeersOf = function(hash) {
           data = { announce: getProperAnnounceUrls(entries[0].trackers), infoHash: entries[0].uuid }
 
         if (data.announce.length) {
-          console.log("--> #PROPER ANNOUNCE URLS: " + data.announce.length)
           var client = new TrackerClient(peerId, port, data)
           client.on('error', ignore)
           client.once('update', function (res) {
-            console.log("--> GOT RESPONSE ("+entries[0].uuid+"): " + JSON.stringify(res))
             registerAnnounceResponse(res.announce)
             Hash.update({ uuid: entries[0].uuid }, {
               seeders: res.complete,
               leechers: res.incomplete,
               updatedAt: entries[0].updatedAt
             }, function(err, hashes) {
-                console.log("=============================UPDATED!!!===========")
                 Indexer.workers['update-tracker']--
               })
           })
           client.update()
         } else {
-          console.log("--> !!!!!!!!!!!!!!!!!!!NO PROPER ANNOUNCE URLS! original: " + JSON.stringify(entries[0].trackers))
           Indexer.workers['update-tracker']--
         }
       }

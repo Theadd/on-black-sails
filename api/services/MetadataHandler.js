@@ -59,7 +59,6 @@ var ipcServeCb = function () {
   ipc.server.on (
     'hash',
     function (data, socket) {
-      console.log("\tipc.metadata on hash: " + data)
       if (pool.indexOf(data) == -1) {
         pool.push(data)
       }

@@ -62,7 +62,6 @@ var ipcServeCb = function () {
   ipc.server.on (
     'hash',
     function (data, socket) {
-      console.log("\tipc.media on hash: " + data)
       if (pool.indexOf(data) == -1) {
         pool.push(data)
       }
@@ -119,7 +118,6 @@ exports.start = function () {
             //propagate update to other IPC handlers
             StatusHandler.add(task.hash)
             TrackerHandler.add(task.hash)
-            console.log("\t\t"+task.hash)
             if (typeof entries[0].imdb !== "undefined" && entries[0].imdb.length) {
               task.imdb = entries[0].imdb
               task.use('http://www.omdbapi.com/?i=' +  entries[0].imdb)
