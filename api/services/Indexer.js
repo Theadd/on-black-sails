@@ -128,7 +128,7 @@ var indexSiteAPI = function(content) {
             }
           }
           if (addAttempts >= contentLength) {
-            console.log("[" + task.url + "] Indexed " + added + " out of " + contentLength + " in " + ((new Date().getTime() - startTime)) + "ms (" + (task._totalNumLines || 0) + " lines so far)")
+            console.log("[" + task.url + "] Indexed " + added + " out of " + (contentLength + 1) + " in " + ((new Date().getTime() - startTime)) + "ms (" + (task._totalNumLines || 0) + " lines so far)")
             addAttempts = 0
             added = 0
             task.resume()
