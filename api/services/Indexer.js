@@ -127,13 +127,15 @@ var indexSiteAPI = function(content) {
               MetadataHandler.add(entry.uuid)
             }
           }
-          if (addAttempts == contentLength) {
+          if (addAttempts >= contentLength) {
             console.log("[" + task.url + "] Indexed " + added + " out of " + contentLength + " in " + ((new Date().getTime() - startTime)) + "ms (" + (task._totalNumLines || 0) + " lines so far)")
             addAttempts = 0
             added = 0
             task.resume()
           }
         })
+      } else {
+        --contentLength
       }
     }
   }
