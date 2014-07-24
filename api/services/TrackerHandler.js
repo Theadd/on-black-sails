@@ -168,8 +168,9 @@ var getProperAnnounceUrls = exports.getProperAnnounceUrls = function (trackers) 
 
   if (!properFound) {
     for (var i in trackers) {
-      if (trackers[i].indexOf('dht://') == -1) {
-        announceUrls.push(trackers[i])
+      var tracker_i = trackers[i].toLowerCase()
+      if (tracker_i.indexOf('dht://') == -1 && tracker_i.indexOf('https://') == -1) {
+        announceUrls.push(tracker_i)
       }
     }
   }
