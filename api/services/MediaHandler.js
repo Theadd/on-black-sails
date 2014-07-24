@@ -7,7 +7,8 @@ var ipc = require('node-ipc')
 var pool = [],
   localPool = [],
   isClientEnabled = false,
-  isEnlargePoolActive = false
+  isEnlargePoolActive = false,
+  taskActive = true
 
 exports.reconfig = function (ipc) {
   ipc.config.appspace = 'onblacksails.'
@@ -25,7 +26,7 @@ exports.cacheStats = {}
  */
 exports.init = function () {
   MediaHandler.reconfig(ipc)
-  console.log("Initializing metadata IPC server on platform " + sails.config['platform']);
+  console.log("Initializing media IPC server on platform " + sails.config['platform']);
   ((sails.config['platform'] == 'win32') ? ipc.serveNet(ipc.config.networkHost, ipc.config.networkPort, ipcServeCb) : ipc.serve(ipc.config.socketRoot + ipc.config.appspace + ipc.config.id, ipcServeCb))
 
   ipc.server.start()
@@ -47,6 +48,18 @@ exports.add = function (hash) {
   }
 }
 
+exports.run = function (json) {
+  if (!isClientEnabled) {
+    this.connect()
+  }
+  if (ipc.of.media.connected || false) {
+    ipc.of.media.emit(
+      'run',
+      json
+    )
+  }
+}
+
 /**
  * Connect client to IPC server
  */
@@ -64,6 +77,22 @@ var ipcServeCb = function () {
     function (data, socket) {
       if (pool.indexOf(data) == -1) {
         pool.push(data)
+      }
+    }
+  )
+  ipc.server.on (
+    'run',
+    function (data, socket) {
+      if (data['action'] == 'log') {
+        console.log(data['data'])
+      } else if (data['action'] == 'pause') {
+        taskActive = false
+        console.log("Active: " + taskActive)
+      } else if (data['action'] == 'resume') {
+        taskActive = true
+        console.log("Active: " + taskActive)
+      } else if (data['action'] == 'refresh') {
+        Indexer.sendStatistics()
       }
     }
   )
@@ -100,7 +129,7 @@ exports.start = function () {
         enlargePool()
       }
     }
-    if (pool.length) {
+    if (taskActive && pool.length) {
       if (pool.length % 5 == 0) {
         MediaHandler.cacheStats = task.requestsCache.getStats()
       }

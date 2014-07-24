@@ -31,6 +31,16 @@ module.exports.routes = {
     view: 'homepage'
   },
 
+  '/task': {
+    controller: 'TaskController'
+    //action: 'someAction'
+  },
+
+  '/tasks': {
+    controller: 'TaskController',
+    action: 'show'
+  }
+
 
   // Custom routes here...
 

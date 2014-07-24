@@ -10,7 +10,8 @@ var totalResponses = 0,
   pool = [],
   localPool = [],
   recentPool = [],
-  isClientEnabled = false
+  isClientEnabled = false,
+  taskActive = true
 
 var announce = []
 
@@ -50,6 +51,18 @@ exports.add = function (hash) {
   }
 }
 
+exports.run = function (json) {
+  if (!isClientEnabled) {
+    this.connect()
+  }
+  if (ipc.of.tracker.connected || false) {
+    ipc.of.tracker.emit(
+      'run',
+      json
+    )
+  }
+}
+
 /**
  * Connect client to IPC server
  */
@@ -67,6 +80,22 @@ var ipcServeCb = function () {
     function (data, socket) {
       if (pool.indexOf(data) == -1 && recentPool.indexOf(data) == -1) {
         pool.push(data)
+      }
+    }
+  )
+  ipc.server.on (
+    'run',
+    function (data, socket) {
+      if (data['action'] == 'log') {
+        console.log(data['data'])
+      } else if (data['action'] == 'pause') {
+        taskActive = false
+        console.log("Active: " + taskActive)
+      } else if (data['action'] == 'resume') {
+        taskActive = true
+        console.log("Active: " + taskActive)
+      } else if (data['action'] == 'refresh') {
+        Indexer.sendStatistics()
       }
     }
   )
@@ -91,7 +120,7 @@ var ipcConnectCb = function() {
 }
 
 var start = exports.start = function () {
-  if (pool.length) {
+  if (taskActive && pool.length) {
     var hash = pool.shift()
     if (recentPool.push(hash) > 250) {
       recentPool.splice(0, 25)

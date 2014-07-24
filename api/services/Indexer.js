@@ -139,7 +139,7 @@ var indexSiteAPI = function(content) {
   }
 }
 
-function sendStatistics() {
+var sendStatistics = exports.sendStatistics = function() {
   var statistics = {
     'session': session,
     'workers': workers,

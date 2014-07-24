@@ -115,3 +115,7 @@ var mergeStatistics = function (values) {
     statistics['media-cache-stats'] = JSON.parse(JSON.stringify(values['media-cache-stats']))
   }
 }
+
+exports.getStatistics = function () {
+  return statistics
+}

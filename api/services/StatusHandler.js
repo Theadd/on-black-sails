@@ -7,7 +7,8 @@ var ipc = require('node-ipc')
 var pool = [],
   localPool = [],
   isClientEnabled = false,
-  status2value = { 'VERIFIED': 2, 'GOOD': 1, 'NONE': 0, 'ERROR': 0, 'NOTFOUND': 0, 'BAD': -1, 'FAKE': -2 }
+  status2value = { 'VERIFIED': 2, 'GOOD': 1, 'NONE': 0, 'ERROR': 0, 'NOTFOUND': 0, 'BAD': -1, 'FAKE': -2 },
+  taskActive = true
 
 exports.reconfig = function (ipc) {
   ipc.config.appspace = 'onblacksails.'
@@ -45,6 +46,18 @@ exports.add = function (hash) {
   }
 }
 
+exports.run = function (json) {
+  if (!isClientEnabled) {
+    this.connect()
+  }
+  if (ipc.of.status.connected || false) {
+    ipc.of.status.emit(
+      'run',
+      json
+    )
+  }
+}
+
 /**
  * Connect client to IPC server
  */
@@ -62,6 +75,22 @@ var ipcServeCb = function () {
     function (data, socket) {
       if (pool.indexOf(data) == -1) {
         pool.push(data)
+      }
+    }
+  )
+  ipc.server.on (
+    'run',
+    function (data, socket) {
+      if (data['action'] == 'log') {
+        console.log(data['data'])
+      } else if (data['action'] == 'pause') {
+        taskActive = false
+        console.log("Active: " + taskActive)
+      } else if (data['action'] == 'resume') {
+        taskActive = true
+        console.log("Active: " + taskActive)
+      } else if (data['action'] == 'refresh') {
+        Indexer.sendStatistics()
       }
     }
   )
@@ -89,7 +118,7 @@ exports.start = function () {
   Indexer.createTask(function () {
     var task = this
     task.setStatus('targeting')
-    if (pool.length) {
+    if (taskActive && pool.length) {
       var hash = pool.pop()
       Hash.find()
         .where({ uuid: hash })
@@ -103,7 +132,7 @@ exports.start = function () {
             task.use('http://bitsnoop.com/api/fakeskan.php?hash=' + entries[0].uuid)
           }
         })
-    } else {
+    } else if (taskActive) {
       Hash.find()
         .where({ downloaded: true })
         .sort('updatedAt ASC')
@@ -119,6 +148,8 @@ exports.start = function () {
             task.use('http://bitsnoop.com/api/fakeskan.php?hash=' + entries[0].uuid)
           }
         })
+    } else {
+      task.setStatus('standby')
     }
   }, Indexer.role['update-status-interval'], updateStatus)
 }
