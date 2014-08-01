@@ -7,15 +7,8 @@
 
 module.exports = {
 
-  /*tracker: function (req, res) {
-    var params = req.allParams()
-    delete params['id']
-    runHandlerActions(TrackerHandler, params)
-
-    res.json({
-      total: 'tracker'
-    })
-  },*/
+  //DEPRECATED
+  /*
 
   'show': function (req, res) {
 
@@ -42,9 +35,11 @@ module.exports = {
       success: Boolean(handler)
     })
   }
+  */
 
 };
 
+/*
 var runHandlerActions = function (handler, params) {
   for (var key in params) {
     if (params.hasOwnProperty(key)) {
@@ -71,4 +66,5 @@ var getServiceHandler = function (handlerId) {
   }
   return handler
 }
+*/
 

@@ -1,7 +1,7 @@
 /**
  * Created by Theadd on 7/19/14.
  */
-
+/*  DEPRECATED
 var ipc = require('node-ipc')
 
 var localPool = [],
@@ -31,9 +31,7 @@ ipc.config.silent = true
 ipc.config.networkHost = 'localhost'
 ipc.config.networkPort = 7891
 
-/**
- * Initialize IPC server
- */
+
 exports.init = function () {
   console.log("Initializing output IPC server")
   ipc.serveNet('localhost', 7891,
@@ -67,9 +65,7 @@ exports.add = function (item) {
   }
 }
 
-/**
- * Connect client to IPC server
- */
+
 exports.connect = function () {
   isClientEnabled = true
   ipc.connectToNet(
@@ -119,3 +115,4 @@ var mergeStatistics = function (values) {
 exports.getStatistics = function () {
   return statistics
 }
+  */

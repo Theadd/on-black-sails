@@ -4,10 +4,10 @@
 
 var Task = require('tasker').Task
 
-var session = exports.session = {'movies': 0, 'status': 0, 'metadata': 0, 'files': 0, 'peers': 0},
-  statisticsTimer = null,
-  workers = exports.workers = {'update-metadata': 0, 'update-status': 0, 'update-media': [], 'index-file': 0, 'update-tracker': 0 },
-  role = exports.role = {}
+//var session = exports.session = {'movies': 0, 'status': 0, 'metadata': 0, 'files': 0, 'peers': 0},
+  //statisticsTimer = null,
+  //workers = exports.workers = {'update-metadata': 0, 'update-status': 0, 'update-media': [], 'index-file': 0, 'update-tracker': 0 },
+var role = exports.role = {}
 
 exports.run = function() {
   var os = require('os')
@@ -16,18 +16,30 @@ exports.run = function() {
   role = Indexer.role = CommandLineHelpers.getValues()
   console.log(CommandLineHelpers.usage())
 
+  TrackerService.setup()
+  MetadataService.setup()
+  StatusService.setup()
+  MediaService.setup()
+
+  setInterval( function() {
+    console.log("\n\n\n")
+    console.log(TrackerService.getStats())
+    console.log(MetadataService.getStats())
+    console.log(StatusService.getStats())
+    console.log(MediaService.getStats())
+  }, 10000)
 
 
   if (role['tracker']) {
-    TrackerHandler.init()
-    TrackerHandler.start()
+    TrackerService.server()
+    TrackerService.run()
   }
 
-  if (role['controller']) {
+  /*if (role['controller']) {
     HandlerController.init()
   } else {
-    statisticsTimer = setInterval( function() { sendStatistics() }, 30000)
-  }
+    //statisticsTimer = setInterval( function() { sendStatistics() }, 30000)
+  }*/
 
   if (role['update-index']) {
     createTask('http://bitsnoop.com/api/latest_tz.php?t=all', 600000, indexSiteAPI) //10min = 600000
@@ -42,18 +54,18 @@ exports.run = function() {
   }
 
   if (role['update-metadata']) {
-    MetadataHandler.init()
-    MetadataHandler.start()
+    MetadataService.server()
+    MetadataService.start()
   }
 
   if (role['update-status']) {
-    StatusHandler.init()
-    StatusHandler.start()
+    StatusService.server()
+    StatusService.start()
   }
 
   if (role['update-media']) {
-    MediaHandler.init()
-    MediaHandler.start()
+    MediaService.server()
+    MediaService.start()
   }
 
 }
@@ -69,7 +81,7 @@ var createTask = exports.createTask = function(target, interval, dataCb, errorCb
       if (typeof task.role !== "undefined") {
         workers[task.role]--
       }
-      console.log(this.url)
+      console.log(task.url)
       var self = this
       if (typeof self.hash !== "undefined") {
         console.log("SKIP UPDATING " + self.hash)
@@ -86,7 +98,8 @@ var createTask = exports.createTask = function(target, interval, dataCb, errorCb
 
   task.on('data', dataCb);
 
-  task.start()
+  setTimeout( function() { task.start() }, 100)
+  return task
 }
 
 var indexSiteAPI = function(content) {
@@ -124,7 +137,7 @@ var indexSiteAPI = function(content) {
           if (!err) {
             ++added
             if (role['live']) {
-              MetadataHandler.add(entry.uuid)
+              MetadataService.queue(entry.uuid)
             }
           }
           if (addAttempts >= contentLength) {
@@ -141,6 +154,7 @@ var indexSiteAPI = function(content) {
   }
 }
 
+/*
 var sendStatistics = exports.sendStatistics = function() {
   var statistics = {
     'session': session,
@@ -151,6 +165,7 @@ var sendStatistics = exports.sendStatistics = function() {
   HandlerController.add(statistics)
   session = Indexer.session = {'movies': 0, 'status': 0, 'metadata': 0, 'files': 0, 'peers': 0}
 }
+*/
 
 var getDownloadLink = exports.getDownloadLink = function(hash, cache, source) {
   if (cache.length) {

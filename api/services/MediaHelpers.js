@@ -67,7 +67,7 @@ exports.matchingIMDBIDFromTMDB = function (title, year, cb, opts) {
       if (err) {
         moviedbBusyState = false
         console.log(err)
-        delete Indexer.workers['update-media'][opts['hash']]
+        //delete Indexer.workers['update-media'][opts['hash']]
       } else {
         var probable = []
 
@@ -79,7 +79,7 @@ exports.matchingIMDBIDFromTMDB = function (title, year, cb, opts) {
             MovieDB.movieInfo({id: matching['id'] }, function(error, mdbinfo) {
               if (error) {
                 moviedbBusyState = false
-                delete Indexer.workers['update-media'][opts['hash']]
+                //delete Indexer.workers['update-media'][opts['hash']]
               } else {
                 opts['imdb'] = mdbinfo['imdb_id']
                 cb(opts)
@@ -88,11 +88,11 @@ exports.matchingIMDBIDFromTMDB = function (title, year, cb, opts) {
             })
           } else {
             moviedbBusyState = false
-            delete Indexer.workers['update-media'][opts['hash']]
+            //delete Indexer.workers['update-media'][opts['hash']]
           }
         } else {
           moviedbBusyState = false
-          delete Indexer.workers['update-media'][opts['hash']]
+          //delete Indexer.workers['update-media'][opts['hash']]
         }
       }
 

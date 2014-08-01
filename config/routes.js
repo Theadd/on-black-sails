@@ -29,7 +29,7 @@ module.exports.routes = {
   // (Alternatively, remove this and add an `index.html` file in your `assets` directory)
   '/': {
     view: 'homepage'
-  },
+  }/*,
 
   '/task': {
     controller: 'TaskController'
@@ -40,6 +40,7 @@ module.exports.routes = {
     controller: 'TaskController',
     action: 'show'
   }
+  */
 
 
   // Custom routes here...
