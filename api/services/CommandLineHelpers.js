@@ -2,42 +2,238 @@
  * Created by Theadd on 7/13/14.
  */
 
-exports.usage = function () {
-  return "\n  Usage: sails lift [options]\n       forever start app.js [options]\n\n\
-  Options syntax:\n\t[--full-index] [--update-index] [--update-metadata[=number]]\n\t[--update-status[=number] [--update-media[=number]]] [--quiet]\n\t[--port=number] [--verbose]\n\n\
-  Options:\n\
-  \t--full-index\n\
-  \t\tIndexes all torrents from bitsnoop.com and kickass.to\n\t\tThis should only be set the first time or after a downtime\n\t\tbigger than an hour.\n\n\
-  \t--update-index\n\
-  \t\tPeriodically indexes latest torrents from bitsnoop.com and\n\t\tkickass.to\n\n\
-  \t--update-metadata[=number]\n\
-  \t\tIndexes metadata of *.torrent files by downloading them from\n\t\tpublic torrent cache sites like torcache.net or torrage.com\n\
-  \t\t* The interval between requests, in milliseconds, is optional\n\t\t  and defaults to 250ms.\n\n\
-  \t--update-status[=number]\n\
-  \t\tUpdates fake status of indexed torrents and peers information\n\t\tfrom announce trackers.\n\
-  \t\t* The interval between requests, in milliseconds, is optional\n\t\t  and defaults to 335ms.\n\n\
-  \t--update-media[=number]\n\
-  \t\tUpdates media related information such as the IMDB ID or the\n\t\taverage rate.\n\
-  \t\t* The interval between requests, in milliseconds, is optional\n\t\t  and defaults to 500ms.\n\n\
-  \t\t\033[36mNote:\033[0m Should be used in conjunction with --update-status\n\n";
+var extend = require('util')._extend
+
+var sailsDefaultConfigKeys = [ 'blueprints',
+  'bootstrap',
+  'connections',
+  'cors',
+  'csrf',
+  'globals',
+  'http',
+  'i18n',
+  'port',
+  'environment',
+  'log',
+  'models',
+  'policies',
+  'routes',
+  'session',
+  'sockets',
+  'views',
+  'hooks',
+  'appPath',
+  'paths',
+  'middleware',
+  'rootPath',
+  'sailsPackageJSON',
+  'generators',
+  'config',
+  '_',
+  'ssl',
+  'cache',
+  'express',
+  'platform' ]
+
+var defaultConfig = {
+  'index': {
+    'kickass': {
+      'active': false,
+      'full': false
+    },
+    'bitsnoop': {
+      'active': false,
+      'full': false
+    }
+  },
+  'metadata': {
+    'active': false,
+    'interval': 250,
+    'retry': 5000,
+    'silent': true,
+    'host': 'localhost',
+    'port': 8018
+  },
+  'tracker': {
+    'active': false,
+    'interval': 200,
+    'retry': 5000,
+    'silent': true,
+    'host': 'localhost',
+    'port': 8010
+  },
+  'status': {
+    'active': false,
+    'interval': 335,
+    'retry': 5000,
+    'silent': true,
+    'host': 'localhost',
+    'port': 8015
+  },
+  'media': {
+    'active': false,
+    'interval': 500,
+    'retry': 5000,
+    'silent': true,
+    'host': 'localhost',
+    'port': 8013
+  },
+  'live': false,
+  'datapath': '.data/'
 }
 
-exports.getValues = function() {
-  return {
-    'full-index': Boolean(sails.config['full-index']),
-    'full-index-kickass': (!(typeof sails.config['full-index'] === 'string' && sails.config['full-index'] == 'bitsnoop')),
-    'full-index-bitsnoop': (!(typeof sails.config['full-index'] === 'string' && sails.config['full-index'] == 'kickass')),
-    'update-index': Boolean(sails.config['update-index']),
-    'update-metadata': Boolean(sails.config['update-metadata']),
-    'update-metadata-interval': (typeof sails.config['update-metadata'] === 'number') ? sails.config['update-metadata'] : 250,
-    'update-status': Boolean(sails.config['update-status']),
-    'update-status-interval': (typeof sails.config['update-status'] === 'number') ? sails.config['update-status'] : 335,
-    'update-media': Boolean(sails.config['update-media']),
-    'update-media-interval': (typeof sails.config['update-media'] === 'number') ? sails.config['update-media'] : 500,
-    'quiet': Boolean(sails.config['quiet']),
-    'verbose': Boolean(sails.config['verbose']),
-    'tracker': Boolean(sails.config['tracker']),
-    'live': Boolean(sails.config['live'])//,
-    //'controller': Boolean(sails.config['controller'])
+var services = ['metadata', 'tracker', 'status', 'media']
+var serviceOverwrites = ['retry', 'interval', 'silent']
+
+var commandLineParameters = {}
+var config = exports.config = {}
+
+exports.process = function () {
+  //get command line parameters
+  Object.keys(sails.config).forEach(function(key) {
+    if (sailsDefaultConfigKeys.indexOf(key) == -1) {
+      commandLineParameters[key] = sails.config[key]
+    }
+  })
+  config = extendObject(config, defaultConfig)
+
+  var configFile,
+    configFileContent = {},
+    saveConfigFile = releaseObjectKey(commandLineParameters, 'save') || false,
+    value = null
+  //--config-file=<filename>
+  if ((configFile = releaseObjectKey(commandLineParameters, 'config-file')) != null) {
+    try {
+      var fs = require('fs')
+      var data = fs.readFileSync(configFile)
+      configFileContent = JSON.parse(data)
+    } catch(err) {
+      console.warn("Unable to read config from: " + configFile)
+    }
+    config = extendObject(config, configFileContent)
   }
+  //serviceOverwrites: ['retry', 'interval', 'silent']
+  for (var i in serviceOverwrites) {
+    if ((value = releaseObjectKey(commandLineParameters, serviceOverwrites[i])) != null) {
+      for (var e in services) {
+        config[services[e]][serviceOverwrites[i]] = value
+      }
+    }
+  }
+  //full index overwrite
+  if ((value = releaseObjectKey(commandLineParameters, 'full')) != null) {
+    Object.keys(config.index).forEach(function(key) {
+      config.index[key]['full'] = value
+    })
+  }
+  //other parameters left
+  var parametersLeft = Object.keys(commandLineParameters)
+  for (var j in parametersLeft) {
+    if ((value = releaseObjectKey(commandLineParameters, parametersLeft[j])) != null) {
+      var parts = parametersLeft[j].split("-"),
+        numParts = parts.length,
+        step = config
+
+      try {
+        for (var k in parts) {
+          if (--numParts == 0) {
+            if (typeof step[parts[k]]['active'] !== "undefined") {
+              step[parts[k]]['active'] = value
+            } else {
+              step[parts[k]] = value
+            }
+          } else {
+            step = step[parts[k]]
+          }
+        }
+      } catch (err) {
+        console.warn("Unrecognized parameter: " + parametersLeft[j])
+      }
+    }
+  }
+  //save current config to the value specified with "--config-file=<filename>"
+  if (saveConfigFile) {
+    var fs = require('fs');
+    fs.writeFile(configFile, JSON.stringify(config, undefined, 2), function(err) {
+      if (err) console.warn(err)
+    })
+  }
+
+  CommandLineHelpers.config = config
 }
+
+var releaseObjectKey = function (object, key) {
+  var value = null
+
+  if (typeof object[key] !== "undefined") {
+    value = object[key]
+    delete object[key]
+  }
+  return value
+}
+
+exports.usage = function () {
+  return "\n  Usage: sails lift [actions] [options]\n         forever start app.js [actions] [options]\n\n\
+  \033[36mIndex torrents from public sites:\033[0m\n\
+    Actions:\n\
+      --index-kickass\n\
+        Indexes torrents from kickass.to\n\n\
+      --index-bitsnoop\n\
+        Indexes torrents from bitsnoop.to\n\n\
+    Options:\n\
+      --full\n\
+        If specified, indexes ALL torrents from specified action, once.\n\
+        Otherwise, periodically indexes latest torrents only.\n\n\
+      --live\n\
+        If specified, all torrent UUIDs will be queued to metadata IPC service.\n\n\
+  \033[36mBackground services:\033[0m\n\
+    Actions:\n\
+      --metadata\n\
+        Stores metadata of *.torrent files by downloading them from public\n\
+        torrent cache sites like torcache.net or torrage.com\n\
+      --status\n\
+        Update fake status of indexed torrents.\n\n\
+      --tracker\n\
+        Update peers information from announce trackers.\n\n\
+      --media\n\
+        Update media related information like IMDB ID and rate.\n\n\
+    General service options:\n\
+      --retry=number\n\
+        Interval in milliseconds to wait before a IPC service client tries to\n\
+        reconnect.\n\n\
+      --interval=number\n\
+        Interval in milliseconds between requests.\n\n\
+      --silent[=boolean]\n\
+        Disable to write IPC log/debug messages to output.\n\n\
+    Service specific options:\n\
+      NOTE: Replace ACTION with service name.\n\n\
+      --ACTION-retry=number\n\
+        Interval in milliseconds to wait before IPC service client tries to\n\
+        reconnect.\n\n\
+      --ACTION-interval=number\n\
+        Interval in milliseconds between requests.\n\n\
+      --ACTION-silent[=boolean]\n\
+        Disable to write IPC log/debug messages to output.\n\n\
+      --ACTION-host=string\n\
+        Specifies network host of service IPC server.\n\n\
+      --ACTION-port=number\n\
+        Specifies network port of service IPC server.\n\n\
+  \033[36mGlobal options:\033[0m\n\
+    --config-file=filename\n\
+      File to load config values from it.\n\n\
+    --save\n\
+      Save current config values to the file specified using: --config-file\n\n\
+    --datapath=path\n\
+      Path to store items pending of services.\n\n";
+}
+
+var extendObject = function (primary, secondary) {
+  secondary = secondary || null
+  var o = extend({}, primary)
+  if (secondary != null) {
+    extend(o, secondary)
+  }
+  return o
+}
+
+

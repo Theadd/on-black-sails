@@ -7,14 +7,13 @@ var Task = require('tasker').Task
 //var session = exports.session = {'movies': 0, 'status': 0, 'metadata': 0, 'files': 0, 'peers': 0},
   //statisticsTimer = null,
   //workers = exports.workers = {'update-metadata': 0, 'update-status': 0, 'update-media': [], 'index-file': 0, 'update-tracker': 0 },
-var role = exports.role = {}
 
 exports.run = function() {
   var os = require('os')
   sails.config['platform'] = os.platform()
 
-  role = Indexer.role = CommandLineHelpers.getValues()
   console.log(CommandLineHelpers.usage())
+  CommandLineHelpers.process()
 
   TrackerService.setup()
   MetadataService.setup()
@@ -30,40 +29,38 @@ exports.run = function() {
   }, 10000)
 
 
-  if (role['tracker']) {
+  if (CommandLineHelpers.config.tracker.active) {
     TrackerService.server()
     TrackerService.run()
   }
 
-  /*if (role['controller']) {
-    HandlerController.init()
-  } else {
-    //statisticsTimer = setInterval( function() { sendStatistics() }, 30000)
-  }*/
-
-  if (role['update-index']) {
-    createTask('http://bitsnoop.com/api/latest_tz.php?t=all', 600000, indexSiteAPI) //10min = 600000
-    createTask('http://kickass.to/hourlydump.txt.gz', 1800000, indexSiteAPI) //30min = 1800000
-  }
-  if (role['full-index']) {
-    if (role['full-index-bitsnoop']) {
-      createTask('http://ext.bitsnoop.com/export/b3_all.txt.gz', 0, indexSiteAPI)
-    } else if (role['full-index-kickass']) {
+  if (CommandLineHelpers.config.index.kickass.active) {
+    if (CommandLineHelpers.config.index.kickass.full) {
       createTask('http://kickass.to/dailydump.txt.gz', 0, indexSiteAPI)
+    } else {
+      createTask('http://kickass.to/hourlydump.txt.gz', 1800000, indexSiteAPI) //30min = 1800000
     }
   }
 
-  if (role['update-metadata']) {
+  if (CommandLineHelpers.config.index.bitsnoop.active) {
+    if (CommandLineHelpers.config.index.bitsnoop.full) {
+      createTask('http://ext.bitsnoop.com/export/b3_all.txt.gz', 0, indexSiteAPI)
+    } else {
+      createTask('http://bitsnoop.com/api/latest_tz.php?t=all', 600000, indexSiteAPI) //10min = 600000
+    }
+  }
+
+  if (CommandLineHelpers.config.metadata.active) {
     MetadataService.server()
     MetadataService.start()
   }
 
-  if (role['update-status']) {
+  if (CommandLineHelpers.config.status.active) {
     StatusService.server()
     StatusService.start()
   }
 
-  if (role['update-media']) {
+  if (CommandLineHelpers.config.media.active) {
     MediaService.server()
     MediaService.start()
   }
@@ -136,7 +133,7 @@ var indexSiteAPI = function(content) {
           ++addAttempts
           if (!err) {
             ++added
-            if (role['live']) {
+            if (CommandLineHelpers.config.live) {
               MetadataService.queue(entry.uuid)
             }
           }

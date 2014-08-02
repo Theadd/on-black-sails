@@ -13,10 +13,10 @@ module.exports.setup = function() {
     'runInterval': 0,
     'appspace': 'onblacksails.',
     'id': 'media',
-    'retry': 5000,
-    'silent': true,
-    'networkHost': 'localhost',
-    'networkPort': 8013
+    'retry': CommandLineHelpers.config.media.retry,
+    'silent': CommandLineHelpers.config.media.silent,
+    'networkHost': CommandLineHelpers.config.media.host,
+    'networkPort': CommandLineHelpers.config.media.port
   })
 
   self._isEmptyBusy = false
@@ -77,7 +77,7 @@ module.exports.start = function () {
 
   self._task = Indexer.createTask(
     function () { return self.run.apply(self, arguments) }
-    , Indexer.role['update-media-interval'],
+    , CommandLineHelpers.config.media.interval,
     function () { return self.updateMovie.apply(self, arguments) }
   )
 

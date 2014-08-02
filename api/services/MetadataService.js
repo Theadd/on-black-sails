@@ -13,10 +13,10 @@ module.exports.setup = function() {
     'runInterval': 0,
     'appspace': 'onblacksails.',
     'id': 'metadata',
-    'retry': 5000,
-    'silent': true,
-    'networkHost': 'localhost',
-    'networkPort': 8018
+    'retry': CommandLineHelpers.config.metadata.retry,
+    'silent': CommandLineHelpers.config.metadata.silent,
+    'networkHost': CommandLineHelpers.config.metadata.host,
+    'networkPort': CommandLineHelpers.config.metadata.port
   })
 
   self._isEmptyBusy = false
@@ -67,7 +67,7 @@ module.exports.start = function () {
 
   self._task = Indexer.createTask(
     function () { return self.run.apply(self, arguments) }
-    , Indexer.role['update-metadata-interval'],
+    , CommandLineHelpers.config.metadata.interval,
     function () { return self.updateMetadata.apply(self, arguments) },
     function () { return self.errorOnUpdateMetadata.apply(self, arguments) }
   )

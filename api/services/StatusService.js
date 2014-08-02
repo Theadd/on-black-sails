@@ -14,10 +14,10 @@ module.exports.setup = function() {
     'runInterval': 0,
     'appspace': 'onblacksails.',
     'id': 'status',
-    'retry': 5000,
-    'silent': true,
-    'networkHost': 'localhost',
-    'networkPort': 8015
+    'retry': CommandLineHelpers.config.status.retry,
+    'silent': CommandLineHelpers.config.status.silent,
+    'networkHost': CommandLineHelpers.config.status.host,
+    'networkPort': CommandLineHelpers.config.status.port
   })
 
   self._isEmptyBusy = false
@@ -69,7 +69,7 @@ module.exports.start = function () {
 
   self._task = Indexer.createTask(
     function () { return self.run.apply(self, arguments) }
-    , Indexer.role['update-status-interval'],
+    , CommandLineHelpers.config.status.interval,
     function () { return self.updateStatus.apply(self, arguments) }
   )
 }

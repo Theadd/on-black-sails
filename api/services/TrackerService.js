@@ -11,13 +11,13 @@ module.exports.setup = function() {
   this.config({
     'recentPoolMaxSize': 250,
     'poolMinSize': -1,
-    'runInterval': 200,
+    'runInterval': CommandLineHelpers.config.tracker.interval,
     'appspace': 'onblacksails.',
     'id': 'tracker',
-    'retry': 5000,
-    'silent': true,
-    'networkHost': 'localhost',
-    'networkPort': 8010
+    'retry': CommandLineHelpers.config.tracker.retry,
+    'silent': CommandLineHelpers.config.tracker.silent,
+    'networkHost': CommandLineHelpers.config.tracker.host,
+    'networkPort': CommandLineHelpers.config.tracker.port
   })
 
   this.totalResponses = 0
