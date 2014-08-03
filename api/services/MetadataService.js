@@ -16,7 +16,8 @@ module.exports.setup = function() {
     'retry': CommandLineHelpers.config.metadata.retry,
     'silent': CommandLineHelpers.config.metadata.silent,
     'networkHost': CommandLineHelpers.config.metadata.host,
-    'networkPort': CommandLineHelpers.config.metadata.port
+    'networkPort': CommandLineHelpers.config.metadata.port,
+    'path': CommandLineHelpers.config.datapath
   })
 
   self._isEmptyBusy = false

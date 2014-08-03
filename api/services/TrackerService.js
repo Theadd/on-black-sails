@@ -17,7 +17,8 @@ module.exports.setup = function() {
     'retry': CommandLineHelpers.config.tracker.retry,
     'silent': CommandLineHelpers.config.tracker.silent,
     'networkHost': CommandLineHelpers.config.tracker.host,
-    'networkPort': CommandLineHelpers.config.tracker.port
+    'networkPort': CommandLineHelpers.config.tracker.port,
+    'path': CommandLineHelpers.config.datapath
   })
 
   this.totalResponses = 0

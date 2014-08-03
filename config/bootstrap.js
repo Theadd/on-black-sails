@@ -12,7 +12,7 @@
 module.exports.bootstrap = function(cb) {
   var later = require('later');
 
-  later.setTimeout(Indexer.run, later.parse.text('every 3 sec'));
+  later.setTimeout(Indexer.run, later.parse.text('every 1 sec'));
 
   // It's very important to trigger this callack method when you are finished
   // with the bootstrap!  (otherwise your server will never lift, since it's waiting on the bootstrap)
