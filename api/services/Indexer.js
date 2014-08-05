@@ -16,13 +16,13 @@ exports.run = function() {
   StatusService.setup()
   MediaService.setup()
 
-  setInterval( function() {
+  /*setInterval( function() {
     console.log("\n\n\n")
     console.log(TrackerService.getStats())
     console.log(MetadataService.getStats())
     console.log(StatusService.getStats())
     console.log(MediaService.getStats())
-  }, 10000)
+  }, 10000)*/
 
 
   if (CommandLineHelpers.config.tracker.active) {

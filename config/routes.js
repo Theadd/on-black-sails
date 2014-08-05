@@ -28,8 +28,11 @@ module.exports.routes = {
   //
   // (Alternatively, remove this and add an `index.html` file in your `assets` directory)
   '/': {
+    view: 'static/index'
+  }
+  /*'/': {
     view: 'homepage'
-  }/*,
+  },
 
   '/task': {
     controller: 'TaskController'

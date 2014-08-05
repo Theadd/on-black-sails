@@ -28,7 +28,8 @@
     "bittorrent-tracker": "^2.0.0",
     "node-ipc": "git+https://git@github.com/Theadd/node-ipc.git",
     "moviedb": "git+https://git@github.com/Theadd/moviedb.git",
-    "ipc-service": "git+https://git@github.com/Theadd/ipc-service.git"
+    "ipc-service": "git+https://git@github.com/Theadd/ipc-service.git",
+    "bcrypt": "^0.8.0"
   },
   "scripts": {
     "start": "node app.js",

@@ -18,7 +18,17 @@ module.exports.policies = {
 
   // Default policy for all controllers and actions
   // (`true` allows public access)
-  '*': true
+  '*': "flash",
+
+  user: {
+    'new': "flash",
+    subscribe: ["flash", "authenticated"],
+    create: "flash",
+    show: "userCanSeeProfile",
+    edit: "userCanSeeProfile",
+    update: "userCanSeeProfile",
+    '*': "admin"
+  }
 
 	// Here's an example of mapping some policies to run before
   // a controller and its actions

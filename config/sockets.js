@@ -118,7 +118,7 @@ module.exports.sockets = {
         // to report an error, call `cb(err)`
     }
   */
-  authorization: false,
+  authorization: true,
 
   // Whether to run code which supports legacy usage for connected
   // sockets running the v0.9 version of the socket client SDK (i.e. sails.io.js).
