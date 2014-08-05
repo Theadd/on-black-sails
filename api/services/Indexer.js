@@ -4,10 +4,6 @@
 
 var Task = require('tasker').Task
 
-//var session = exports.session = {'movies': 0, 'status': 0, 'metadata': 0, 'files': 0, 'peers': 0},
-  //statisticsTimer = null,
-  //workers = exports.workers = {'update-metadata': 0, 'update-status': 0, 'update-media': [], 'index-file': 0, 'update-tracker': 0 },
-
 exports.run = function() {
   var os = require('os')
   sails.config['platform'] = os.platform()
@@ -64,8 +60,8 @@ exports.run = function() {
     MediaService.server()
     MediaService.start()
   }
-
 }
+
 
 var createTask = exports.createTask = function(target, interval, dataCb, errorCb, logStatus) {
   var task = new Task(target, interval)
@@ -151,20 +147,7 @@ var indexSiteAPI = function(content) {
   }
 }
 
-/*
-var sendStatistics = exports.sendStatistics = function() {
-  var statistics = {
-    'session': session,
-    'workers': workers,
-    'announce': (role['tracker']) ? TrackerHandler.getAnnounce() : {},
-    'media-cache-stats': (role['update-media']) ? MediaHandler.cacheStats : {}
-  }
-  HandlerController.add(statistics)
-  session = Indexer.session = {'movies': 0, 'status': 0, 'metadata': 0, 'files': 0, 'peers': 0}
-}
-*/
-
-var getDownloadLink = exports.getDownloadLink = function(hash, cache, source) {
+exports.getDownloadLink = function(hash, cache, source) {
   if (cache.length) {
     return 'http://' + cache + '/torrent/' + hash.toUpperCase() + '.torrent'
   } else {
