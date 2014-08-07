@@ -29,7 +29,7 @@ module.exports.connections = {
   //MongoDB on localhost
   mongo: {
     adapter: 'sails-mongo',
-    host: 'localhost',
+    host: 'mongos.onblacksails.com',
     port: 27040,
     database: 'onblacksails'
   }
