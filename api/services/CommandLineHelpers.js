@@ -87,7 +87,8 @@ var defaultConfig = {
     'port': 8011
   },
   'live': false,
-  'datapath': '.data/'
+  'datapath': '.data/',
+  'clusterid': 0
 }
 
 var services = ['metadata', 'tracker', 'status', 'media', 'propagate']
@@ -235,8 +236,8 @@ exports.usage = function () {
       Save current config values to the file specified using: --config-file\n\n\
     --datapath=path\n\
       Path to store items pending of services.\n\n\
-    --node-uuid=string\n\
-      UUID from ExchangeNode model used to identify this ExchangeNode in propagation communications.\n\n";
+    --clusterid=number\n\
+      UUID from ExchangeNode model used to identify this cluster of on-black-sails processes.\n\n";
 }
 
 var extendObject = function (primary, secondary) {

@@ -110,6 +110,11 @@ module.exports = {
       type: 'string',
       defaultsTo: ''
     },
+
+    updatedBy: {
+      type: 'integer',
+      defaultsTo: 0
+    },
     /*cache: {
      type: 'string',
      enum: ['', 'torrage.com', 'torcache.net']

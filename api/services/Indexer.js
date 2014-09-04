@@ -11,10 +11,28 @@ exports.run = function() {
   console.log(CommandLineHelpers.usage())
   CommandLineHelpers.process()
 
+  /*var data = {
+    uuid: 1,
+    baseURL: 'http://127.0.0.1:1339/exchange/',
+    key: 'key1339',
+    enabled: true
+  }
+
+  ExchangeNode.create(data).exec(function(err, entry) {
+    if (!err) {
+      console.log("ExchangeNode created!")
+      console.log(JSON.stringify(entry));
+    } else {
+      console.log("FAIL!!!!!! ExchangeNode NOT created!")
+    }
+  })*/
+  console.log(CommandLineHelpers.config);
+
   TrackerService.setup()
   MetadataService.setup()
   StatusService.setup()
   MediaService.setup()
+  PropagateService.setup()
 
   /*setInterval( function() {
     console.log("\n\n\n")
@@ -59,6 +77,11 @@ exports.run = function() {
   if (CommandLineHelpers.config.media.active) {
     MediaService.server()
     MediaService.start()
+  }
+
+  if (CommandLineHelpers.config.propagate.active) {
+    PropagateService.server() //TODO: useless?
+    PropagateService.run()
   }
 }
 
