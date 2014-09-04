@@ -234,7 +234,9 @@ exports.usage = function () {
     --save\n\
       Save current config values to the file specified using: --config-file\n\n\
     --datapath=path\n\
-      Path to store items pending of services.\n\n";
+      Path to store items pending of services.\n\n\
+    --node-uuid=string\n\
+      UUID from ExchangeNode model used to identify this ExchangeNode in propagation communications.\n\n";
 }
 
 var extendObject = function (primary, secondary) {
