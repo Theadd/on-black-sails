@@ -78,11 +78,19 @@ var defaultConfig = {
     'host': 'localhost',
     'port': 8013
   },
+  'propagate': {
+    'active': false,
+    'interval': 60000,
+    'retry': 30000,
+    'silent': true,
+    'host': 'localhost',
+    'port': 8011
+  },
   'live': false,
   'datapath': '.data/'
 }
 
-var services = ['metadata', 'tracker', 'status', 'media']
+var services = ['metadata', 'tracker', 'status', 'media', 'propagate']
 var serviceOverwrites = ['retry', 'interval', 'silent']
 
 var commandLineParameters = {}
@@ -197,6 +205,8 @@ exports.usage = function () {
         Update peers information from announce trackers.\n\n\
       --media\n\
         Update media related information like IMDB ID and rate.\n\n\
+      --propagate\n\
+        Propagate database items that were updated recently to remote nodes.\n\n\
     General service options:\n\
       --retry=number\n\
         Interval in milliseconds to wait before a IPC service client tries to\n\
