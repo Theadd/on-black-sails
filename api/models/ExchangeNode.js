@@ -7,6 +7,9 @@
 
 module.exports = {
 
+  autoCreatedAt: false,
+  autoUpdatedAt: false,
+
   attributes: {
 
     uuid: {
@@ -24,7 +27,7 @@ module.exports = {
       required: true
     },
 
-    wantsAlive: {
+    /*wantsAlive: {
       type: 'boolean',
       defaultsTo: false
     },
@@ -37,11 +40,18 @@ module.exports = {
     wantsFiles: {
       type: 'boolean',
       defaultsTo: false
-    },
+    },*/
 
     enabled: {
       type: 'boolean',
       defaultsTo: true
+    },
+
+    propagatedAt: {
+      type: 'datetime',
+      defaultsTo: function() {
+        return new Date()
+      }
     }
   }
 };

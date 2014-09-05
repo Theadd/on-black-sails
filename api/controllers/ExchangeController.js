@@ -66,6 +66,88 @@ module.exports = {
       })
     }
 
+  },
+
+  /**
+   * ExchangeController.merge()
+   */
+  merge: function (req, res) {
+
+    console.log("\n\n\tGOT MERGE REQUEST!")
+
+    var remoteUUID = req.param('uuid') || null,
+      exchangeKey = req.param('key') || null,
+      exchangeData = req.param('data') || ''
+
+    if (remoteUUID != null && exchangeKey != null) {
+      getExchangeNode(remoteUUID, function exchangeNodeCB(err, exchangeNode) {
+        if (!err) {
+          getExchangeNode(CommandLineHelpers.config.clusterid, function thisNodeCB(err, thisNode) {
+            try {
+              if (!err) {
+                if (exchangeKey == getExchangeKey(thisNode.uuid, thisNode.key, exchangeNode.uuid, exchangeNode.key, exchangeData.length)) {
+                  //authenticated
+                  if (thisNode.enabled) {
+                    console.log("\t\tGOT DATA TO MERGE, LENGTH: "+exchangeData.length)
+                    var error = false,
+                      success = true,
+                      data = null
+
+                    try {
+                      data = JSON.parse(exchangeData)
+                    } catch (e) {
+                      error = e
+                      success = false
+                    }
+                    res.json({
+                      error: error,
+                      success: success
+                    })
+                    if (success) {
+                      for (var i in data) {
+                        console.log("\t\t[MERGE] data["+i+"].uuid: " + data[i].uuid)
+                        //TODO: Merge
+                      }
+                    }
+                  } else {
+                    res.json({
+                      active: false,
+                      error: 'Node not enabled'
+                    })
+                  }
+                } else {
+                  res.json({
+                    active: false,
+                    error: 'Invalid exchange key'
+                  })
+                }
+              } else {
+                res.json({
+                  active: false,
+                  error: err
+                })
+              }
+            } catch (error) {
+              res.json({
+                active: false,
+                error: error
+              })
+            }
+          })
+        } else {
+          res.json({
+            active: false,
+            error: err
+          })
+        }
+      })
+    } else {
+      res.json({
+        active: false,
+        error: 'Missing parameters'
+      })
+    }
+
   }
 
 };
