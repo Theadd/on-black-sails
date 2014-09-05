@@ -237,7 +237,7 @@ exports.usage = function () {
     --datapath=path\n\
       Path to store items pending of services.\n\n\
     --clusterid=number\n\
-      UUID from ExchangeNode model used to identify this cluster of on-black-sails processes.\n\n";
+      UUID from ExchangeNode model used to identify this cluster of processes.\n\n";
 }
 
 var extendObject = function (primary, secondary) {

@@ -72,9 +72,6 @@ module.exports = {
    * ExchangeController.merge()
    */
   merge: function (req, res) {
-
-    console.log("\n\n\tGOT MERGE REQUEST!")
-
     var remoteUUID = req.param('uuid') || null,
       exchangeKey = req.param('key') || null,
       exchangeData = req.param('data') || ''

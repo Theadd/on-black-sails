@@ -50,8 +50,6 @@ module.exports.propagate = function() {
     self.getExchangeNode(CommandLineHelpers.config.clusterid, function(err, thisExchangeNode) {
       self._propagate(err, thisExchangeNode);
     })
-
-    self._isBusy = false; //TODO: We're not done here yet!
   }
 }
 
@@ -95,10 +93,10 @@ module.exports._propagateToActiveNodes = function(thisNode, remoteNodes) {
     clusterid = CommandLineHelpers.config.clusterid,
     chunk = []
 
+  self._activeOperations = 0
+
   Hash.find()
     .where({ downloaded: true, updatedAt: { '>=': thisNode.propagatedAt } })
-    //.sort('updatedAt ASC')
-    //.limit(60)
     .exec(function(err, entries) {
       if (!err && entries.length) {
         for (var index in entries) {
@@ -125,8 +123,11 @@ module.exports._postToActiveNodes = function(thisNode, remoteNodes, data) {
   var self = this
 
   for (var i in remoteNodes) {
+    ++self._activeOperations
     self._exchangeNodeGet(thisNode, remoteNodes[i], 'merge', data, function exchangeNodePostCB(err, res) {
-      console.log("\tIN CALLBACK OF _postToActiveNodes -> _exchangeNodeGet")
+      if (--self._activeOperations == 0) {
+        self._isBusy = false
+      }
     })
   }
 }
