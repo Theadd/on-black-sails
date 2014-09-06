@@ -1,6 +1,6 @@
 on-black-sails!
 ===========
-### [Structure](#structure) &nbsp; [Services/Tasks](#configuration) &nbsp; [Installation](#installation)
+### [Structure](#structure) &nbsp; [Services/Tasks](#servicestasks) &nbsp; [Installation](#installation)
 
 Using sails.js framework, **on-black-sails** provides a Restful API of indexed torrents from public trackers on the net. Those indexed torrents are being fetched and updated by several tasks, each task is implemented as an [ipc-service](https://github.com/Theadd/ipc-service).
 
