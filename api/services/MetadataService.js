@@ -99,17 +99,19 @@ module.exports.updateMetadata = function(content) {
     }
   })
   //Update File model
-  for (var i in content.files) {
-    var data = {};
-    data['hash'] = task.hash
-    data['file'] = content.files[i].name
-    data['title'] = task.title
-    data['category'] = task.category
-    data['added'] = new Date(content.creationDate)
-    data['size'] = content.files[i].size;
-    File.create(data).exec(function(err, fileentry) {
-      if (err) console.error(err)
-    })
+  if (CommandLineHelpers.config.indexfiles) {
+    for (var i in content.files) {
+      var data = {};
+      data['hash'] = task.hash
+      data['file'] = content.files[i].name
+      data['title'] = task.title
+      data['category'] = task.category
+      data['added'] = new Date(content.creationDate)
+      data['size'] = content.files[i].size;
+      File.create(data).exec(function (err, fileentry) {
+        if (err) console.error(err)
+      })
+    }
   }
 }
 
