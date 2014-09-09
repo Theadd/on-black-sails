@@ -145,6 +145,45 @@ module.exports = {
       })
     }
 
+  },
+
+  /**
+   * ExchangeController.set()
+   */
+  set: function (req, res) {
+    //TODO: Security|Authentication
+    var uuid = req.param('uuid') || null,
+      key = req.param('key') || null,
+      baseURL = req.param('baseURL') || '',
+      enabled = req.param('enabled') || true
+
+    if (uuid != null && key != null && baseURL.length) {
+      var data = {
+        uuid: Number(uuid),
+        baseURL: baseURL, //'http://127.0.0.1:1337/exchange/',
+        key: key, //'key1337',
+        enabled: Boolean(enabled)
+      }
+      //TODO: Create or Update if exists
+      ExchangeNode.create(data).exec(function(err, entry) {
+        if (!err) {
+          res.json({
+            success: true,
+            error: false
+          })
+        } else {
+          res.json({
+            success: false,
+            error: 'Error on ExchangeNode.create'
+          })
+        }
+      })
+    } else {
+      res.json({
+        success: false,
+        error: 'Missing parameters'
+      })
+    }
   }
 
 };

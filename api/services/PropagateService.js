@@ -81,8 +81,13 @@ module.exports._propagate = function(err, thisExchangeNode) {
             })
           }
         }
+        if (self._exchangeNodes.length == 0) {
+          console.log("ERROR! _exchangeNodes empty!")
+          self._isBusy = false
+        }
       } else {
         console.log("No ExchangeNode found to propagate")
+        self._isBusy = false
       }
     })
 }
@@ -96,7 +101,8 @@ module.exports._propagateToActiveNodes = function(thisNode, remoteNodes) {
   self._activeOperations = 0
 
   Hash.find()
-    .where({ downloaded: true, updatedAt: { '>=': thisNode.propagatedAt } })
+    //.where({ downloaded: true, updatedAt: { '>=': thisNode.propagatedAt } })
+    .where({ peersUpdatedAt: { '>=': thisNode.propagatedAt } })
     .exec(function(err, entries) {
       if (!err && entries.length) {
         for (var index in entries) {

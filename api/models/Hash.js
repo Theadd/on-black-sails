@@ -7,7 +7,6 @@
 
 module.exports = {
 
-  //adapter: 'mongo',
   migrate: 'alter', // adds and/or removes columns on changes to the schema
   //migrate: 'drop', // drops all your tables and then re-creates them. All data is deleted.
   //migrate: 'safe', doesn't do anything on sails lift- for use in production.
@@ -19,10 +18,7 @@ module.exports = {
       type: 'string',
       unique: true,
       primaryKey: true,
-      required: true/*,
-       len: 40,
-       alphanumeric: true,
-       uuid: true*/
+      required: true
     },
 
     title: {
@@ -43,11 +39,6 @@ module.exports = {
       type: 'array',
       defaultsTo: []
     },
-
-    /*files: {
-      type: 'array',
-      defaultsTo: []
-    },*/
 
     files: {
       type: 'integer',
@@ -115,22 +106,14 @@ module.exports = {
       type: 'integer',
       defaultsTo: 0
     },
-    /*cache: {
-     type: 'string',
-     enum: ['', 'torrage.com', 'torcache.net']
-     }*/
+
+    peersUpdatedAt: {
+      type: 'datetime'
+    },
 
     toJSON: function() {
       var obj = this.toObject();
-      /*if (typeof obj.cache !== "undefined" && obj.cache.length) {
-        obj.link = Indexer.getDownloadLink(obj.uuid, obj.cache, obj.source);
-        obj.magnet = "magnet:?xt=urn:btih:" + obj.uuid.toLowerCase() + "&dn=" + encodeURI(obj.title);
-      } else {
-        obj.magnet = "magnet:?xt=urn:btih:" + obj.uuid.toLowerCase() + "&dn=" + encodeURI(obj.title);
-        obj.link = obj.magnet;
-      }*/
       obj.category = obj.category.toLowerCase();
-      //delete obj.downloaded;
       return obj;
     }
 

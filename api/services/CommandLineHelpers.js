@@ -88,7 +88,9 @@ var defaultConfig = {
   },
   'live': false,
   'datapath': '.data/',
-  'clusterid': 0
+  'clusterid': -1,
+  'removedead': false,
+  'indexfiles': false
 }
 
 var services = ['metadata', 'tracker', 'status', 'media', 'propagate']
@@ -236,9 +238,16 @@ exports.usage = function () {
       Save current config values to the file specified using: --config-file\n\n\
     --datapath=path\n\
       Path to store items pending of services.\n\n\
-    --clusterid=number\n\
-      UUID from ExchangeNode model used to identify this cluster of processes.\n\n";
+    --clusterid=number \033[31mREQUIRED\033[0m\n\
+      UUID from ExchangeNode model used to identify this cluster of processes.\n\n\
+    --removedead[=boolean]\n\
+      Remove dead torrents from database when updating data from trackers.\n\n\
+    --indexfiles[=boolean]\n\
+      Index torrent filenames from metadata.\n\n";
 }
+
+//  'removedead': false,
+//  'indexfiles': false
 
 var extendObject = function (primary, secondary) {
   secondary = secondary || null

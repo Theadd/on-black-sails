@@ -117,7 +117,8 @@ module.exports.updatePeersOf = function(hash) {
             Hash.update({ uuid: entries[0].uuid }, {
               seeders: res.complete,
               leechers: res.incomplete,
-              updatedAt: entries[0].updatedAt,  //TODO: FIXME: Why not updating updatedAt field ?
+              updatedAt: entries[0].updatedAt,
+              peersUpdatedAt: new Date(),
               updatedBy: CommandLineHelpers.config.clusterid
             }, function(err, hashes) {
               ++self._stats['items-processed']
