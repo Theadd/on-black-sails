@@ -1,16 +1,20 @@
-# on-black-sails
+on-black-sails!
 ===========
+### [Structure](#structure) &nbsp; [Services/Tasks](#servicestasks) &nbsp; [Installation](#installation)
 
-## Initial Setup
+Using sails.js framework, **on-black-sails** provides a Restful API of indexed torrents from public trackers on the net. Those indexed torrents are being fetched and updated by several tasks, each task is implemented as an [ipc-service](https://github.com/Theadd/ipc-service).
+
+## Structure
+on-black-sails is not a client-server architecture, it can be composed of several independent running processes acting on their own. Each process can (specified using the command line) handle none, one or multiple tasks/services and does not depend on other processes that handle other tasks to be running at the same time.
+
+## Services/Tasks
+* **MediaService.js**: Gathers movie torrents related data from "imdb.com"
+* **MetadataService.js**: Downloads each .torrent file and gets its metadata
+* **StatusService.js**: Updates fake status of indexed torrents
+* **TrackerService.js**: Updates seeds/peers/etc from trackers.
+* **PropagateService.js**: Propagates indexed torrents which its *peers* data has been updated recently.
+
+## Installation
 * `git clone https://github.com/Theadd/on-black-sails.git`
 * Edit `config/connections.js` to meet your mongodb server parameters.
-* Start a mongo client to prepare the database and collection with the following:
-```
-use onblacksails
-db.hash.ensureIndex({uuid: 1}, { unique: true })
-db.hash.ensureIndex({downloaded: 1, updatedAt: 1})
-db.hash.ensureIndex({title: "text"})
-```
-* Run `sails lift --update-index` and kill it when there is no more output for a while.
-* Run `sails lift --update-metadata` and wait some minutes before killing it.
-* At this point, your database should have some data we can work with, run `sails lift --update-index --update-metadata --update-status --update-media`.
+* ...
