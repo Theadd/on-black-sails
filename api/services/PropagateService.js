@@ -50,6 +50,8 @@ module.exports.propagate = function() {
     self.getExchangeNode(CommandLineHelpers.config.clusterid, function(err, thisExchangeNode) {
       self._propagate(err, thisExchangeNode);
     })
+  } else {
+    console.log("ªªª SERVICE BUSY! ªªª")
   }
 }
 
@@ -73,15 +75,21 @@ module.exports._propagate = function(err, thisExchangeNode) {
                   console.log(res)
                 }
               } else {
-                console.log(e);
+                console.log("CATCH ERROR FROM _exchangeNodeGet")
+                console.log(e)
               }
               if (--self._exchangeNodeCount == 0) {
-                self._propagateToActiveNodes(thisExchangeNode, self._exchangeNodes)
+                if (self._exchangeNodes.length) {
+                  self._propagateToActiveNodes(thisExchangeNode, self._exchangeNodes)
+                } else {
+                  console.log("ERROR! _exchangeNodes empty in _exchangeNodeGet!")
+                  self._isBusy = false
+                }
               }
             })
           }
         }
-        if (self._exchangeNodes.length == 0) {
+        if (self._exchangeNodeCount == 0) {
           console.log("ERROR! _exchangeNodes empty!")
           self._isBusy = false
         }
@@ -94,11 +102,11 @@ module.exports._propagate = function(err, thisExchangeNode) {
 
 module.exports._propagateToActiveNodes = function(thisNode, remoteNodes) {
   var self = this,
-    currentDate = new Date(),
     clusterid = CommandLineHelpers.config.clusterid,
     chunk = []
 
   self._activeOperations = 0
+  self._propagateStart = new Date()
 
   Hash.find()
     //.where({ downloaded: true, updatedAt: { '>=': thisNode.propagatedAt } })
@@ -115,12 +123,13 @@ module.exports._propagateToActiveNodes = function(thisNode, remoteNodes) {
             }
           }
         }
-
         if (chunk.length) {
           self._postToActiveNodes(thisNode, remoteNodes, JSON.stringify(chunk))
         }
       } else {
-        console.log("Unexpected error in _propagateToActiveNodes.on('find')")
+        console.log("Unexpected error in _propagateToActiveNodes.on('find'), entries.length: " + entries.length)
+        console.log(err)
+        self._isBusy = false
       }
     })
 }
@@ -132,6 +141,11 @@ module.exports._postToActiveNodes = function(thisNode, remoteNodes, data) {
     ++self._activeOperations
     self._exchangeNodeGet(thisNode, remoteNodes[i], 'merge', data, function exchangeNodePostCB(err, res) {
       if (--self._activeOperations == 0) {
+        ExchangeNode.update({ uuid: thisNode.uuid }, {
+          propagatedAt: self._propagateStart
+        }, function (error, hashes) {
+          console.log("\n[FINAL] error: " + Boolean(error) + ", result: " + JSON.stringify(hashes))
+        })
         self._isBusy = false
       }
     })

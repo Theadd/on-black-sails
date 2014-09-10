@@ -102,8 +102,8 @@ module.exports = {
                     })
                     if (success) {
                       for (var i in data) {
-                        console.log("\t\t[MERGE] data["+i+"].uuid: " + data[i].uuid)
-                        //TODO: Merge
+                        //console.log("\t\t[MERGE] data["+i+"].uuid: " + data[i].uuid)
+                        mergeHashItem(data[i])
                       }
                     }
                   } else {
@@ -205,4 +205,70 @@ function getExchangeNode (uuid, callback) {
       }
     })
 }
+
+
+function mergeHashItem (item) {
+  Hash.find()
+    .where({ uuid: item.uuid })
+    .exec(function (err, entries) {
+      //console.log("\tTRYING TO MERGE: " + item.uuid + " >>> err: " + Boolean(err) + ", entries: " + entries.length);
+      if (!err && entries.length) {
+        if (entries[0].rate != item.rate) {
+          if (entries[0].updatedAt > item.updatedAt) {
+            //do not update media info and status
+            Hash.update({ uuid: item.uuid }, {
+              seeders: item.seeders,
+              leechers: item.leechers,
+              updatedAt: entries[0].updatedAt,
+              peersUpdatedAt: item.peersUpdatedAt,
+              updatedBy: item.updatedBy
+            }, function (err, hashes) {
+              //updated
+              //console.log("-- updated without media, " + item.uuid);
+            })
+          } else {
+            //update media info too
+            Hash.update({ uuid: item.uuid }, {
+              seeders: item.seeders,
+              leechers: item.leechers,
+              updatedAt: item.updatedAt,
+              peersUpdatedAt: item.peersUpdatedAt,
+              updatedBy: item.updatedBy,
+              rate: item.rate,
+              media: item.media
+            }, function (err, hashes) {
+              //updated
+              //console.log("-- updated WITH media, " + item.uuid);
+            })
+          }
+        } else {
+          Hash.update({ uuid: item.uuid }, {
+            seeders: item.seeders,
+            leechers: item.leechers,
+            updatedAt: entries[0].updatedAt,
+            peersUpdatedAt: item.peersUpdatedAt,
+            updatedBy: item.updatedBy
+          }, function (err, hashes) {
+            //updated
+            //console.log("-- updated peers only since rates were equal, " + item.uuid);
+          })
+        }
+      } else {
+        delete item._id
+        delete item.id
+        //console.log("\t\tHash.create non existing uuid: " + item.uuid);
+        Hash.create(item).exec(function (createErr, entry) {
+          if (createErr) {
+            console.error("\nERROR on Hash.create! " + JSON.stringify(item))
+            console.log(createErr)
+            //console.trace()
+          } else {
+            //console.log("\t\t\tCREATE SUCCESS, " + item.uuid);
+          }
+        })
+      }
+
+    })
+}
+
 
