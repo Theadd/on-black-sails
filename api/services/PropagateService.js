@@ -28,26 +28,14 @@ module.exports.setup = function() {
   })
 }
 
-module.exports.getExchangeNode = function(uuid, callback) {
-  ExchangeNode.find()
-    .where({ uuid: Number(uuid) })
-    .limit(1)
-    .exec(function(err, entries) {
-      if (!err && entries.length) {
-        callback(null, entries[0])
-      } else {
-        callback(err)
-      }
-    })
-}
-
 module.exports.propagate = function() {
   var self = this
 
   if (!self._isBusy) {
     self._isBusy = true;
 
-    self.getExchangeNode(CommandLineHelpers.config.clusterid, function(err, thisExchangeNode) {
+    /*self.getExchangeNode*/
+    ExchangeNodeHelpers.getNode(CommandLineHelpers.config.clusterid, function(err, thisExchangeNode) {
       self._propagate(err, thisExchangeNode);
     })
   } else {
@@ -67,22 +55,22 @@ module.exports._propagate = function(err, thisExchangeNode) {
         for (var i in entries) {
           if (entries[i].uuid != thisExchangeNode.uuid) {
             ++self._exchangeNodeCount
-            self._exchangeNodeGet(thisExchangeNode, entries[i], 'active', '', function activeNodeCB(e, res) {
+            self._request(thisExchangeNode, entries[i], 'active', '', function activeNodeCB(e, res) {
               if (!e) {
                 if (res['active']) {
                   self._exchangeNodes.push(extendObject(entries[i]))
                 } else {
+                  console.log("ExchangeNode NOT active!")
                   console.log(res)
                 }
               } else {
-                console.log("CATCH ERROR FROM _exchangeNodeGet")
-                console.log(e)
+                console.log("ExchangeNode unreachable!")
               }
               if (--self._exchangeNodeCount == 0) {
                 if (self._exchangeNodes.length) {
                   self._propagateToActiveNodes(thisExchangeNode, self._exchangeNodes)
                 } else {
-                  console.log("ERROR! _exchangeNodes empty in _exchangeNodeGet!")
+                  console.log("No active ExchangeNodes found!")
                   self._isBusy = false
                 }
               }
@@ -90,11 +78,11 @@ module.exports._propagate = function(err, thisExchangeNode) {
           }
         }
         if (self._exchangeNodeCount == 0) {
-          console.log("ERROR! _exchangeNodes empty!")
+          console.log("Found 0 ExchangeNode to propagate")
           self._isBusy = false
         }
       } else {
-        console.log("No ExchangeNode found to propagate")
+        console.log("Found 0 ExchangeNode to propagate")
         self._isBusy = false
       }
     })
@@ -109,7 +97,6 @@ module.exports._propagateToActiveNodes = function(thisNode, remoteNodes) {
   self._propagateStart = new Date()
 
   Hash.find()
-    //.where({ downloaded: true, updatedAt: { '>=': thisNode.propagatedAt } })
     .where({ peersUpdatedAt: { '>=': thisNode.propagatedAt } })
     .exec(function(err, entries) {
       if (!err && entries.length) {
@@ -127,8 +114,7 @@ module.exports._propagateToActiveNodes = function(thisNode, remoteNodes) {
           self._postToActiveNodes(thisNode, remoteNodes, JSON.stringify(chunk))
         }
       } else {
-        console.log("Unexpected error in _propagateToActiveNodes.on('find'), entries.length: " + entries.length)
-        console.log(err)
+        console.log("Nothing to propagate.")
         self._isBusy = false
       }
     })
@@ -139,12 +125,12 @@ module.exports._postToActiveNodes = function(thisNode, remoteNodes, data) {
 
   for (var i in remoteNodes) {
     ++self._activeOperations
-    self._exchangeNodeGet(thisNode, remoteNodes[i], 'merge', data, function exchangeNodePostCB(err, res) {
+    self._request(thisNode, remoteNodes[i], 'merge', data, function exchangeNodePostCB(err, res) {
       if (--self._activeOperations == 0) {
         ExchangeNode.update({ uuid: thisNode.uuid }, {
           propagatedAt: self._propagateStart
         }, function (error, hashes) {
-          console.log("\n[FINAL] error: " + Boolean(error) + ", result: " + JSON.stringify(hashes))
+          console.log("PROPAGATED: " + (!Boolean(error)) + " (" + self._propagateStart + ")")
         })
         self._isBusy = false
       }
@@ -152,9 +138,8 @@ module.exports._postToActiveNodes = function(thisNode, remoteNodes, data) {
   }
 }
 
-module.exports._exchangeNodeGet = function(thisNode, remoteNode, action, data, callback) {
-  var self = this,
-    exchangeKey = self._getExchangeKey(remoteNode.uuid, remoteNode.key, thisNode.uuid, thisNode.key, data.length),
+module.exports._request = function(thisNode, remoteNode, action, data, callback) {
+  var exchangeKey = ExchangeNodeHelpers.getKey(remoteNode.uuid, remoteNode.key, thisNode.uuid, thisNode.key, data.length),
     url = remoteNode.baseURL + action + '?uuid=' + thisNode.uuid + '&key=' + exchangeKey
 
   requestify.get(url, {
@@ -171,11 +156,6 @@ module.exports._exchangeNodeGet = function(thisNode, remoteNode, action, data, c
   }, function(error) {
     callback(error)
   })
-}
-
-module.exports._getExchangeKey = function(rUUID, rKEY, sUUID, sKEY, len) {
-  var crypto = require('crypto')
-  return crypto.createHash('md5').update('' + rUUID + rKEY + sUUID + sKEY + len).digest("hex")
 }
 
 var extendObject = function (primary, secondary) {
