@@ -55,7 +55,7 @@ module.exports.setup = function() {
             }
             self._isEmptyBusy = false
           } else {
-            console.log("Unexpected error in MetadataService.on('empty')")
+            //No entries found with: { downloaded: false }
             self._isEmptyBusy = false
           }
         })

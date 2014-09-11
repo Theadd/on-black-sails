@@ -33,7 +33,6 @@ exports.merge = function (item) {
             var recentUpdatedAt = (entries[0].updatedAt < item.updatedAt),
               rateMatch = (entries[0].rate == item.rate)
 
-            console.log("\t" + item.uuid + " is being updated.")
             Hash.update({ uuid: item.uuid }, {
               seeders: item.seeders,
               leechers: item.leechers,
@@ -47,26 +46,25 @@ exports.merge = function (item) {
             })
           }
         } else {
-          console.log(item.uuid + " is already most updated.")
         }
       } else {
-        delete item._id
-        delete item.id
-        Hash.create(item).exec(function (createErr, entry) {
-          if (createErr) {
-            console.error("\nERROR on Hash.create! " + JSON.stringify(item))
-            console.log(createErr)
-          }
-        })
+        if (!(CommandLineHelpers.config.removedead && item.seeders == 0)) {
+          delete item._id
+          delete item.id
+          Hash.create(item).exec(function (createErr, entry) {
+            if (createErr) {
+              console.error("\nERROR on Hash.create! " + JSON.stringify(item))
+              console.log(createErr)
+            }
+          })
+        }
       }
     })
 }
 
 exports.remove = function (uuid) {
-  console.log("HashHelpers.remove('" + uuid + "')")
   Hash.destroy({ uuid: uuid }).exec(function(err) {
     if (err) {
-      console.warn("Error: HashHelpers.remove('" + uuid + "')")
     }
   })
 }

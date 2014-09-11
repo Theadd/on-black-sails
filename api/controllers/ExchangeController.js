@@ -85,7 +85,6 @@ module.exports = {
                 if (exchangeKey == ExchangeNodeHelpers.getKey(thisNode.uuid, thisNode.key, exchangeNode.uuid, exchangeNode.key, exchangeData.length)) {
                   //authenticated
                   if (thisNode.enabled) {
-                    console.log("GOT DATA TO MERGE, LENGTH: " + exchangeData.length)
                     var error = false,
                       success = true,
                       data = null
