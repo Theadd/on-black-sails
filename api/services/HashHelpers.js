@@ -7,13 +7,13 @@ var isMostUpdated = exports.isMostUpdated = function (existing, received) {
 
   if (typeof existing.peersUpdatedAt !== "undefined") {
     if (typeof received.peersUpdatedAt !== "undefined") {
-      mostUpdated = (existing.peersUpdatedAt < received.peersUpdatedAt)
+      mostUpdated = ((new Date(existing.peersUpdatedAt)) < (new Date(received.peersUpdatedAt)))
     }
   } else {
     if (typeof received.peersUpdatedAt !== "undefined") {
       mostUpdated = true
     } else {
-      mostUpdated = (existing.updatedAt < received.updatedAt)
+      mostUpdated = ((new Date(existing.updatedAt)) < (new Date(received.updatedAt)))
     }
   }
 
