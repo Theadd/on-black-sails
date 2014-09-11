@@ -27,10 +27,8 @@ exports.merge = function (item) {
       if (!err && entries.length) {
         if (isMostUpdated(entries[0], item)) {
           if (CommandLineHelpers.config.removedead && item.seeders == 0) {
-            //TODO: REMOVE DEAD
-            console.log("######## DEAD FOUND: " + item.uuid)
-            console.log(item)
-            console.log("\n")
+            //Remove dead torrent
+            HashHelpers.remove(entries[0].uuid)
           } else {
             var recentUpdatedAt = (entries[0].updatedAt < item.updatedAt),
               rateMatch = (entries[0].rate == item.rate)
@@ -62,4 +60,13 @@ exports.merge = function (item) {
         })
       }
     })
+}
+
+exports.remove = function (uuid) {
+  console.log("HashHelpers.remove('" + uuid + "')")
+  Hash.destroy({ uuid: uuid }).exec(function(err) {
+    if (err) {
+      console.warn("Error: HashHelpers.remove('" + uuid + "')")
+    }
+  })
 }

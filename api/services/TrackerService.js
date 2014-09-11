@@ -114,15 +114,20 @@ module.exports.updatePeersOf = function(hash) {
           client.on('error', ignore)
           client.once('update', function (res) {
             self.registerAnnounceResponse(res.announce)
-            Hash.update({ uuid: entries[0].uuid }, {
-              seeders: res.complete,
-              leechers: res.incomplete,
-              updatedAt: entries[0].updatedAt,
-              peersUpdatedAt: new Date(),
-              updatedBy: CommandLineHelpers.config.clusterid
-            }, function(err, hashes) {
-              ++self._stats['items-processed']
-            })
+            if (res.complete == 0 && CommandLineHelpers.config.removedead) {
+              //Remove dead torrent
+              HashHelpers.remove(entries[0].uuid)
+            } else {
+              Hash.update({ uuid: entries[0].uuid }, {
+                seeders: res.complete,
+                leechers: res.incomplete,
+                updatedAt: entries[0].updatedAt,
+                peersUpdatedAt: new Date(),
+                updatedBy: CommandLineHelpers.config.clusterid
+              }, function (err, hashes) {
+                ++self._stats['items-processed']
+              })
+            }
           })
           client.update()
         } else {
