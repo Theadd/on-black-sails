@@ -80,11 +80,11 @@ module.exports.updateMetadata = function(content) {
 
   //Update Hash model
   Hash.update({ uuid: task.hash },{
-    size: content.size,
-    trackers: content.trackers,
+    size: Number(content.length),
+    trackers: content.announce,
     files: content.files.length,
     downloaded: true,
-    added: new Date(content.creationDate)
+    added: content.created
   }, function(err, hashes) {
     ++self._stats['items-processed']
     if (err) {
