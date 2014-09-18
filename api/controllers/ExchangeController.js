@@ -182,6 +182,23 @@ module.exports = {
         error: 'Missing parameters'
       })
     }
+  },
+
+  /**
+   * ExchangeController.stats()
+   * FIXME: Wrong place
+   */
+  stats: function (req, res) {
+    var output = {}
+    output['MetadataService'] = MetadataService.getStats()
+    output['MediaService'] = MediaService.getStats()
+    output['StatusService'] = StatusService.getStats()
+    output['TrackerService'] = TrackerService.getStats()
+    output['PropagateService'] = PropagateService.getStats()
+    //console.log(JSON.stringify(output, null, '  '))
+    res.json({
+      output: output
+    })
   }
 
 };
