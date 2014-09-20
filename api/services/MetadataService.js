@@ -76,7 +76,8 @@ module.exports.start = function () {
 
 module.exports.updateMetadata = function(content) {
   var self = this,
-    task = self._task
+    task = self._task,
+    dateAdded = content.created || (new Date())
 
   //Update Hash model
   Hash.update({ uuid: task.hash },{
@@ -84,7 +85,7 @@ module.exports.updateMetadata = function(content) {
     trackers: content.announce,
     files: content.files.length,
     downloaded: true,
-    added: content.created
+    added: dateAdded
   }, function(err, hashes) {
     ++self._stats['items-processed']
     if (err) {
@@ -106,7 +107,7 @@ module.exports.updateMetadata = function(content) {
       data['file'] = content.files[i].name
       data['title'] = task.title
       data['category'] = task.category
-      data['added'] = new Date(content.creationDate)
+      data['added'] = dateAdded
       data['size'] = content.files[i].size;
       File.create(data).exec(function (err, fileentry) {
         if (err) console.error(err)
