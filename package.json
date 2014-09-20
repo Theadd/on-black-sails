@@ -26,7 +26,6 @@
     "later": "^1.1.6",
     "sails-mongo": "git+https://git@github.com/Theadd/sails-mongo.git",
     "bittorrent-tracker": "^2.6.0",
-    "node-ipc": "git+https://git@github.com/Theadd/node-ipc.git",
     "moviedb": "git+https://git@github.com/Theadd/moviedb.git",
     "ipc-service": "git+https://git@github.com/Theadd/ipc-service.git",
     "bcrypt": "^0.8.0",
