@@ -27,6 +27,20 @@ module.exports = {
         added: {'>': addedDate}
       })
     }
+  },
+  /** Add items to MetadataService queue which aren't downloaded yet. */
+  emptyMetadataQueue: {
+    defaults: {
+      interval: 120000,
+      target: 'metadata'
+    },
+    getQuery: function() {
+      return Hash.find({
+        where: { downloaded: false },
+        sort: 'updatedAt ASC',
+        limit: 60
+      })
+    }
   }
 }
 

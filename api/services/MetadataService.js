@@ -17,7 +17,8 @@ module.exports.setup = function() {
     'silent': CommandLineHelpers.config.metadata.silent,
     'networkHost': CommandLineHelpers.config.metadata.host,
     'networkPort': CommandLineHelpers.config.metadata.port,
-    'path': CommandLineHelpers.config.datapath
+    'path': CommandLineHelpers.config.datapath,
+    'onempty': CommandLineHelpers.config.metadata.onempty
   })
 
   self._isEmptyBusy = false
@@ -42,23 +43,22 @@ module.exports.setup = function() {
   })
 
   self.on('empty', function() {
+    console.log("on empty")
     if (!self._isEmptyBusy) {
-      self._isEmptyBusy = true
-      Hash.find()
-        .where({ downloaded: false })
-        .sort('updatedAt ASC')
-        .limit(60)
-        .exec(function(err, entries) {
-          if (!err && entries.length) {
-            for (var i in entries) {
-              self.queue(entries[i].uuid)
-            }
-            self._isEmptyBusy = false
-          } else {
-            //No entries found with: { downloaded: false }
-            self._isEmptyBusy = false
-          }
+      console.log("\ton empty when not busy")
+      if (self.config('onempty') != false) {
+        self._isEmptyBusy = true
+        self._emptyStart = new Date().getTime()
+        ServiceQueueModel.runOnce(self.config('onempty'), function (err, msg) {
+          self._isEmptyBusy = false
+          console.log("end on empty runOnce "+self.config('onempty'))
+          console.log("ERR: " )
+          console.log(err)
+          console.log("MSG: "+msg)
+          console.log("\t\tTOOK: " + ((new Date().getTime()) - self._emptyStart) + "ms")
+
         })
+      }
     }
   })
 }

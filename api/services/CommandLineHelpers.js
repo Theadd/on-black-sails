@@ -52,7 +52,8 @@ var defaultConfig = {
     'retry': 5000,
     'silent': true,
     'host': 'localhost',
-    'port': 8018
+    'port': 8018,
+    'onempty': 'emptyMetadataQueue'
   },
   'tracker': {
     'active': false,
@@ -60,7 +61,8 @@ var defaultConfig = {
     'retry': 5000,
     'silent': true,
     'host': 'localhost',
-    'port': 8010
+    'port': 8010,
+    'onempty': false
   },
   'status': {
     'active': false,
@@ -68,7 +70,8 @@ var defaultConfig = {
     'retry': 5000,
     'silent': true,
     'host': 'localhost',
-    'port': 8015
+    'port': 8015,
+    'onempty': false
   },
   'media': {
     'active': false,
@@ -76,7 +79,8 @@ var defaultConfig = {
     'retry': 5000,
     'silent': true,
     'host': 'localhost',
-    'port': 8013
+    'port': 8013,
+    'onempty': false
   },
   'propagate': {
     'active': false,
@@ -84,7 +88,8 @@ var defaultConfig = {
     'retry': 30000,
     'silent': true,
     'host': 'localhost',
-    'port': 8011
+    'port': 8011,
+    'onempty': false
   },
   'live': false,
   'datapath': '.data/',
