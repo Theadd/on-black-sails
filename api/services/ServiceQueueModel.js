@@ -33,7 +33,7 @@ exports.runOnce = function (modelName, cb) {
         model.getQuery(model.defaults).exec(function(err, entries) {
           if (!err && entries.length) {
             for (var i in entries) {
-              targetService.queue(entries[i].uuid)
+              targetService.queue(entries[i].uuid, model.defaults.prioritize || false)
             }
             if (cb) {
               cb(null, entries.length)

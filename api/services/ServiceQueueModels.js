@@ -2,15 +2,18 @@
  * Created by Theadd on 22/09/2014.
  */
 
+//Example return value: Hash.find({ where: { title: 'foo' }, skip: 20, limit: 10, sort: 'title DESC' })
 module.exports = {
+  /** Predefined model that add items to TrackerService queue that had been updated by a TrackerService within the last
+   * two hours and were added within last 24 hours. Used to keep torrent peers up to date for newly created ones since
+   * its when they are more active. */
   updatePeersOnRecent: {
     defaults: {
-      'interval': 900000,
-      'limit': false,
-      'target': 'tracker',
-      'prioritize': true
+      interval: 900000,   //15min (REQUIRED).
+      target: 'tracker',  //add items to TrackerService queue (REQUIRED).
+      prioritize: true    //prioritize items in the queue (OPTIONAL).
     },
-    getQuery: function(options) {
+    getQuery: function() {
       var fromDate = new Date(),
         toDate = new Date(),
         addedDate = new Date()
@@ -19,24 +22,10 @@ module.exports = {
       toDate.setMinutes(toDate.getMinutes() - 15)
       addedDate.setHours(addedDate.getHours() - 24)
 
-      console.log(options)
-
-      console.log("==========================================")
-      console.log("\tFrom date: " + fromDate)
-      console.log("\tTo date: " + toDate)
-      console.log("\tAdded date: " + addedDate)
-      console.log("==========================================")
-
-      var query = Hash.find({
+      return Hash.find({
         peersUpdatedAt: {'>': fromDate, '<': toDate},
         added: {'>': addedDate}
       })
-
-      if (options.limit || false) {
-        query = query.limit(options.limit)
-      }
-
-      return query
     }
   }
 }
