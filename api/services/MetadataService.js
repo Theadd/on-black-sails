@@ -46,7 +46,7 @@ module.exports.setup = function() {
     if (!self._isEmptyBusy) {
       if (self.config('onempty') != false) {
         self._isEmptyBusy = true
-        ServiceQueueModel.runOnce(self.config('onempty'), function (err, msg) {
+        ServiceQueueModel.runOnce(self.config('onempty'), function () {
           self._isEmptyBusy = false
         })
       }

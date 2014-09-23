@@ -9,9 +9,10 @@ module.exports = {
    * its when they are more active. */
   updatePeersOnRecent: {
     defaults: {
-      interval: 900000,   //15min (REQUIRED).
-      target: 'tracker',  //add items to TrackerService queue (REQUIRED).
-      prioritize: true    //prioritize items in the queue (OPTIONAL).
+      interval: 900000,     //15min (REQUIRED).
+      target: 'tracker',    //add items to TrackerService queue (REQUIRED).
+      prioritize: true,     //prioritize items in the queue (OPTIONAL).
+      skipRecentPool: true  //do not check service recent pool if items already exist (OPTIONAL).
     },
     getQuery: function() {
       var fromDate = new Date(),

@@ -32,16 +32,16 @@ exports.runOnce = function (modelName, cb) {
       if (targetService) {
         model.getQuery(model.defaults).exec(function(err, entries) {
           if (!err && entries.length) {
-            var i
+            var i, skipRecentPool = model.defaults.skipRecentPool || false
             if (typeof model.filter === "function") {
               for (i in entries) {
                 if (model.filter(entries[i])) {
-                  targetService.queue(entries[i].uuid, model.defaults.prioritize || false)
+                  targetService.queue(entries[i].uuid, model.defaults.prioritize || false, skipRecentPool)
                 }
               }
             } else {
               for (i in entries) {
-                targetService.queue(entries[i].uuid, model.defaults.prioritize || false)
+                targetService.queue(entries[i].uuid, model.defaults.prioritize || false, skipRecentPool)
               }
             }
             if (cb) {
