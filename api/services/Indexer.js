@@ -61,6 +61,14 @@ exports.run = function() {
     PropagateService.server() //TODO: useless?
     PropagateService.run()
   }
+
+  if (CommandLineHelpers.config.autoqueue != false) {
+    var queueModels = CommandLineHelpers.config.autoqueue.split(',')
+    for (var queueModel in queueModels) {
+      console.log("Running queue model " + queueModels[queueModel])
+      ServiceQueueModel.run(queueModels[queueModel])
+    }
+  }
 }
 
 

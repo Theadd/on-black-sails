@@ -90,7 +90,8 @@ var defaultConfig = {
   'datapath': '.data/',
   'clusterid': -1,
   'removedead': false,
-  'indexfiles': false
+  'indexfiles': false,
+  'autoqueue': false
 }
 
 var services = ['metadata', 'tracker', 'status', 'media', 'propagate']
@@ -245,9 +246,6 @@ exports.usage = function () {
     --indexfiles[=boolean]\n\
       Index torrent filenames from metadata.\n\n";
 }
-
-//  'removedead': false,
-//  'indexfiles': false
 
 var extendObject = function (primary, secondary) {
   secondary = secondary || null
