@@ -59,6 +59,19 @@ module.exports = {
       TrackerService.queue(entry.uuid)
       return true
     }
+  },
+  /** Add items to MediaService which are already downloaded. */
+  emptyMediaQueue: {
+    defaults: {
+      interval: 120000,
+      target: 'status'
+    },
+    getQuery: function() {
+      return Hash.find()
+        .where({downloaded: true, category: ["movies", "video movies"] })
+        .sort('updatedAt ASC')
+        .limit(120)
+    }
   }
 }
 

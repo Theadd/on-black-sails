@@ -71,6 +71,17 @@ module.exports.setup = function() {
         })
     }
   })
+
+  self.on('empty', function() {
+    if (!self._isEmptyBusy) {
+      if (self.config('onempty') != false) {
+        self._isEmptyBusy = true
+        ServiceQueueModel.runOnce(self.config('onempty'), function () {
+          self._isEmptyBusy = false
+        })
+      }
+    }
+  })
 }
 
 module.exports.start = function () {

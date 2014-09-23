@@ -80,7 +80,7 @@ var defaultConfig = {
     'silent': true,
     'host': 'localhost',
     'port': 8013,
-    'onempty': false
+    'onempty': 'emptyMediaQueue'
   },
   'propagate': {
     'active': false,
