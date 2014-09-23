@@ -880,14 +880,22 @@ module.exports.setup = function() {
   var self = this
   self._stats['urls-in-blacklist'] = 0
   self._stats['no-valid-announce'] = 0
+  self._isEmptyBusy = false
 
-  this.on('process', function(item) {
+  self.on('process', function(item) {
     self.updatePeersOf(item)
   })
 
-  //console.log("calling serviceQueueModel")
-  //ServiceQueueModel.runOnce('updatePeersOnRecent')
-  //console.log("calling serviceQueueModel done")
+  self.on('empty', function() {
+    if (!self._isEmptyBusy) {
+      if (self.config('onempty') != false) {
+        self._isEmptyBusy = true
+        ServiceQueueModel.runOnce(self.config('onempty'), function () {
+          self._isEmptyBusy = false
+        })
+      }
+    }
+  })
 }
 
 module.exports.getProperAnnounceUrls = function (trackers) {
