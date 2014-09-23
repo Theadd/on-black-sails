@@ -43,35 +43,9 @@ module.exports.setup = function() {
 
   self.on('empty', function() {
     if (!self._isEmptyBusy) {
-      self._isEmptyBusy = true
-      Hash.find()
-        .where({ downloaded: true })
-        .sort('updatedAt ASC')
-        .where({category: { not: ["movies", "video movies"] } })
-        .limit(60)
-        .exec(function(err, entries) {
-          if (!err && entries.length) {
-            for (var i in entries) {
-              self.queue(entries[i].uuid)
-              TrackerService.queue(entries[i].uuid)
-            }
-            self._isEmptyBusy = false
-          } else {
-            console.log("Unexpected error in StatusService.on('empty')")
-            self._isEmptyBusy = false
-          }
-        })
-    }
-  })
-
-  self.on('empty', function() {
-    console.log("on empty")
-    if (!self._isEmptyBusy) {
-      console.log("\ton empty when not busy")
       if (self.config('onempty') != false) {
         self._isEmptyBusy = true
-        self._emptyStart = new Date().getTime()
-        ServiceQueueModel.runOnce(self.config('onempty'), function (err, msg) {
+        ServiceQueueModel.runOnce(self.config('onempty'), function () {
           self._isEmptyBusy = false
         })
       }
