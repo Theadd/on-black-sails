@@ -71,7 +71,7 @@ var defaultConfig = {
     'silent': true,
     'host': 'localhost',
     'port': 8015,
-    'onempty': false
+    'onempty': 'emptyStatusQueue'
   },
   'media': {
     'active': false,

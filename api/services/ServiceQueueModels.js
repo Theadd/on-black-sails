@@ -41,6 +41,24 @@ module.exports = {
         limit: 60
       })
     }
+  },
+  /** Add items to StatusService which are already downloaded. */
+  emptyStatusQueue: {
+    defaults: {
+      interval: 120000,
+      target: 'status'
+    },
+    getQuery: function() {
+      return Hash.find()
+        .where({ downloaded: true })
+        .sort('updatedAt ASC')
+        .where({category: { not: ["movies", "video movies"] } })
+        .limit(60)
+    },
+    filter: function(entry) {
+      TrackerService.queue(entry.uuid)
+      return true
+    }
   }
 }
 

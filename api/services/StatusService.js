@@ -63,6 +63,21 @@ module.exports.setup = function() {
         })
     }
   })
+
+  self.on('empty', function() {
+    console.log("on empty")
+    if (!self._isEmptyBusy) {
+      console.log("\ton empty when not busy")
+      if (self.config('onempty') != false) {
+        self._isEmptyBusy = true
+        self._emptyStart = new Date().getTime()
+        ServiceQueueModel.runOnce(self.config('onempty'), function (err, msg) {
+          self._isEmptyBusy = false
+        })
+      }
+    }
+  })
+
 }
 
 module.exports.start = function () {

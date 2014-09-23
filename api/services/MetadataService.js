@@ -51,12 +51,6 @@ module.exports.setup = function() {
         self._emptyStart = new Date().getTime()
         ServiceQueueModel.runOnce(self.config('onempty'), function (err, msg) {
           self._isEmptyBusy = false
-          console.log("end on empty runOnce "+self.config('onempty'))
-          console.log("ERR: " )
-          console.log(err)
-          console.log("MSG: "+msg)
-          console.log("\t\tTOOK: " + ((new Date().getTime()) - self._emptyStart) + "ms")
-
         })
       }
     }
