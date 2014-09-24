@@ -880,6 +880,12 @@ module.exports.setup = function() {
   var self = this
   self._stats['urls-in-blacklist'] = 0
   self._stats['no-valid-announce'] = 0
+  self._stats['items-updated'] = 0
+  self._stats['items-update-error'] = 0
+  self._stats['items-dead-removed'] = 0
+  self._stats['items-not-found'] = 0
+  self._stats['items-found'] = 0
+  self._stats['items-received'] = 0
   self._isEmptyBusy = false
 
   self.on('process', function(item) {
@@ -966,7 +972,6 @@ module.exports.registerAnnounceResponse = function (url) {
 
   this.announce[url] = item
   ++this.totalResponses
-  ++this._stats['items-processed']
 }
 
 function ignore(err) {
@@ -976,11 +981,14 @@ function ignore(err) {
 module.exports.updatePeersOf = function(hash) {
   var self = this
 
+  ++self._stats['items-received']
+
   Hash.find()
     .where({ uuid: hash })
     .limit(1)
     .exec(function(err, entries) {
       if (!err && entries.length) {
+        ++self._stats['items-found']
         var peerId = new Buffer('01234567890123456789'),
           port = 6881,
           data = { announce: self.getProperAnnounceUrls(entries[0].trackers), infoHash: entries[0].uuid }
@@ -989,10 +997,12 @@ module.exports.updatePeersOf = function(hash) {
           var client = new TrackerClient(peerId, port, data)
           client.on('error', ignore)
           client.once('update', function (res) {
+            ++self._stats['items-processed']
             self.registerAnnounceResponse(res.announce)
             if (res.complete == 0 && CommandLineHelpers.config.removedead) {
               //Remove dead torrent
               HashHelpers.remove(entries[0].uuid)
+              ++self._stats['items-dead-removed']
             } else {
               Hash.update({ uuid: entries[0].uuid }, {
                 seeders: res.complete,
@@ -1000,15 +1010,25 @@ module.exports.updatePeersOf = function(hash) {
                 updatedAt: entries[0].updatedAt,
                 peersUpdatedAt: new Date(),
                 updatedBy: CommandLineHelpers.config.clusterid
-              }, function (err, hashes) {
-                ++self._stats['items-processed']
+              }, function (uErr, hashes) {
+                if (!uErr) {
+                  ++self._stats['items-updated']
+                } else {
+                  ++self._stats['items-update-error']
+                  console.log("(TRACKER) UPDATE ERROR! " + entries[0].uuid)
+                  console.log(uErr)
+                }
               })
             }
+            client.stop()
+            client = null
           })
           client.update()
-        } else {
-          ++self._stats['items-processed']
         }
+      } else {
+        ++self._stats['items-not-found']
+        console.log("(TRACKER) Item not found! " + hash)
+        console.log(err)
       }
     })
 }

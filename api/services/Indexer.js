@@ -69,6 +69,15 @@ exports.run = function() {
       ServiceQueueModel.run(queueModels[queueModel])
     }
   }
+
+  if (sails.config.command || false) {
+    var targetService = ServiceQueueModel.getTargetService(sails.config.target || 'tracker')
+    targetService.client()
+    setTimeout(function () {
+      console.log("EXECUTING COMMAND " + sails.config.command + " ON " + (sails.config.target || 'tracker'))
+      targetService.exec({name: sails.config.command})
+    }, 2000);
+  }
 }
 
 

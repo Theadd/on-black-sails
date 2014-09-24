@@ -66,7 +66,7 @@ exports.runOnce = function (modelName, cb) {
   }
 }
 
-var getTargetService = function (target) {
+var getTargetService = exports.getTargetService = function (target) {
   var targetService = false
 
   switch (target) {
