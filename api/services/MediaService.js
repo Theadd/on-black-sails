@@ -54,27 +54,6 @@ module.exports.setup = function() {
 
   self.on('empty', function() {
     if (!self._isEmptyBusy) {
-      self._isEmptyBusy = true
-      Hash.find()
-        .where({downloaded: true, category: ["movies", "video movies"] })
-        .sort('updatedAt ASC')
-        .limit(120)
-        .exec(function(err, entries) {
-          if (!err && entries.length) {
-            for (var i in entries) {
-              self.queue(entries[i].uuid)
-            }
-            self._isEmptyBusy = false
-          } else {
-            console.log("Unexpected error in MediaService.on('empty')")
-            self._isEmptyBusy = false
-          }
-        })
-    }
-  })
-
-  self.on('empty', function() {
-    if (!self._isEmptyBusy) {
       if (self.config('onempty') != false) {
         self._isEmptyBusy = true
         ServiceQueueModel.runOnce(self.config('onempty'), function () {
