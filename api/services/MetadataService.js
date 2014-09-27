@@ -70,6 +70,10 @@ module.exports.updateMetadata = function(content) {
     task = self._task,
     dateAdded = content.created || (new Date())
 
+  if (!self.isValidDate(dateAdded)) {
+    dateAdded = new Date()
+  }
+
   //Update Hash model
   Hash.update({ uuid: task.hash },{
     size: Number(content.length),
@@ -120,4 +124,10 @@ module.exports.errorOnUpdateMetadata = function(error) {
       console.log(err)
     }
   })
+}
+
+module.exports.isValidDate = function(d) {
+  if ( Object.prototype.toString.call(d) !== "[object Date]" )
+    return false
+  return !isNaN(d.getTime())
 }
