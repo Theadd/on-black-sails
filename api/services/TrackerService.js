@@ -890,6 +890,7 @@ module.exports.setup = function() {
   self._stats['items-retry'] = 0
   self._stats['items-retry-fail'] = 0
   self._stats['working-pool-size'] = 0
+  self._stats['items-dead-retry'] = 0
   self._isEmptyBusy = false
   self._workingPool = []
   self._retriesPool = []
@@ -1009,8 +1010,13 @@ module.exports.updatePeersOf = function(hash) {
             self.registerAnnounceResponse(res.announce)
             if (res.complete == 0 && CommandLineHelpers.config.removedead) {
               //Remove dead torrent
-              HashHelpers.remove(entries[0].uuid)
-              ++self._stats['items-dead-removed']
+              if (self._processRetryAttempt(entries[0].uuid)) {
+                ++self._stats['items-dead-retry']
+                self.queue(entries[0].uuid, true, true)
+              } else {
+                HashHelpers.remove(entries[0].uuid)
+                ++self._stats['items-dead-removed']
+              }
             } else {
               Hash.update({ uuid: entries[0].uuid }, {
                 seeders: res.complete,
