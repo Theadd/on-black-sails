@@ -872,7 +872,8 @@ module.exports.setup = function() {
     'silent': CommandLineHelpers.config.tracker.silent,
     'networkHost': CommandLineHelpers.config.tracker.host,
     'networkPort': CommandLineHelpers.config.tracker.port,
-    'path': CommandLineHelpers.config.datapath
+    'path': CommandLineHelpers.config.datapath,
+    'onempty': CommandLineHelpers.config.tracker.onempty
   })
 
   this.totalResponses = 0
@@ -887,6 +888,7 @@ module.exports.setup = function() {
   self._stats['items-found'] = 0
   self._stats['items-received'] = 0
   self._isEmptyBusy = false
+  self._workingPool = []
 
   self.on('process', function(item) {
     self.updatePeersOf(item)
@@ -994,10 +996,12 @@ module.exports.updatePeersOf = function(hash) {
           data = { announce: self.getProperAnnounceUrls(entries[0].trackers), infoHash: entries[0].uuid }
 
         if (data.announce.length) {
+          self._addToWorkingPool(entries[0].uuid)
           var client = new TrackerClient(peerId, port, data)
           client.on('error', ignore)
           client.once('update', function (res) {
             ++self._stats['items-processed']
+            self._removeFromWorkingPool(entries[0].uuid)
             self.registerAnnounceResponse(res.announce)
             if (res.complete == 0 && CommandLineHelpers.config.removedead) {
               //Remove dead torrent
@@ -1051,4 +1055,33 @@ module.exports.isInBlacklist = function(url) {
     }
   }
   return blacklisted
+}
+
+module.exports._addToWorkingPool = function(uuid) {
+  var self = this, index = self._workingPool.indexOf(uuid);
+
+  if (index == -1) {
+    self._workingPool.unshift(uuid)
+    if (self._workingPool.length > 6) {
+      var retry = self._workingPool.splice(-3)
+      for (var i in retry) {
+        console.log("(TRACKER) RETRY: " + retry[i])
+        self.queue(retry[i], false, true)
+      }
+    }
+    self._stats['working-pool'] = self._workingPool.length
+  } else {
+    console.log("\t(TRACKER) ALREADY PRESENT IN WORKING POOL! " + uuid)
+  }
+
+}
+
+
+module.exports._removeFromWorkingPool = function(uuid) {
+  var self = this, index = self._workingPool.indexOf(uuid);
+
+  if (index > -1) {
+    self._workingPool.splice(index, 1);
+    self._stats['working-pool'] = self._workingPool.length
+  }
 }

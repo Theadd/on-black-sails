@@ -17,7 +17,8 @@ module.exports.setup = function() {
     'silent': CommandLineHelpers.config.media.silent,
     'networkHost': CommandLineHelpers.config.media.host,
     'networkPort': CommandLineHelpers.config.media.port,
-    'path': CommandLineHelpers.config.datapath
+    'path': CommandLineHelpers.config.datapath,
+    'onempty': CommandLineHelpers.config.media.onempty
   })
 
   self._isEmptyBusy = false
