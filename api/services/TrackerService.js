@@ -887,8 +887,12 @@ module.exports.setup = function() {
   self._stats['items-not-found'] = 0
   self._stats['items-found'] = 0
   self._stats['items-received'] = 0
+  self._stats['items-retry'] = 0
+  self._stats['items-retry-fail'] = 0
+  self._stats['working-pool-size'] = 0
   self._isEmptyBusy = false
   self._workingPool = []
+  self._retriesPool = []
 
   self.on('process', function(item) {
     self.updatePeersOf(item)
@@ -1058,30 +1062,45 @@ module.exports.isInBlacklist = function(url) {
 }
 
 module.exports._addToWorkingPool = function(uuid) {
-  var self = this, index = self._workingPool.indexOf(uuid);
+  var self = this, index = self._workingPool.indexOf(uuid)
 
   if (index == -1) {
     self._workingPool.unshift(uuid)
-    if (self._workingPool.length > 6) {
-      var retry = self._workingPool.splice(-3)
+    if (self._workingPool.length > 20) {
+      var retry = self._workingPool.splice(-10)
       for (var i in retry) {
-        console.log("(TRACKER) RETRY: " + retry[i])
-        self.queue(retry[i], false, true)
+        if (self._processRetryAttempt(retry[i])) {
+          ++self._stats['items-retry']
+          self.queue(retry[i], false, true)
+        } else {
+          ++self._stats['items-retry-fail']
+        }
       }
     }
-    self._stats['working-pool'] = self._workingPool.length
-  } else {
-    console.log("\t(TRACKER) ALREADY PRESENT IN WORKING POOL! " + uuid)
+    self._stats['working-pool-size'] = self._workingPool.length
   }
-
 }
 
-
 module.exports._removeFromWorkingPool = function(uuid) {
-  var self = this, index = self._workingPool.indexOf(uuid);
+  var self = this, index = self._workingPool.indexOf(uuid)
 
   if (index > -1) {
-    self._workingPool.splice(index, 1);
-    self._stats['working-pool'] = self._workingPool.length
+    self._workingPool.splice(index, 1)
+    self._stats['working-pool-size'] = self._workingPool.length
   }
+}
+
+module.exports._processRetryAttempt = function(uuid) {
+  var self = this, index = self._retriesPool.indexOf(uuid), valid = true
+
+  if (index > -1) {
+    self._retriesPool.splice(index, 1)
+    valid = false
+  } else {
+    if (self._retriesPool.unshift(uuid) >= 120) {
+      self._retriesPool.splice(-40)
+    }
+  }
+
+  return valid
 }
