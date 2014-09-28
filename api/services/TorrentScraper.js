@@ -31,7 +31,8 @@ function Scraper (hash, announce, opts, cb) {
 
   self._scraperTimeout = function () {
     var results = getReliablePeers(self._results)
-    if ((results == false || results.length < Math.min(Math.ceil(self._announce / 2), 5)) && self._availableRetries > 0) {
+    //  >>> C9B262D13650D0D1CA8AD077F8216641202D2B2D	0/0 (0) - 0 #1/7
+    if ((results == false || self._results.length < Math.min(Math.ceil(self._announce.length / 2), 5)) && self._availableRetries > 0) {
       --self._availableRetries
       self.__timer = setTimeout( self._scraperTimeout, self._opts.interval)
     } else {
