@@ -4,6 +4,7 @@
 
 var extend = require('util')._extend
 var BittorrentTracker = require('bittorrent-tracker')
+var _scrapeRequests = {}, _scrapeResponses = {}
 
 module.exports = Scraper
 
@@ -22,8 +23,10 @@ function Scraper (hash, announce, opts, cb) {
   self._availableRetries = self._opts.maxRetries
 
   self._announce.forEach(function (url) {
+    registerScrapeRequest(url)
     BittorrentTracker.scrape(url, self._hash, function(err, res) {
       if (!err) {
+        registerScrapeResponse(url)
         self._results.push(res)
       }
     })
@@ -71,4 +74,24 @@ var getReliablePeers = function (results) {
   }
 
   return (index != -1) ? peers : false
+}
+
+var registerScrapeRequest = function (url) {
+  if (typeof _scrapeRequests[url] !== "undefined") {
+    ++_scrapeRequests[url]
+  } else {
+    _scrapeRequests[url] = 1
+  }
+}
+
+var registerScrapeResponse = function (url) {
+  if (typeof _scrapeResponses[url] !== "undefined") {
+    ++_scrapeResponses[url]
+  } else {
+    _scrapeResponses[url] = 1
+  }
+}
+
+module.exports.getActivity = function () {
+  return {requests: _scrapeRequests, responses: _scrapeResponses}
 }

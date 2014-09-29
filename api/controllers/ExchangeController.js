@@ -189,13 +189,17 @@ module.exports = {
    * FIXME: Wrong place
    */
   stats: function (req, res) {
-    var output = {}
+    var output = {},
+      extended = Boolean(req.param('extended'))
+
     output['MetadataService'] = MetadataService.getStats()
     output['MediaService'] = MediaService.getStats()
     output['StatusService'] = StatusService.getStats()
     output['TrackerService'] = TrackerService.getStats()
+    if (extended) {
+      output['TorrentScraper'] = TorrentScraper.getActivity()
+    }
     output['PropagateService'] = PropagateService.getStats()
-    //console.log(JSON.stringify(output, null, '  '))
     res.json({
       output: output
     })
