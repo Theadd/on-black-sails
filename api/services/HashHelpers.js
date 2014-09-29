@@ -90,6 +90,9 @@ var blacklistPatterns = [
   'torrage.com',
   'zoink.it',
   '/scrape',
+// protocols
+  'dht://',
+  'https://',
 // TPB
   'thepiratebay',
   'piratebay.',

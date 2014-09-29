@@ -67,10 +67,6 @@ module.exports.getProperAnnounceUrls = function (trackers) {
     }
   }
 
-  if (announceUrls.length == 0) {
-    ++self._stats['no-valid-announce']
-  }
-
   return announceUrls
 }
 
@@ -82,40 +78,44 @@ module.exports.updatePeersOf = function(hash) {
     .limit(1)
     .exec(function(err, entries) {
       if (!err && entries.length) {
-        ++self._stats['working-pool-size']
         var announceUrls = self.getProperAnnounceUrls(entries[0].trackers)
-        new TorrentScraper(entries[0].uuid, announceUrls, null, function (err, res) {
-          ++self._stats['items-processed']
-          --self._stats['working-pool-size']
-          if (!err) {
-            console.log("  >>> " + entries[0].uuid + "\t" + res.complete + "/" + res.incomplete + " (" + res.downloaded + ") - " + res.retries + " #" + res.responses + "/" + res.announces)
-            if (res.complete == 0 && res.incomplete == 0 && CommandLineHelpers.config.removedead) {
-              HashHelpers.remove(entries[0].uuid)
-              ++self._stats['items-dead-removed']
+        if (announceUrls.length) {
+          ++self._stats['working-pool-size']
+          new TorrentScraper(entries[0].uuid, announceUrls, null, function (err, res) {
+            ++self._stats['items-processed']
+            --self._stats['working-pool-size']
+            if (!err) {
+              console.log("  >>> " + entries[0].uuid + "\t" + res.complete + "/" + res.incomplete + " (" + res.downloaded + ") - " + res.retries + " #" + res.responses + "/" + res.announces)
+              if (res.complete == 0 && res.incomplete == 0 && CommandLineHelpers.config.removedead) {
+                HashHelpers.remove(entries[0].uuid)
+                ++self._stats['items-dead-removed']
+              } else {
+                Hash.update({ uuid: entries[0].uuid }, {
+                  seeders: res.complete,
+                  leechers: res.incomplete,
+                  updatedAt: entries[0].updatedAt,
+                  peersUpdatedAt: new Date(),
+                  updatedBy: CommandLineHelpers.config.clusterid
+                }, function (uErr, hashes) {
+                  if (!uErr) {
+                    ++self._stats['items-updated']
+                  } else {
+                    ++self._stats['items-update-error']
+                    console.log("(TRACKER) UPDATE ERROR! " + entries[0].uuid)
+                    console.log(uErr)
+                  }
+                })
+              }
             } else {
-              Hash.update({ uuid: entries[0].uuid }, {
-                seeders: res.complete,
-                leechers: res.incomplete,
-                updatedAt: entries[0].updatedAt,
-                peersUpdatedAt: new Date(),
-                updatedBy: CommandLineHelpers.config.clusterid
-              }, function (uErr, hashes) {
-                if (!uErr) {
-                  ++self._stats['items-updated']
-                } else {
-                  ++self._stats['items-update-error']
-                  console.log("(TRACKER) UPDATE ERROR! " + entries[0].uuid)
-                  console.log(uErr)
-                }
-              })
+              console.log("\t\tERROR >>> " + entries[0].uuid + " > #" + announceUrls.length)
+              console.log(announceUrls)
+              ++self._stats['items-retry-fail']
             }
-          } else {
-            console.log("\t\tERROR >>> " + entries[0].uuid + " > #" + announceUrls.length)
-            console.log(announceUrls)
-            ++self._stats['items-retry-fail']
-          }
 
-        })
+          })
+        } else {
+          ++self._stats['no-valid-announce']
+        }
       } else {
         ++self._stats['items-not-found']
         console.log("(TRACKER) Item not found! " + hash)

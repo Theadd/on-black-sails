@@ -17,7 +17,7 @@ function Scraper (hash, announce, opts, cb) {
   self._opts = extend({
     interval: 800,
     getAll: false,
-    maxRetries: 5
+    maxRetries: 3
   }, opts)
   self._availableRetries = self._opts.maxRetries
 
@@ -31,10 +31,10 @@ function Scraper (hash, announce, opts, cb) {
 
   self._scraperTimeout = function () {
     var results = getReliablePeers(self._results)
-    //  >>> C9B262D13650D0D1CA8AD077F8216641202D2B2D	0/0 (0) - 0 #1/7
+    clearTimeout(self._timer)
     if ((results == false || self._results.length < Math.min(Math.ceil(self._announce.length / 2), 5)) && self._availableRetries > 0) {
       --self._availableRetries
-      self.__timer = setTimeout( self._scraperTimeout, self._opts.interval)
+      self._timer = setTimeout( self._scraperTimeout, self._opts.interval)
     } else {
       if (results != false) {
         results.retries = self._opts.maxRetries - self._availableRetries
