@@ -78,7 +78,7 @@ exports.isValidAnnounceURL = function(url) {
       break
     }
   }
-  return blacklisted
+  return !blacklisted
 }
 
 /** Blacklist patterns for announce urls.

@@ -59,7 +59,7 @@ module.exports.getProperAnnounceUrls = function (trackers) {
   for (var i in trackers) {
     var tracker_i = trackers[i].toLowerCase()
     if (tracker_i.indexOf('dht://') == -1 && tracker_i.indexOf('https://') == -1) {
-      if (!HashHelpers.isValidAnnounceURL(tracker_i)) {
+      if (HashHelpers.isValidAnnounceURL(tracker_i)) {
         announceUrls.push(tracker_i)
       } else {
         ++self._stats['urls-in-blacklist']
