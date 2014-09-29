@@ -129,5 +129,7 @@ module.exports.errorOnUpdateMetadata = function(error) {
 module.exports.isValidDate = function(d) {
   if ( Object.prototype.toString.call(d) !== "[object Date]" )
     return false
-  return !isNaN(d.getTime())
+  if (!isNaN(d.getTime())) {
+    return (d.getTime() <= (new Date().getTime()))
+  } else return false
 }
