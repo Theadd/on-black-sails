@@ -2,8 +2,7 @@
  * Created by Theadd on 7/26/14.
  */
 
-var TrackerClient = require('bittorrent-tracker')
-var rawAnnounceItem = {'requests': 0, 'responses': 0, 'timeouts': 0, 'last-request': new Date().getTime() }
+var TrackerClient = require('bittorrent-tracker-scrape')
 
 module.exports = new (require('ipc-service').Service)()
 
@@ -38,6 +37,13 @@ module.exports.setup = function() {
   self._retriesPool = []
 
   self.on('process', function(item) {
+    if (self._stats['items-served'] % 50 == 0) {
+      try {
+        global.gc()
+      } catch (e) {
+        console.error("Restart this process enabling garbage collection: \"node --expose-gc app.js ...\"")
+      }
+    }
     self.updatePeersOf(item)
   })
 
@@ -53,23 +59,6 @@ module.exports.setup = function() {
   })
 }
 
-module.exports.getProperAnnounceUrls = function (trackers) {
-  var announceUrls = [], self = this
-
-  for (var i in trackers) {
-    var tracker_i = trackers[i].toLowerCase()
-    if (tracker_i.indexOf('dht://') == -1 && tracker_i.indexOf('https://') == -1) {
-      if (HashHelpers.isValidAnnounceURL(tracker_i)) {
-        announceUrls.push(tracker_i)
-      } else {
-        ++self._stats['urls-in-blacklist']
-      }
-    }
-  }
-
-  return announceUrls
-}
-
 module.exports.updatePeersOf = function(hash) {
   var self = this
 
@@ -78,10 +67,14 @@ module.exports.updatePeersOf = function(hash) {
     .limit(1)
     .exec(function(err, entries) {
       if (!err && entries.length) {
-        var announceUrls = self.getProperAnnounceUrls(entries[0].trackers)
-        if (announceUrls.length) {
+
+        if (entries[0].trackers.length) {
           ++self._stats['working-pool-size']
-          new TorrentScraper(entries[0].uuid, announceUrls, null, function (err, res) {
+
+          var client = new TrackerClient(hash, entries[0].trackers)
+          client.sanitize()
+
+          client.request(function (err, res) {
             ++self._stats['items-processed']
             --self._stats['working-pool-size']
             if (!err) {
@@ -107,8 +100,8 @@ module.exports.updatePeersOf = function(hash) {
                 })
               }
             } else {
-              console.log("\t\tERROR >>> " + entries[0].uuid + " > #" + announceUrls.length)
-              console.log(announceUrls)
+              console.log("\t\tERROR >>> " + entries[0].uuid)
+              console.log(client.getAnnounce())
               ++self._stats['items-retry-fail']
             }
 

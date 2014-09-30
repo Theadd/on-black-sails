@@ -197,7 +197,7 @@ module.exports = {
     output['StatusService'] = StatusService.getStats()
     output['TrackerService'] = TrackerService.getStats()
     if (extended) {
-      output['TorrentScraper'] = TorrentScraper.getActivity()
+      //output['TorrentScraper'] = TorrentScraper.getActivity()
     }
     output['PropagateService'] = PropagateService.getStats()
     res.json({
