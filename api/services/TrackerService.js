@@ -32,6 +32,7 @@ module.exports.setup = function() {
   self._stats['items-not-found'] = 0
   self._stats['items-retry-fail'] = 0
   self._stats['working-pool-size'] = 0
+  self._stats['force-idle'] = 0
   self._isEmptyBusy = false
   self._workingPool = []
   self._retriesPool = []
@@ -44,7 +45,12 @@ module.exports.setup = function() {
         console.error("Restart this process enabling garbage collection: \"node --expose-gc app.js ...\"")
       }
     }
-    self.updatePeersOf(item)
+    if (self._stats['working-pool-size'] >= 10) {
+      ++self._stats['force-idle']
+      self.queue(item, true, true)
+    } else {
+      self.updatePeersOf(item)
+    }
   })
 
   self.on('empty', function() {
