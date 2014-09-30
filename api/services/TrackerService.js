@@ -45,7 +45,7 @@ module.exports.setup = function() {
         console.error("Restart this process enabling garbage collection: \"node --expose-gc app.js ...\"")
       }
     }
-    if (self._stats['working-pool-size'] >= 10) {
+    if (self._stats['working-pool-size'] >= 5) {
       ++self._stats['force-idle']
       self.queue(item, true, true)
     } else {
@@ -84,7 +84,7 @@ module.exports.updatePeersOf = function(hash) {
             ++self._stats['items-processed']
             --self._stats['working-pool-size']
             if (!err) {
-              console.log("  >>> " + entries[0].uuid + "\t" + res.complete + "/" + res.incomplete + " (" + res.downloaded + ") - " + res.retries + " #" + res.responses + "/" + res.announces)
+              //console.log("  >>> " + entries[0].uuid + "\t" + res.complete + "/" + res.incomplete + " (" + res.downloaded + ") - " + res.retries + " #" + res.responses + "/" + res.announces)
               if (res.complete == 0 && res.incomplete == 0 && CommandLineHelpers.config.removedead) {
                 HashHelpers.remove(entries[0].uuid)
                 ++self._stats['items-dead-removed']
@@ -106,8 +106,8 @@ module.exports.updatePeersOf = function(hash) {
                 })
               }
             } else {
-              console.log("\t\tERROR >>> " + entries[0].uuid)
-              console.log(client.getAnnounce())
+              //console.log("\t\tERROR >>> " + entries[0].uuid)
+              //console.log(client.getAnnounce())
               ++self._stats['items-retry-fail']
             }
 

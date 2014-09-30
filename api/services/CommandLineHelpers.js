@@ -57,7 +57,7 @@ var defaultConfig = {
   },
   'tracker': {
     'active': false,
-    'interval': 200,
+    'interval': 350,  //200,
     'retry': 5000,
     'silent': true,
     'host': 'localhost',
