@@ -74,19 +74,10 @@ module.exports.updateMetadata = function(content) {
     dateAdded = new Date()
   }
 
-  var announceUrls = []
-  if (Array.isArray(content.announce)) {
-    for (var iUrl in content.announce) {
-      if (HashHelpers.isValidAnnounceURL(content.announce[iUrl])) {
-        announceUrls.push(content.announce[iUrl])
-      }
-    }
-  }
-
   //Update Hash model
   Hash.update({ uuid: task.hash },{
     size: Number(content.length),
-    trackers: announceUrls,
+    trackers: content.announce,
     files: content.files.length,
     downloaded: true,
     added: dateAdded
