@@ -2,6 +2,8 @@
  * Created by Theadd on 11/09/2014.
  */
 
+var deadTorrentsPool = []
+
 var isMostUpdated = exports.isMostUpdated = function (existing, received) {
   var mostUpdated = false
 
@@ -26,7 +28,7 @@ exports.merge = function (item) {
     .exec(function (err, entries) {
       if (!err && entries.length) {
         if (isMostUpdated(entries[0], item)) {
-          if (CommandLineHelpers.config.removedead && item.seeders == 0) {
+          if (CommandLineHelpers.config.removedead && item.seeders == 0 && item.leechers == 0) {
             //Remove dead torrent
             HashHelpers.remove(entries[0].uuid)
           } else {
@@ -63,9 +65,35 @@ exports.merge = function (item) {
 }
 
 exports.remove = function (uuid) {
-  console.log("REMOVE: " + uuid)
-  Hash.destroy({ uuid: uuid }).exec(function(err) {
-    if (err) {
-    }
+  process.nextTick(function () {
+    Hash.find()
+      .where({ uuid: uuid })
+      .exec(function (err, entries) {
+        if (!err && entries.length) {
+          if (entries[0].seeders == 0 && entries[0].leechers == 0) {
+            //torrent already dead, delete
+            console.log("REMOVING: " + uuid)
+            Hash.destroy({ uuid: uuid }).exec(function() {})
+          } else {
+            //torrent was not dead last check
+            var index = deadTorrentsPool.indexOf(uuid)
+            if (index == -1) {
+              //seems dead for first time, recheck before remove
+              if (deadTorrentsPool.unshift(uuid) >= 500) {
+                deadTorrentsPool.splice(-50)
+              }
+              console.log("RECHECK BEFORE REMOVING: " + uuid)
+              TrackerService.queue(uuid, true, true)
+            } else {
+              //recheck also returns dead, remove from dead pool and database
+              console.log("REMOVING (After recheck): " + uuid)
+              deadTorrentsPool.splice(index, 1)
+              Hash.destroy({ uuid: uuid }).exec(function() {})
+            }
+          }
+        } else {
+          //torrent not found, no remove needed
+        }
+      })
   })
 }
