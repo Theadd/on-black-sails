@@ -63,6 +63,7 @@ exports.merge = function (item) {
 }
 
 exports.remove = function (uuid) {
+  console.log("REMOVE: " + uuid)
   Hash.destroy({ uuid: uuid }).exec(function(err) {
     if (err) {
     }
