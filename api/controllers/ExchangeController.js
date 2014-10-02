@@ -186,7 +186,6 @@ module.exports = {
 
   /**
    * ExchangeController.stats()
-   * FIXME: Wrong place
    */
   stats: function (req, res) {
     var output = {},
@@ -196,10 +195,13 @@ module.exports = {
     output['MediaService'] = MediaService.getStats()
     output['StatusService'] = StatusService.getStats()
     output['TrackerService'] = TrackerService.getStats()
+    output['PropagateService'] = PropagateService.getStats()
     if (extended) {
       //output['TorrentScraper'] = TorrentScraper.getActivity()
+      output['PID'] = process.pid
+      var util = require('util')
+      output['MEM'] = util.inspect(process.memoryUsage())
     }
-    output['PropagateService'] = PropagateService.getStats()
     res.json({
       output: output
     })
