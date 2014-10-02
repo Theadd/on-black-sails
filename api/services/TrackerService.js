@@ -8,8 +8,8 @@ module.exports = new (require('ipc-service').Service)()
 
 module.exports.setup = function() {
   this.config({
-    'recentPoolMaxSize': 750,
-    'poolMinSize': -1,
+    'recentPoolMaxSize': 2500,
+    'poolMinSize': 10,
     'runInterval': CommandLineHelpers.config.tracker.interval,
     'appspace': 'onblacksails.',
     'id': 'tracker',
@@ -25,7 +25,6 @@ module.exports.setup = function() {
   this.announce = []
   var self = this
   self._stats['urls-in-blacklist'] = 0
-  self._stats['no-valid-announce'] = 0
   self._stats['items-updated'] = 0
   self._stats['items-update-error'] = 0
   self._stats['items-dead-removed'] = 0
@@ -73,48 +72,44 @@ module.exports.updatePeersOf = function(hash) {
     .limit(1)
     .exec(function(err, entries) {
       if (!err && entries.length) {
+        ++self._stats['working-pool-size']
 
-        if (entries[0].trackers.length) {
-          ++self._stats['working-pool-size']
+        var client = new TrackerClient(hash, entries[0].trackers)
+        client.sanitize()
 
-          var client = new TrackerClient(hash, entries[0].trackers)
-          client.sanitize()
-
-          client.request(function (err, res) {
-            ++self._stats['items-processed']
-            --self._stats['working-pool-size']
-            if (!err) {
-              //console.log("  >>> " + entries[0].uuid + "\t" + res.complete + "/" + res.incomplete + " (" + res.downloaded + ") - " + res.retries + " #" + res.responses + "/" + res.announces)
-              if (res.complete == 0 && res.incomplete == 0 && CommandLineHelpers.config.removedead) {
-                HashHelpers.remove(entries[0].uuid)
-                ++self._stats['items-dead-removed']
-              } else {
-                Hash.update({ uuid: entries[0].uuid }, {
-                  seeders: res.complete,
-                  leechers: res.incomplete,
-                  updatedAt: entries[0].updatedAt,
-                  peersUpdatedAt: new Date(),
-                  updatedBy: CommandLineHelpers.config.clusterid
-                }, function (uErr, hashes) {
-                  if (!uErr) {
-                    ++self._stats['items-updated']
-                  } else {
-                    ++self._stats['items-update-error']
-                    console.log("(TRACKER) UPDATE ERROR! " + entries[0].uuid)
-                    console.log(uErr)
-                  }
-                })
-              }
+        client.request(function (err, res) {
+          ++self._stats['items-processed']
+          --self._stats['working-pool-size']
+          if (!err) {
+            //console.log("  >>> " + entries[0].uuid + "\t" + res.complete + "/" + res.incomplete + " (" + res.downloaded + ") - " + res.retries + " #" + res.responses + "/" + res.announces)
+            if (res.complete == 0 && res.incomplete == 0 && CommandLineHelpers.config.removedead) {
+              HashHelpers.remove(entries[0].uuid)
+              ++self._stats['items-dead-removed']
             } else {
-              //console.log("\t\tERROR >>> " + entries[0].uuid)
-              //console.log(client.getAnnounce())
-              ++self._stats['items-retry-fail']
+              Hash.update({ uuid: entries[0].uuid }, {
+                seeders: res.complete,
+                leechers: res.incomplete,
+                updatedAt: entries[0].updatedAt,
+                peersUpdatedAt: new Date(),
+                updatedBy: CommandLineHelpers.config.clusterid
+              }, function (uErr, hashes) {
+                if (!uErr) {
+                  ++self._stats['items-updated']
+                } else {
+                  ++self._stats['items-update-error']
+                  console.log("(TRACKER) UPDATE ERROR! " + entries[0].uuid)
+                  console.log(uErr)
+                }
+              })
             }
+          } else {
+            //console.log("\t\tERROR >>> " + entries[0].uuid)
+            //console.log(client.getAnnounce())
+            ++self._stats['items-retry-fail']
+          }
 
-          })
-        } else {
-          ++self._stats['no-valid-announce']
-        }
+        })
+
       } else {
         ++self._stats['items-not-found']
         console.log("(TRACKER) Item not found! " + hash)
