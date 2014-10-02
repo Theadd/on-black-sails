@@ -8,7 +8,7 @@ module.exports = new (require('ipc-service').Service)()
 
 module.exports.setup = function() {
   this.config({
-    'recentPoolMaxSize': 250,
+    'recentPoolMaxSize': 750,
     'poolMinSize': -1,
     'runInterval': CommandLineHelpers.config.tracker.interval,
     'appspace': 'onblacksails.',
