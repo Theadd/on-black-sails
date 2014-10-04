@@ -35,13 +35,6 @@ module.exports.setup = function() {
   self._retriesPool = []
 
   self.on('process', function(item) {
-    if (self._stats['items-served'] % 50 == 0) {
-      try {
-        global.gc()
-      } catch (e) {
-        console.error("Restart this process enabling garbage collection: \"node --expose-gc app.js ...\"")
-      }
-    }
     if (self._stats['working-pool-size'] >= 5) {
       ++self._stats['force-idle']
       self.queue(item, true, true)

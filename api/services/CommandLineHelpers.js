@@ -96,7 +96,8 @@ var defaultConfig = {
   'clusterid': -1,
   'removedead': false,
   'indexfiles': false,
-  'autoqueue': false
+  'autoqueue': false,
+  'autogc': false
 }
 
 var services = ['metadata', 'tracker', 'status', 'media', 'propagate']
