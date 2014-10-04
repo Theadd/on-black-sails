@@ -21,8 +21,6 @@ module.exports.setup = function() {
     'onempty': CommandLineHelpers.config.tracker.onempty
   })
 
-  this.totalResponses = 0
-  this.announce = []
   var self = this
   self._stats['urls-in-blacklist'] = 0
   self._stats['items-updated'] = 0
@@ -74,10 +72,7 @@ module.exports.updatePeersOf = function(hash) {
       if (!err && entries.length) {
         ++self._stats['working-pool-size']
 
-        var client = new TrackerClient(hash, entries[0].trackers)
-        client.sanitize()
-
-        client.request(function (err, res) {
+        new TrackerClient(hash, entries[0].trackers, {}, function (err, res) {
           ++self._stats['items-processed']
           --self._stats['working-pool-size']
           if (!err) {
@@ -107,9 +102,7 @@ module.exports.updatePeersOf = function(hash) {
             //console.log(client.getAnnounce())
             ++self._stats['items-retry-fail']
           }
-
         })
-
       } else {
         ++self._stats['items-not-found']
         console.log("(TRACKER) Item not found! " + hash)
@@ -117,4 +110,3 @@ module.exports.updatePeersOf = function(hash) {
       }
     })
 }
-
