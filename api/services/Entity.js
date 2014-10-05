@@ -52,12 +52,30 @@ module.exports.deploy = function() {
   }
 }
 
+EntityObject.prototype.addLinkedEntity = function (name, config) {
+  LinkedEntity.create({name: name, config: config}).exec(function(err, entry) {
+    if (!err) {
+      console.log("\n[addLinkedEntity]\tADDED! " + entry.name + ", enabled: " + entry.enabled)
+    } else {
+      console.log(err)
+    }
+  })
+}
+
 EntityObject.prototype.spawnChildProcesses = function () {
   var self = this
 
-  //self._spawnChildProcessQueue.push(config)
-
-  self.spawnNextChildProcess()
+  LinkedEntity.find({enabled: true}).exec(function(err, entries) {
+    if (!err && entries.length) {
+      for (var i in entries) {
+        entries[i].config['name'] = entries[i].name
+        self._spawnChildProcessQueue.push(entries[i].config)
+      }
+      self.spawnNextChildProcess()
+    } else {
+      console.error("No linked entities found!")
+    }
+  })
 }
 
 EntityObject.prototype.spawnNextChildProcess = function () {
@@ -140,7 +158,6 @@ EntityObject.prototype.handleMessageOnWorker = function (msg) {
         console.log("MSG configure")
         self.config = extend(self.config, msg.val)
         CommandLineHelpers.config = extend(CommandLineHelpers.config, self.config)  //TODO: refactoring
-        console.log(self.config)
         process.send({ cmd: 'configured', id: self.id })
         break
       case 'run':
