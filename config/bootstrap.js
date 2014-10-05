@@ -10,12 +10,11 @@
  */
 
 module.exports.bootstrap = function(cb) {
-  var later = require('later');
-
-  later.setTimeout(Indexer.run, later.parse.text('every 1 sec'));
+  Entity.deploy()
 
   // It's very important to trigger this callack method when you are finished
   // with the bootstrap!  (otherwise your server will never lift, since it's waiting on the bootstrap)
+  //TODO: Set online = false in public entity only
   User.update({}, {
       online: false
     },
@@ -29,3 +28,5 @@ module.exports.bootstrap = function(cb) {
     }
   )
 };
+
+

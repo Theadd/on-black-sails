@@ -5,15 +5,6 @@
 var Task = require('tasker').Task
 
 exports.run = function() {
-  var os = require('os')
-  sails.config['platform'] = os.platform()
-
-
-  CommandLineHelpers.process()
-  if (CommandLineHelpers.config.clusterid == -1 || typeof CommandLineHelpers.config.clusterid !== "number") {
-    console.log(CommandLineHelpers.usage())
-    process.exit();
-  }
 
   TrackerService.setup()
   MetadataService.setup()

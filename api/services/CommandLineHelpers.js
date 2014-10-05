@@ -102,6 +102,7 @@ var defaultConfig = {
 
 var services = ['metadata', 'tracker', 'status', 'media', 'propagate']
 var serviceOverwrites = ['retry', 'interval', 'silent']
+var unlistedParameters = ['master']
 
 var commandLineParameters = {}
 var config = exports.config = {}
@@ -165,7 +166,9 @@ exports.process = function () {
           }
         }
       } catch (err) {
-        console.warn("Unrecognized parameter: " + parametersLeft[j])
+        if (unlistedParameters.indexOf(parametersLeft[j]) == -1) {
+          console.warn("Unrecognized parameter: " + parametersLeft[j])
+        }
       }
     }
   }
