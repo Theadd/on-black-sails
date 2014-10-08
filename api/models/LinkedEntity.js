@@ -20,6 +20,16 @@ module.exports = {
     enabled: {
       type: 'boolean',
       defaultsTo: true
+    },
+
+    respawn: {
+      type: 'boolean',
+      defaultsTo: true
+    },
+
+    port: {
+      type: 'integer',
+      required: true
     }
 
   }

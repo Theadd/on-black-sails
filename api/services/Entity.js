@@ -30,9 +30,17 @@ module.exports.deploy = function() {
     if (Boolean(sails.config.master)) {
       //Standalone process able to fork linked entities (MASTER)
       self.isMaster = true
+      cluster.on('exit', function(worker, code, signal) {
+        sails.log.error("Worker " + worker.config.name + " <" + worker.process.pid + "> died (" + (signal || code) + ")")
+        if (worker.config.enabled && worker.config.respawn) {
+          sails.log.debug("Restarting worker " + worker.config.name + " <" + worker.process.pid + ">")
+          self.spawnChildProcessByName(worker.config.name, true)
+        }
+      })
       process.nextTick(function () {
         self.spawnChildProcesses()
       })
+
     } else {
       //Standalone process NOT in linked entities (MASTER)
       if (CommandLineHelpers.config.clusterid == -1 || typeof CommandLineHelpers.config.clusterid !== "number") {
@@ -52,14 +60,28 @@ module.exports.deploy = function() {
   }
 }
 
-EntityObject.prototype.addLinkedEntity = function (name, config) {
-  LinkedEntity.create({name: name, config: config}).exec(function(err, entry) {
-    if (!err) {
-      console.log("\n[addLinkedEntity]\tADDED! " + entry.name + ", enabled: " + entry.enabled)
-    } else {
-      console.log(err)
+EntityObject.prototype.addLinkedEntity = function (name, config, port, enabled, respawn) {
+  try {
+    if (typeof config === "string") {
+      var fs = require('fs'),
+        data = fs.readFileSync(config)
+
+      config = JSON.parse(data)
     }
-  })
+    port = (port || config.port || 1338)
+    enabled = (typeof enabled !== "undefined") ? enabled : true
+    respawn = (typeof respawn !== "undefined") ? respawn : true
+
+    LinkedEntity.create({name: name, config: config, enabled: enabled, respawn: respawn, port: port}).exec(function (err, entry) {
+      if (!err) {
+        console.log("\n[addLinkedEntity]\tADDED! " + entry.name + ", enabled: " + entry.enabled + ", port: " + port)
+      } else {
+        console.log(err)
+      }
+    })
+  } catch (err) {
+    console.error(err)
+  }
 }
 
 EntityObject.prototype.spawnChildProcesses = function () {
@@ -69,6 +91,32 @@ EntityObject.prototype.spawnChildProcesses = function () {
     if (!err && entries.length) {
       for (var i in entries) {
         entries[i].config['name'] = entries[i].name
+        entries[i].config['enabled'] = entries[i].enabled
+        entries[i].config['respawn'] = entries[i].respawn
+        entries[i].config['port'] = entries[i].port
+
+        self._spawnChildProcessQueue.push(entries[i].config)
+      }
+      self.spawnNextChildProcess()
+    } else {
+      console.error("No linked entities found!")
+    }
+  })
+}
+
+EntityObject.prototype.spawnChildProcessByName = function (name, force) {
+  var self = this
+  force = force || false
+
+  LinkedEntity.find({name: name}).exec(function(err, entries) {
+    if (!err && entries.length) {
+      for (var i in entries) {
+        entries[i].config['name'] = entries[i].name
+        entries[i].config['enabled'] = entries[i].enabled
+        entries[i].config['respawn'] = entries[i].respawn
+        entries[i].config['port'] = entries[i].port
+        entries[i].config['force'] = force
+
         self._spawnChildProcessQueue.push(entries[i].config)
       }
       self.spawnNextChildProcess()
@@ -99,7 +147,8 @@ EntityObject.prototype.spawnChildProcess = function (processConfig, callback) {
     ports = self.getRequiredPorts(processConfig)
 
   new TestPorts(ports, function (err, res) {
-    if (res.taken.length) {
+    if (res.taken.length && !Boolean(processConfig['force'])) {
+      console.log(res)
       return callback(new Error("FAILED TO SPAWN CHILD PROCESS, ONE OR MORE REQUIRED PORTS ARE ALREADY TAKEN"))
     } else {
       var childProcessKey = self._spawnChildProcess(processConfig)
@@ -180,6 +229,22 @@ EntityObject.prototype.getRequiredPorts = function (config) {
   if (config.propagate.active) ports.push(config.propagate.port)
 
   return ports
+}
+
+EntityObject.prototype.terminate = function (killProcess) {
+  killProcess = killProcess || false
+  sails.log.debug("Entity.terminate("+killProcess+")")
+
+  TrackerService.terminate(false, true)
+  StatusService.terminate(false, true)
+  MediaService.terminate(false, true)
+  MetadataService.terminate(false, true)
+  if (killProcess) {
+    if (cluster.isWorker)
+      cluster.worker.disconnect()
+
+    process.exit(0)
+  }
 }
 
 ////////////////////////////////////////////////////////////////
