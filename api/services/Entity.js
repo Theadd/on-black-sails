@@ -163,6 +163,7 @@ EntityObject.prototype._spawnChildProcess = function (processConfig) {
 
   console.log("FORKING ON PORT: " + processConfig.port)
   process.env.PORT = processConfig.port
+  process.env.CHILD_PROCESS = true
   cluster.fork()
 
 
