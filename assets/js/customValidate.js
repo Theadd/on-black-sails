@@ -2,23 +2,32 @@ $(document).ready(function() {
   $('#sign-up-form').validate({
     rules: {
       name: {
-        required: true
+        required: true,
+        minlength: 3,
+        maxlength: 25
+
       },
       email: {
         required: true,
         email: true
       },
+      title: {
+        required: false,
+        maxlength: 128
+      },
       password: {
+        required: true,
         minlength: 6,
-        required: true
+        maxlength: 512
       },
       confirmation: {
         minlength: 6,
         equalTo: "#password"
       }
     },
-    success: function(element) {
+    errorClass: "error help-block"
+    /*success: function(element) {
       element.text('OK!').addClass('valid');
-    }
+    }*/
   });
 });

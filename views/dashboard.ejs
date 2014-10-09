@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title><%- title %></title>
+
+  <link href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css" rel="stylesheet">
+  <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+  <link href="/styles/dashboard/dashboard.css" rel="stylesheet">
+
+  <!--Added this so the client has access to the csrf tag and it's grabbed first service side on every page -->
+  <script type="text/javascript">
+    window.overlord = { csrf: "<%= _csrf %>" };
+  </script>
+
+</head>
+<body>
+<div id="page-wrapper" class="active">
+
+  <!-- Sidebar -->
+
+  <div id="sidebar-wrapper">
+    <ul class="sidebar">
+      <li id="toggle-sidebar" class="sidebar-main">
+        <a href="#">
+          Dashboard
+          <span class="menu-icon glyphicon glyphicon-transfer"></span>
+        </a>
+      </li>
+      <li class="sidebar-title"><span>NAVIGATION</span></li>
+      <li class="sidebar-list">
+        <a href="#">Dashboard <span class="menu-icon fa fa-tachometer"></span></a>
+      </li>
+      <li class="sidebar-list">
+        <a href="#/tables">Tables <span class="menu-icon fa fa-table"></span></a>
+      </li>
+      <li class="sidebar-list">
+        <a href="#">Servers <span class="menu-icon fa fa-tasks"></span></a>
+      </li>
+      <li class="sidebar-list">
+        <a href="#">Settings <span class="menu-icon fa fa-cogs"></span></a>
+      </li>
+      <li class="sidebar-title separator"><span>QUICK LINKS</span></li>
+      <li class="sidebar-list">
+        <a href="#" target="_blank">Forums <span class="menu-icon fa fa-external-link"></span></a>
+      </li>
+    </ul>
+    <div class="sidebar-footer">
+      <div class="col-xs-4">
+        <a href="https://github.com/Theadd/on-black-sails" target="_blank">
+          Github
+        </a>
+      </div>
+      <div class="col-xs-4">
+        <a href="#" target="_blank">
+          About
+        </a>
+      </div>
+      <div class="col-xs-4">
+        <a href="#">
+          Support
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- End Sidebar -->
+
+  <div id="content-wrapper">
+    <div class="page-content">
+
+      <!-- Header Bar -->
+
+      <div class="row header">
+        <div class="col-xs-12">
+          <div class="user pull-right">
+            <% if (!session.authenticated) { %>
+            <ul class="nav navbar-nav">
+              <li>
+                <form class="navbar-form" action="/session/create">
+                  <div class="form-group">
+                    <input type="text" placeholder="Email" name="email" class="form-control" style="width: 150px;">
+                  </div>
+                  <div class="form-group">
+                    <input type="password" placeholder="Password" name="password" class="form-control" style="width: 150px;">
+                  </div>
+                  <button type="submit" class="btn btn-default">Sign in</button>
+                  <input type="hidden" name="_csrf" value="<%= _csrf %>" />
+                </form>
+              </li>
+            </ul>
+            <% } %>
+            <% if (session.authenticated) { %>
+            <div class="item dropdown">
+              <a href="#" class="dropdown-toggle">
+                <img src="/images/avatar.jpg">
+              </a>
+              <ul class="dropdown-menu dropdown-menu-right">
+                <li class="dropdown-header">
+                  Joe Bloggs
+                </li>
+                <li class="divider"></li>
+                <li class="link">
+                  <a href="#">
+                    Profile
+                  </a>
+                </li>
+                <li class="link">
+                  <a href="#">
+                    Menu Item
+                  </a>
+                </li>
+                <li class="link">
+                  <a href="#">
+                    Menu Item
+                  </a>
+                </li>
+                <li class="divider"></li>
+                <li class="link">
+                  <a href="#">
+                    Logout
+                  </a>
+                </li>
+              </ul>
+            </div>
+            <% } %>
+            <div class="item dropdown">
+              <a href="#" class="dropdown-toggle">
+                <i class="fa fa-bell-o"></i>
+              </a>
+              <ul class="dropdown-menu dropdown-menu-right">
+                <li class="dropdown-header">
+                  Notifications
+                </li>
+                <li class="divider"></li>
+                <li>
+                  <a href="#">Server Down!</a>
+                </li>
+              </ul>
+            </div>
+          </div>
+          <div class="meta">
+            <div class="page">
+              Dashboard
+            </div>
+            <div class="breadcrumb-links">
+              Home / Dashboard
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- End Header Bar -->
+
+      <!-- Main Content -->
+      <%- body %>
+
+    </div><!-- End Page Content -->
+  </div><!-- End Content Wrapper -->
+</div><!-- End Page Wrapper -->
+<!--TEMPLATES-->
+<script type="text/javascript" src="/jst.js"></script>
+<!--TEMPLATES END-->
+<!--SCRIPTS-->
+<script src="/js/dependencies/jquery.js"></script>
+<script src="/js/dependencies/bootstrap.js"></script>
+<script src="/js/dependencies/jquery.validate.min.js"></script>
+<script src="/js/dependencies/sails.io.js"></script>
+<script src="/js/dependencies/underscore.js"></script>
+<script src="/js/app.js"></script>
+<script src="/js/customValidate.js"></script>
+<script src="/js/dashboard.js"></script>
+<!--SCRIPTS END-->
+</body>
+</html>

@@ -1,5 +1,14 @@
-<div class='container'>
-	<h1><%= user.name %> </h1>
+<div class="row">
+
+  <div class="col-lg-12">
+    <div class="widget">
+      <div class="widget-header">
+        <i class="fa fa-user"></i> User profile
+        <div class="clearfix"></div>
+      </div>
+      <div class="widget-body">
+
+      <h1><%= user.name %> </h1>
 	<% if (user.admin) { %>
 		<img src="/images/admin.png">admin
 	<% } else { %>
@@ -10,5 +19,9 @@
 	<h3>contact: <%= user.email %> </h3>
 	
 	<a class="btn btn-medium btn-primary" href="/user/edit/<%= user.id %>">Edit</a>
-	
+
+      </div>
+    </div>
+  </div>
+
 </div>

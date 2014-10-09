@@ -1,8 +1,52 @@
-<div class="container">
-  <div class="jumbotron">
-    <h1>activityOverlord</h1>
 
-    <h2>...tracking app activity better than the NSA since 1899.</h2>
-    <a href="/user/new" class="btn btn-lg btn-success">Sign up now!</a>
+
+
+
+
+<div class="row">
+
+  <div class="col-lg-6">
+    <div class="widget">
+      <div class="widget-header">
+        <i class="fa fa-home"></i> Dashboard
+      </div>
+      <div class="widget-body">
+        <div class="message">
+          <h1>Welcome!</h1>
+        </div>
+
+        <div class="message">
+          Using <a href="http://sailsjs.org">sails.js</a> framework, <strong>on-black-sails</strong> provides a
+          <strong>Restful API</strong> of indexed torrents from public trackers on the net. Those indexed torrents
+          are being fetched and updated by several tasks, each task is implemented as an <em>ipc-service</em>.
+        </div>
+
+        <% if (!session.authenticated) { %>
+        <hr />
+        <p class="text-center">
+          <a href="/user/new" class="btn btn-sm btn-primary">Sign up!</a> &nbsp; or &nbsp; <a href="/session/new" class="btn btn-sm btn-success">Sign in!</a>
+        </p>
+        <% } %>
+
+      </div>
+    </div>
   </div>
-</div>
+
+  <div class="col-lg-6">
+    <div class="widget">
+      <div class="widget-header">
+        <i class="fa fa-plus"></i> System Overview
+        <button class="btn btn-sm btn-info pull-right">Go Advanced</button>
+        <div class="clearfix"></div>
+      </div>
+      <div class="widget-body">
+
+        <div class="message text-center">
+          ...
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+</div><!-- End ROW -->
