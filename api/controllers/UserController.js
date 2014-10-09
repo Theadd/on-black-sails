@@ -19,29 +19,34 @@ module.exports = {
       confirmation: req.param('confirmation')
     };
 
-    User.create(userObj, function userCreated(err, user) {
-      if (err) {
-        req.session.flash = {
-          err: err
-        };
+    User.count({}, function (err, numUsers) {
+      userObj['admin'] = Boolean(err || !numUsers)
 
-        return res.redirect('/user/new');
-      }
+      User.create(userObj, function userCreated(err, user) {
+        if (err) {
+          req.session.flash = {
+            err: err
+          };
 
-      req.session.authenticated = true;
-      req.session.User = user;
+          return res.redirect('/user/new');
+        }
 
-      user.online = true;
-      user.save(function(err, user) {
-        if (err) return next(err);
+        req.session.authenticated = true;
+        req.session.User = user;
 
-        user.action = " signed-up and logged-in.";
+        user.online = true;
+        user.save(function(err, user) {
+          if (err) return next(err);
 
-        User.publishCreate(user);
+          user.action = " signed-up and logged-in.";
 
-        res.redirect('/user/show/'+user.id);
+          User.publishCreate(user);
+
+          res.redirect('/user/show/'+user.id);
+        });
       });
-    });
+    })
+
   },
 
   show: function(req, res, next) {
