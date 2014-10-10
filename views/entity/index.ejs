@@ -1,0 +1,32 @@
+<div class="row">
+
+  <div class="col-lg-12">
+    <div class="widget">
+      <div class="widget-header">
+        <i class="fa fa-entities"></i> Manage Entities
+        <div class="clearfix"></div>
+      </div>
+      <div class="widget-body narrow">
+
+        <div class="list-group">
+          <% _.each(entities, function(entity) { %>
+          <a href="/entity/show/<%= entity.id %>" class="list-group-item<%= (entity.enabled) ? ' list-group-item-success' : '' %>" data-id="<%= entity.id %>" data-model="entity">
+            <div class="pull-right">
+              <span class="label <%= (entity.enabled) ? 'label-primary' : 'label-default' %>"><i class="fa fa-lg fa-power-off"></i></span>
+              <span class="label <%= (entity.respawn) ? 'label-primary' : 'label-default' %>"><i class="fa fa-lg fa-refresh"></i></span>
+            </div>
+            <p class="list-group-item-heading">
+              <%= entity.name %> @ <%= entity.port %>
+            </p>
+
+          </a>
+          <% }) %>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!--<p class="list-group-item-text">Serving: <strong>TrackerService</strong>, <strong>MetadataService</strong></p>
+<span class="label label-primary"><i class="fa fa-thumbs-up"></i>ENABLED</span>-->

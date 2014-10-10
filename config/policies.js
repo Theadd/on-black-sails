@@ -28,6 +28,15 @@ module.exports.policies = {
     edit: "userCanSeeProfile",
     update: "userCanSeeProfile",
     '*': "admin"
+  },
+  entity: {
+    'new': "flash",
+    subscribe: ["flash", "authenticated"],
+    create: "flash",
+    show: "userCanSeeProfile",
+    edit: "userCanSeeProfile",
+    update: "userCanSeeProfile",
+    '*': "admin"
   }
 
 	// Here's an example of mapping some policies to run before
