@@ -32,12 +32,15 @@ module.exports.deploy = function() {
       //Standalone process able to fork linked entities (MASTER)
       self.isMaster = true
       self._controlledEntity = {}
-      //self._controlledEntityRelation = {}
       cluster.on('exit', function(worker, code, signal) {
+        worker._controlledEntity.set('ready', false)
         sails.log.error("Worker " + worker._controlledEntity.get('name') + " <" + worker._controlledEntity.get('pid') + "> died (" + (signal || code) + ")")
         if (worker._controlledEntity.get('enabled') && worker._controlledEntity.get('respawn')) {
           sails.log.debug("Restarting worker " + worker._controlledEntity.get('name') + " <" + worker._controlledEntity.get('pid') + ">")
-          self.spawnChildProcessByName(worker._controlledEntity.get('name'), true)
+          //self.spawnChildProcessByName(worker._controlledEntity.get('name'), true)
+          worker._controlledEntity.setRespawnByForce(true)
+          self._spawnChildProcessQueue.push(worker._controlledEntity.get('id'))
+          self.spawnNextChildProcess()
         }
       })
       process.nextTick(function () {
@@ -50,11 +53,6 @@ module.exports.deploy = function() {
         })
       })
 
-      /*setTimeout(function () {
-        console.log("console.log(self._controlledEntity)")
-        console.log(self._controlledEntity)
-        console.log("console.log(self._controlledEntity)")
-      }, 10000)*/
     } else {
       //Standalone process NOT in linked entities (MASTER)
       if (CommandLineHelpers.config.clusterid == -1 || typeof CommandLineHelpers.config.clusterid !== "number") {
@@ -228,17 +226,10 @@ EntityObject.prototype.handleMessageOnMaster = function (msg) {
   if (msg.cmd || false) {
     switch (msg.cmd) {
       case 'ready':
-        console.log("MSG ready ON MASTER")
-
         cluster.workers[msg.id]._controlledEntity.set('ready', true)
-
-        console.log("that was  controlled, ready set")
-        //controlled.setWorker(cluster.workers[msg.id])
-        //console.log("done")
         cluster.workers[msg.id].send({ cmd: 'configure', val: cluster.workers[msg.id]._controlledEntity.get('config') })
         break
       case 'configured':
-        console.log("MSG configured ON MASTER")
         cluster.workers[msg.id].send({ cmd: 'run'})
         break
       default:
@@ -253,13 +244,15 @@ EntityObject.prototype.handleMessageOnWorker = function (msg) {
   if (msg.cmd || false) {
     switch (msg.cmd) {
       case 'configure':
-        console.log("MSG configure")
         self.config = extend(self.config, msg.val)
         CommandLineHelpers.config = extend(CommandLineHelpers.config, self.config)  //TODO: refactoring
         process.send({ cmd: 'configured', id: self.id })
         break
       case 'run':
         Indexer.run()
+        break
+      case 'kill':
+        self.terminate(true)
         break
       default:
         console.error("Unrecognized message on worker: " + msg)

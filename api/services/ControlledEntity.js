@@ -166,3 +166,11 @@ ControlledEntity.prototype.getClonedValues = function () {
 
   return result
 }
+
+ControlledEntity.prototype.send = function (command, value) {
+  var self = this
+  value = value || false
+  command = String(command)
+
+  self.get('worker').send({ cmd: command, val: value })
+}

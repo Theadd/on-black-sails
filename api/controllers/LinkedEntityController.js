@@ -156,17 +156,37 @@ module.exports = {
   'toggle': function(req, res) {
 
     if (req.session.User && req.session.User.admin) {
-      console.log("EntityController.enabled: is admin!")
       var entity = Entity.getControlledEntity(req.param('id')),
         prop = req.param('prop')
 
       if (entity) {
         entity.set(prop, !entity.get(prop))
       }
-    } else {
-      console.log("EntityController.enabled: NOT an admin!")
     }
-    //res.redirect('/linkedentity');
+    res.json({
+      error: false
+    })
+  },
+
+  'command': function(req, res) {
+
+    if (req.session.User && req.session.User.admin) {
+      var entity = Entity.getControlledEntity(req.param('id')),
+        prop = req.param('prop')
+
+      if (entity) {
+        switch (prop) {
+          case 'run':
+            entity.setRespawnByForce(true)
+            Entity._spawnChildProcessQueue.push(req.param('id'))
+            Entity.spawnNextChildProcess()
+            break
+          case 'kill':
+            entity.send('kill')
+            break
+        }
+      }
+    }
     res.json({
       error: false
     })

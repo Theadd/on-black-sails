@@ -8,19 +8,28 @@
 
 .list-group {
   .list-group-item {
-    .toolbox {
+    .toolbox-right {
       position: absolute;
       right: 15px;
       z-index: 1;
     }
+    .toolbox-left {
+      position: absolute;
+      left: 15px;
+      z-index: 1;
+    }
     .label {
       padding: 10px;
-      opacity: 0.75;
+      opacity: 0.6;
       display: inline-block;
     }
     .label:hover {
       opacity: 0.9;
       cursor: pointer;
+    }
+    .label.disabled {
+      cursor: default;
+      opacity: 0.25;
     }
   }
   .list-group-item-heading {
@@ -28,6 +37,13 @@
     font-weight: bold;
     letter-spacing: 0.05em;
     opacity: 0.5;
+    /*color: #6699FF;#3399ee*/
+    color: #000;
+    margin: 0 75px;
+    background-color: rgba(75, 127, 255, 0.2);
+    padding: 2px 5px;
+    border-radius: 2px;
+    border: 1px solid rgba(0, 0, 0, 0.1);
   }
 }
 

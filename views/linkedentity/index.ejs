@@ -11,9 +11,29 @@
         <div class="list-group">
           <% _.each(linkedentities, function(entity) { %>
           <a href="/linkedentity/show/<%= entity.id %>" class="list-group-item<%= (entity.ready) ? ' list-group-item-success' : '' %>" data-id="<%= entity.id %>" data-model="linkedentity">
-            <div class="pull-right toolbox">
-              <span data-target="linkedentity" data-id="<%= entity.id %>" data-action="toggle" data-prop="enabled" class="label <%= (entity.enabled) ? 'label-primary' : 'label-default' %>"><i class="fa fa-lg fa-power-off"></i></span>
-              <span data-target="linkedentity" data-id="<%= entity.id %>" data-action="toggle" data-prop="respawn" class="label <%= (entity.respawn) ? 'label-primary' : 'label-default' %>"><i class="fa fa-lg fa-refresh"></i></span>
+            <div class="pull-right">
+              <div class="toolbox-left">
+                <span data-target="linkedentity"
+                      data-id="<%= entity.id %>"
+                      data-action="command"
+                      data-prop="run"
+                      class="label label-success<%= (entity.ready) ? ' disabled' : '' %>">
+                  <i class="fa fa-lg fa-play"></i>
+                </span>
+
+                <span data-target="linkedentity"
+                      data-id="<%= entity.id %>"
+                      data-action="command"
+                      data-prop="kill"
+                      class="label label-danger<%= (entity.ready) ? '' : ' disabled' %>">
+                  <i class="fa fa-lg fa-stop"></i>
+                </span>
+              </div>
+              <div class="toolbox-right">
+
+                <span data-target="linkedentity" data-id="<%= entity.id %>" data-action="toggle" data-prop="enabled" class="label <%= (entity.enabled) ? 'label-primary' : 'label-default' %>"><i class="fa fa-lg fa-power-off"></i></span>
+                <span data-target="linkedentity" data-id="<%= entity.id %>" data-action="toggle" data-prop="respawn" class="label <%= (entity.respawn) ? 'label-primary' : 'label-default' %>"><i class="fa fa-lg fa-refresh"></i></span>
+              </div>
             </div>
             <p class="list-group-item-heading">
               <%= entity.name %> @ <%= entity.port %>

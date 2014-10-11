@@ -25,13 +25,19 @@ var LinkedEntityIndexPage = {
   },
 
   updateLinkedEntityState: function(id, message) {
-    var prop = message.data.property, value = message.data.value;
-    var $element = $('a.list-group-item[data-id="' + id + '"]').first();
+    var prop = message.data.property, value = message.data.value,
+      $element = $('a.list-group-item[data-id="' + id + '"]').first(),
+      $runElement = $('.label[data-id="' + id + '"][data-prop="run"]').first(),
+      $killElement = $('.label[data-id="' + id + '"][data-prop="kill"]').first();
 
     if (Boolean(value)) {
-      $element.addClass('list-group-item-success')
+      $element.addClass('list-group-item-success');
+      $runElement.addClass('disabled');
+      $killElement.removeClass('disabled');
     } else {
       $element.removeClass('list-group-item-success');
+      $runElement.removeClass('disabled');
+      $killElement.addClass('disabled');
     }
   }
 
