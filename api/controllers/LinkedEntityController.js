@@ -144,18 +144,24 @@ module.exports = {
 
   ///////////////////////////// ACTIONS ////////////////////////
 
-  'enabled': function(req, res) {
+  'toggle': function(req, res) {
 
     if (req.session.User && req.session.User.admin) {
       console.log("EntityController.enabled: is admin!")
-      var entity = Entity.getControlledEntity(req.param('id'))
+      var entity = Entity.getControlledEntity(req.param('id')),
+        prop = req.param('prop')
+
       if (entity) {
-        entity.set('enabled', !entity.get('enabled'))
+        entity.set(prop, !entity.get(prop))
       }
     } else {
       console.log("EntityController.enabled: NOT an admin!")
     }
-    res.redirect('/linkedentity');
+    //res.redirect('/linkedentity');
+    res.json({
+      error: false
+    })
   }
+
 };
 

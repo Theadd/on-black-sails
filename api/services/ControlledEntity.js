@@ -132,6 +132,10 @@ ControlledEntity.prototype.set = function (prop, value) {
       self._entity.enabled = Boolean(value)
       self._update(prop, self._entity.enabled)
       break
+    case 'respawn':
+      self._entity.respawn = Boolean(value)
+      self._update(prop, self._entity.respawn)
+      break
     default:
       console.warn("[ControlledEntity] Unrecognized property: " + prop)
   }
