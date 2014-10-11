@@ -29,7 +29,7 @@ module.exports.policies = {
     update: "userCanSeeProfile",
     '*': "admin"
   },
-  entity: {
+  linkedentity: {
     'new': "flash",
     subscribe: ["flash", "authenticated"],
     create: "flash",

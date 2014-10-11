@@ -1,11 +1,14 @@
 io.socket.on('connect', function() {
   io.socket.on('user', cometUserMessageReceivedFromServer);
-
   io.socket.get('/user/subscribe');
+
+  io.socket.on('linkedentity', cometProcessMessageReceivedFromServer);
+  io.socket.get('/linkedentity/subscribe');
 });
 
 function cometUserMessageReceivedFromServer(message) {
   console.log('Here\'s the message: ' + message);
+  console.log(message);
 
   var userId = message.id;
 
@@ -16,10 +19,23 @@ function cometUserMessageReceivedFromServer(message) {
   }
 }
 
+function cometProcessMessageReceivedFromServer(message) {
+  console.log('Got message from LinkedEntity: ' + message);
+  console.log(message);
+
+  var entityId = message.id;
+
+  //updateUserInDom(userId, message);
+
+  if (message.verb !== 'destroyed') {
+    displayFlashActivity(message);
+  }
+}
+
 function displayFlashActivity(message) {
   $('#chatAudio')[0].play();
-  $('.navbar').after('<div class="alert alert-success">' + message.data.name + message.data.action + "</div>");
-  $('.alert').fadeOut(5000);
+  //$('.navbar').after('<div class="alert alert-success">' + message.data.name + message.data.action + "</div>");
+  //$('.alert').fadeOut(5000);
 }
 
 function updateUserInDom(userId, message) {

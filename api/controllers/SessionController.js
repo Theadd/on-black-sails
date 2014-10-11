@@ -64,7 +64,7 @@ module.exports = {
           });
 
           if (req.session.User.admin) {
-            res.redirect('/user');
+            res.redirect('/');
             return;
           }
 

@@ -15,6 +15,7 @@ function EntityObject () {
   self._spawnChildProcessQueue = []
   self.id = 0
   self.config = {}
+  self._controlledEntity = {}
 }
 
 module.exports.deploy = function() {
@@ -30,17 +31,30 @@ module.exports.deploy = function() {
     if (Boolean(sails.config.master)) {
       //Standalone process able to fork linked entities (MASTER)
       self.isMaster = true
+      self._controlledEntity = {}
+      //self._controlledEntityRelation = {}
       cluster.on('exit', function(worker, code, signal) {
-        sails.log.error("Worker " + worker.config.name + " <" + worker.process.pid + "> died (" + (signal || code) + ")")
-        if (worker.config.enabled && worker.config.respawn) {
-          sails.log.debug("Restarting worker " + worker.config.name + " <" + worker.process.pid + ">")
-          self.spawnChildProcessByName(worker.config.name, true)
+        sails.log.error("Worker " + worker._controlledEntity.get('name') + " <" + worker._controlledEntity.get('pid') + "> died (" + (signal || code) + ")")
+        if (worker._controlledEntity.get('enabled') && worker._controlledEntity.get('respawn')) {
+          sails.log.debug("Restarting worker " + worker._controlledEntity.get('name') + " <" + worker._controlledEntity.get('pid') + ">")
+          self.spawnChildProcessByName(worker._controlledEntity.get('name'), true)
         }
       })
       process.nextTick(function () {
-        self.spawnChildProcesses()
+        self.loadControlledEntities(function (err) {
+          if (err) {
+            console.error(err)
+          } else {
+            self.spawnChildProcesses()
+          }
+        })
       })
 
+      /*setTimeout(function () {
+        console.log("console.log(self._controlledEntity)")
+        console.log(self._controlledEntity)
+        console.log("console.log(self._controlledEntity)")
+      }, 10000)*/
     } else {
       //Standalone process NOT in linked entities (MASTER)
       if (CommandLineHelpers.config.clusterid == -1 || typeof CommandLineHelpers.config.clusterid !== "number") {
@@ -84,18 +98,38 @@ EntityObject.prototype.addLinkedEntity = function (name, config, port, enabled, 
   }
 }
 
+EntityObject.prototype.loadControlledEntities = function (callback) {
+  var self = this
+
+  LinkedEntity.find({}).exec(function(err, entries) {
+    if (!err && entries.length) {
+      for (var i in entries) {
+        self._controlledEntity[entries[i].id] = new ControlledEntity(entries[i])
+      }
+      callback(null, self._controlledEntities)
+    } else {
+      callback(new Error("No linked entities found."))
+    }
+  })
+}
+
 EntityObject.prototype.spawnChildProcesses = function () {
   var self = this
 
   LinkedEntity.find({enabled: true}).exec(function(err, entries) {
     if (!err && entries.length) {
       for (var i in entries) {
-        entries[i].config['name'] = entries[i].name
+        /*entries[i].config['name'] = entries[i].name
         entries[i].config['enabled'] = entries[i].enabled
         entries[i].config['respawn'] = entries[i].respawn
+        entries[i].config['storedId'] = entries[i].id
         entries[i].config['port'] = entries[i].port
 
-        self._spawnChildProcessQueue.push(entries[i].config)
+        console.log("\n\nentries[i].id = " + entries[i].id + "\n\n")*/
+
+        //self._spawnChildProcessQueue.push(entries[i].config)
+        self.getControlledEntity(entries[i].id).setRespawnByForce(false)
+        self._spawnChildProcessQueue.push(entries[i].id)
       }
       self.spawnNextChildProcess()
     } else {
@@ -111,13 +145,16 @@ EntityObject.prototype.spawnChildProcessByName = function (name, force) {
   LinkedEntity.find({name: name}).exec(function(err, entries) {
     if (!err && entries.length) {
       for (var i in entries) {
-        entries[i].config['name'] = entries[i].name
+        /*entries[i].config['name'] = entries[i].name
         entries[i].config['enabled'] = entries[i].enabled
         entries[i].config['respawn'] = entries[i].respawn
         entries[i].config['port'] = entries[i].port
+        entries[i].config['storedId'] = entries[i].id
         entries[i].config['force'] = force
 
-        self._spawnChildProcessQueue.push(entries[i].config)
+        self._spawnChildProcessQueue.push(entries[i].config)*/
+        self.getControlledEntity(entries[i].id).setRespawnByForce(true)
+        self._spawnChildProcessQueue.push(entries[i].id)
       }
       self.spawnNextChildProcess()
     } else {
@@ -130,47 +167,47 @@ EntityObject.prototype.spawnNextChildProcess = function () {
   var self = this
 
   if (self._spawnChildProcessQueue.length) {
-    var config = self._spawnChildProcessQueue.shift()
-    self.spawnChildProcess(config, function (err, childProcessKey) {
+    var controlledEntity = self.getControlledEntity(self._spawnChildProcessQueue.shift())
+    self.spawnChildProcess(controlledEntity, function (err, childProcessKey) {
       if (err) {
-        console.error(err)
+        controlledEntity.error(err)
+        controlledEntity.setWorker(null)
       } else {
-        console.log("FORKED " + childProcessKey + " on port " + cluster.workers[childProcessKey].config.port)
+        console.log("FORKED " + childProcessKey)// + " on port " + cluster.workers[childProcessKey].config.port)
+        controlledEntity.setWorker(cluster.workers[childProcessKey])
       }
       return self.spawnNextChildProcess()
     })
   }
 }
 
-EntityObject.prototype.spawnChildProcess = function (processConfig, callback) {
+EntityObject.prototype.spawnChildProcess = function (controlledEntity, callback) {
   var self = this,
-    ports = self.getRequiredPorts(processConfig)
+    ports = controlledEntity.getRequiredPorts()
 
   new TestPorts(ports, function (err, res) {
-    if (res.taken.length && !Boolean(processConfig['force'])) {
-      console.log(res)
+    if (res.taken.length && !controlledEntity.getRespawnByForce()) {
       return callback(new Error("FAILED TO SPAWN CHILD PROCESS, ONE OR MORE REQUIRED PORTS ARE ALREADY TAKEN"))
     } else {
-      var childProcessKey = self._spawnChildProcess(processConfig)
+      var childProcessKey = self._spawnChildProcess(controlledEntity)
       return callback(null, childProcessKey)
     }
   })
 }
 
-EntityObject.prototype._spawnChildProcess = function (processConfig) {
+EntityObject.prototype._spawnChildProcess = function (controlledEntity) {
   var self = this
-  console.log("\t\tspawnChildProcess("+processConfig.port+")" + process.env.PORT + ",,, " + Number(sails.config.port))
+  //console.log("\t\tspawnChildProcess("+processConfig.port+")" + process.env.PORT + ",,, " + Number(sails.config.port))
 
-  console.log("FORKING ON PORT: " + processConfig.port)
-  process.env.PORT = processConfig.port
+  //console.log("FORKING ON PORT: " + processConfig.port)
+  process.env.PORT = controlledEntity.get('port')
   process.env.CHILD_PROCESS = true
   cluster.fork()
-
 
   var workerKeys = Object.keys(cluster.workers),
     childProcessKey = workerKeys[workerKeys.length - 1]
 
-  cluster.workers[childProcessKey].config = processConfig
+  cluster.workers[childProcessKey]._controlledEntity = controlledEntity
 
   cluster.workers[childProcessKey].on('message', function (msg) {
     console.log("\t---> Handling message of " + (childProcessKey || -1))
@@ -180,6 +217,11 @@ EntityObject.prototype._spawnChildProcess = function (processConfig) {
   return childProcessKey
 }
 
+EntityObject.prototype.getControlledEntity = function (id) {
+  return (typeof this._controlledEntity[id] !== "undefined") ? this._controlledEntity[id] : false
+}
+
+
 EntityObject.prototype.handleMessageOnMaster = function (msg) {
   var self = this
 
@@ -187,7 +229,13 @@ EntityObject.prototype.handleMessageOnMaster = function (msg) {
     switch (msg.cmd) {
       case 'ready':
         console.log("MSG ready ON MASTER")
-        cluster.workers[msg.id].send({ cmd: 'configure', val: cluster.workers[msg.id].config })
+
+        cluster.workers[msg.id]._controlledEntity.set('ready', true)
+
+        console.log("that was  controlled, ready set")
+        //controlled.setWorker(cluster.workers[msg.id])
+        //console.log("done")
+        cluster.workers[msg.id].send({ cmd: 'configure', val: cluster.workers[msg.id]._controlledEntity.get('config') })
         break
       case 'configured':
         console.log("MSG configured ON MASTER")
@@ -219,18 +267,6 @@ EntityObject.prototype.handleMessageOnWorker = function (msg) {
   }
 }
 
-EntityObject.prototype.getRequiredPorts = function (config) {
-  var ports = []
-
-  ports.push(config.port)
-  if (config.metadata.active) ports.push(config.metadata.port)
-  if (config.tracker.active) ports.push(config.tracker.port)
-  if (config.status.active) ports.push(config.status.port)
-  if (config.media.active) ports.push(config.media.port)
-  if (config.propagate.active) ports.push(config.propagate.port)
-
-  return ports
-}
 
 EntityObject.prototype.terminate = function (killProcess) {
   killProcess = killProcess || false
@@ -290,3 +326,6 @@ TestPorts.prototype.next = function (callback) {
     })
   } else return callback(false, {available: self.available, taken: self.taken})
 }
+
+
+

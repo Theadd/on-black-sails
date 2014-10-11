@@ -9,11 +9,16 @@
       <div class="widget-body narrow">
 
         <div class="list-group">
-          <% _.each(entities, function(entity) { %>
-          <a href="/entity/show/<%= entity.id %>" class="list-group-item<%= (entity.enabled) ? ' list-group-item-success' : '' %>" data-id="<%= entity.id %>" data-model="entity">
+          <% _.each(linkedentities, function(entity) { %>
+          <a href="/linkedentity/show/<%= entity.id %>" class="list-group-item<%= (entity.enabled) ? ' list-group-item-success' : '' %>" data-id="<%= entity.id %>" data-model="entity">
             <div class="pull-right">
               <span class="label <%= (entity.enabled) ? 'label-primary' : 'label-default' %>"><i class="fa fa-lg fa-power-off"></i></span>
               <span class="label <%= (entity.respawn) ? 'label-primary' : 'label-default' %>"><i class="fa fa-lg fa-refresh"></i></span>
+              <form action="/linkedentity/enabled/<%= entity.id %>" method="POST">
+                <input type="hidden" name="_method" value="enabled"/>
+                <input type="submit" class="btn btn-sm btn-danger" value="Toggle"/>
+                <input type="hidden" name="_csrf" value="<%= _csrf %>"/>
+              </form>
             </div>
             <p class="list-group-item-heading">
               <%= entity.name %> @ <%= entity.port %>

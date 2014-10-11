@@ -54,7 +54,7 @@ module.exports = {
       if (err) return next(err);
       if (!entity) return next();
       res.view({
-        entity: entity
+        linkedentity: entity
       });
     });
   },
@@ -63,7 +63,7 @@ module.exports = {
     LinkedEntity.find(function foundLinkedEntities(err, entities) {
       if (err) return next(err);
       res.view({
-        entities: entities
+        linkedentities: entities
       });
     });
   },
@@ -140,6 +140,22 @@ module.exports = {
 
       res.send(200);
     })
+  },
+
+  ///////////////////////////// ACTIONS ////////////////////////
+
+  'enabled': function(req, res) {
+
+    if (req.session.User && req.session.User.admin) {
+      console.log("EntityController.enabled: is admin!")
+      var entity = Entity.getControlledEntity(req.param('id'))
+      if (entity) {
+        entity.set('enabled', !entity.get('enabled'))
+      }
+    } else {
+      console.log("EntityController.enabled: NOT an admin!")
+    }
+    res.redirect('/linkedentity');
   }
 };
 
