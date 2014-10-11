@@ -1,31 +1,16 @@
 io.socket.on('connect', function() {
-  io.socket.on('user', cometUserMessageReceivedFromServer);
+  io.socket.on('user', cometMessageReceivedFromServer);
   io.socket.get('/user/subscribe');
 
-  io.socket.on('linkedentity', cometProcessMessageReceivedFromServer);
+  io.socket.on('linkedentity', cometMessageReceivedFromServer);
   io.socket.get('/linkedentity/subscribe');
 });
 
-function cometUserMessageReceivedFromServer(message) {
+function cometMessageReceivedFromServer(message) {
   console.log('Here\'s the message: ' + message);
   console.log(message);
 
-  var userId = message.id;
-
-  updateUserInDom(userId, message);
-
-  if (message.verb !== 'destroyed') {
-    displayFlashActivity(message);
-  }
-}
-
-function cometProcessMessageReceivedFromServer(message) {
-  console.log('Got message from LinkedEntity: ' + message);
-  console.log(message);
-
-  var entityId = message.id;
-
-  //updateUserInDom(userId, message);
+  updateEntryInDom(message);
 
   if (message.verb !== 'destroyed') {
     displayFlashActivity(message);
@@ -38,15 +23,17 @@ function displayFlashActivity(message) {
   //$('.alert').fadeOut(5000);
 }
 
-function updateUserInDom(userId, message) {
+function updateEntryInDom(message) {
   var page = document.location.pathname;
 
   page = page.replace(/(\/)$/, '');
 
+  var id = message.id;
+
   switch (page) {
     case '/user':
       if (message.verb === 'updated') {
-        UserIndexPage.updateUser(userId, message);
+        UserIndexPage.updateUser(id, message);
       }
 
       if (message.verb === 'created') {
@@ -54,7 +41,12 @@ function updateUserInDom(userId, message) {
       }
 
       if (message.verb === 'destroyed') {
-        UserIndexPage.destroyUser(userId);
+        UserIndexPage.destroyUser(id);
+      }
+      break;
+    case '/linkedentity':
+      if (message.verb === 'updated') {
+        LinkedEntityIndexPage.updateLinkedEntity(id, message);
       }
       break;
   }
