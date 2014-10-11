@@ -33,24 +33,6 @@ ControlledEntity.prototype.getWorker = function () {
   return this._worker
 }
 
-/*
-ControlledEntity.prototype.setPID = function (pid) {
-  var self = this
-
-  if (typeof pid === "undefined" || pid == null) {
-    self._pid = false
-    self._ready = false
-  } else {
-    self._pid = pid
-    self._ready = true
-  }
-}*/
-
-/*ControlledEntity.prototype.getPID = function () {
-  return this._pid
-}
-*/
-
 ControlledEntity.prototype.getRequiredPorts = function () {
   var self = this, ports = [], config = self._entity.config
 
@@ -124,6 +106,7 @@ ControlledEntity.prototype.set = function (prop, value) {
       if (Boolean(value)) {
         self.set('pid', self.get('worker').process.pid)
       }
+      self._update(prop, self._ready, true)
       break
     case 'pid':
       self._pid = Number(value)
@@ -141,28 +124,45 @@ ControlledEntity.prototype.set = function (prop, value) {
   }
 }
 
-ControlledEntity.prototype._update = function (prop, value) {
+ControlledEntity.prototype._update = function (prop, value, doNotUpdateModel) {
   var self = this, updateValues = {}
 
   updateValues[prop] = value
+  doNotUpdateModel = doNotUpdateModel || false
 
-  console.log("UPDATING " + prop + " TO " + value + " FOR " + self.get('id'))
-  LinkedEntity.update({ id: self.get('id') }, updateValues, function(err, entities) {
-    console.log("\tUPDATED " + prop + " TO " + value + " FOR " + self.get('id'))
-    if (err) {
-      self.error(err)
-    } else {
-      for (var i in entities) {
-        LinkedEntity.publishUpdate(entities[i].id, {
-          name: entities[i].name,
-          property: prop,
-          value: value,
-          action: 'updated'
-        })
+  if (!doNotUpdateModel) {
+    LinkedEntity.update({ id: self.get('id') }, updateValues, function(err, entities) {
+      console.log("\tUPDATED " + prop + " TO " + value + " FOR " + self.get('id'))
+      if (err) {
+        self.error(err)
+      } else {
+        for (var i in entities) {
+          LinkedEntity.publishUpdate(entities[i].id, {
+            name: entities[i].name,
+            property: prop,
+            value: value,
+            action: 'updated'
+          })
+        }
       }
-    }
-  })
+    })
+  } else {
+    console.log("\tPUBLISH (ONLY) " + prop + " TO " + value + " FOR " + self.get('id'))
+    LinkedEntity.publishUpdate(self.get('id'), {
+      name: self.get('name'),
+      property: prop,
+      value: value,
+      action: 'updated'
+    })
+  }
+
 }
 
+ControlledEntity.prototype.getClonedValues = function () {
+  var self = this, result = extend({}, self._entity)
 
+  result.ready = self._ready
+  result.pid = self._pid
 
+  return result
+}

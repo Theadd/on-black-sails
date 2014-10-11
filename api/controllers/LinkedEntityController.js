@@ -61,11 +61,20 @@ module.exports = {
 
   index: function(req, res, next) {
     LinkedEntity.find(function foundLinkedEntities(err, entities) {
-      if (err) return next(err);
+      if (err) return next(err)
+
+      var result = [], i
+      for (i in entities) {
+        try {
+          result.push(Entity.getControlledEntity(entities[i].id).getClonedValues())
+        } catch (e) {
+          console.log(e)
+        }
+      }
       res.view({
-        linkedentities: entities
-      });
-    });
+        linkedentities: result
+      })
+    })
   },
 
   edit: function(req, res, next) {

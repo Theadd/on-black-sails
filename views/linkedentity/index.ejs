@@ -10,7 +10,7 @@
 
         <div class="list-group">
           <% _.each(linkedentities, function(entity) { %>
-          <a href="/linkedentity/show/<%= entity.id %>" class="list-group-item<%= (entity.enabled) ? ' list-group-item-success' : '' %>" data-id="<%= entity.id %>" data-model="entity">
+          <a href="/linkedentity/show/<%= entity.id %>" class="list-group-item<%= (entity.ready) ? ' list-group-item-success' : '' %>" data-id="<%= entity.id %>" data-model="linkedentity">
             <div class="pull-right toolbox">
               <span data-target="linkedentity" data-id="<%= entity.id %>" data-action="toggle" data-prop="enabled" class="label <%= (entity.enabled) ? 'label-primary' : 'label-default' %>"><i class="fa fa-lg fa-power-off"></i></span>
               <span data-target="linkedentity" data-id="<%= entity.id %>" data-action="toggle" data-prop="respawn" class="label <%= (entity.respawn) ? 'label-primary' : 'label-default' %>"><i class="fa fa-lg fa-refresh"></i></span>
