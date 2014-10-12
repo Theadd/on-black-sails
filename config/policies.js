@@ -37,6 +37,10 @@ module.exports.policies = {
     edit: "userCanSeeProfile",
     update: "userCanSeeProfile",
     '*': "admin"
+  },
+  settings: {
+    index: "userCanSeeProfile",
+    '*': "admin"
   }
 
 	// Here's an example of mapping some policies to run before
