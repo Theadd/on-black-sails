@@ -17,7 +17,7 @@ module.exports.setup = function() {
     'silent': CommandLineHelpers.config.tracker.silent,
     'networkHost': CommandLineHelpers.config.tracker.host,
     'networkPort': CommandLineHelpers.config.tracker.port,
-    'path': CommandLineHelpers.config.datapath,
+    'path': CommandLineHelpers.config.datapath || Settings.get('datapath'),
     'onempty': CommandLineHelpers.config.tracker.onempty
   })
 
@@ -70,7 +70,7 @@ module.exports.updatePeersOf = function(hash) {
           --self._stats['working-pool-size']
           if (!err) {
             //console.log("  >>> " + entries[0].uuid + "\t" + res.complete + "/" + res.incomplete + " (" + res.downloaded + ") - " + res.retries + " #" + res.responses + "/" + res.announces)
-            if (res.complete == 0 && res.incomplete == 0 && CommandLineHelpers.config.removedead) {
+            if (res.complete == 0 && res.incomplete == 0 && Settings.get('removedead')) {
               HashHelpers.remove(entries[0].uuid)
               ++self._stats['items-dead-removed']
             } else {
@@ -79,7 +79,7 @@ module.exports.updatePeersOf = function(hash) {
                 leechers: res.incomplete,
                 updatedAt: entries[0].updatedAt,
                 peersUpdatedAt: new Date(),
-                updatedBy: CommandLineHelpers.config.clusterid
+                updatedBy: Settings.get('cluster')
               }, function (uErr, hashes) {
                 if (!uErr) {
                   ++self._stats['items-updated']

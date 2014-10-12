@@ -17,7 +17,7 @@ module.exports.setup = function() {
     'silent': CommandLineHelpers.config.metadata.silent,
     'networkHost': CommandLineHelpers.config.metadata.host,
     'networkPort': CommandLineHelpers.config.metadata.port,
-    'path': CommandLineHelpers.config.datapath,
+    'path': CommandLineHelpers.config.datapath || Settings.get('datapath'),
     'onempty': CommandLineHelpers.config.metadata.onempty
   })
 
@@ -95,7 +95,7 @@ module.exports.updateMetadata = function(content) {
     }
   })
   //Update File model
-  if (CommandLineHelpers.config.indexfiles) {
+  if (Settings.get('indexfiles')) {
     for (var i in content.files) {
       var data = {};
       data['hash'] = task.hash

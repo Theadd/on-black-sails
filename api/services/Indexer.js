@@ -70,14 +70,14 @@ exports.run = function() {
     }, 2000);
   }
 
-  if (CommandLineHelpers.config.autogc || false) {
+  if (CommandLineHelpers.config.autogc || Settings.get('autogc')) {
     setInterval(function () {
       try {
         global.gc()
       } catch (e) {
         console.error("Restart this process enabling garbage collection: \"node --expose-gc app.js ...\"")
       }
-    }, (Number(CommandLineHelpers.config.autogc) >= 1000) ? Number(CommandLineHelpers.config.autogc) : 90000)
+    }, (Number(CommandLineHelpers.config.autogc || Settings.get('autogc')) >= 1000) ? Number(CommandLineHelpers.config.autogc || Settings.get('autogc')) : 90000)
   }
 }
 

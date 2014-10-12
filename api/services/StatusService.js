@@ -18,7 +18,7 @@ module.exports.setup = function() {
     'silent': CommandLineHelpers.config.status.silent,
     'networkHost': CommandLineHelpers.config.status.host,
     'networkPort': CommandLineHelpers.config.status.port,
-    'path': CommandLineHelpers.config.datapath,
+    'path': CommandLineHelpers.config.datapath || Settings.get('datapath'),
     'onempty': CommandLineHelpers.config.status.onempty
   })
 

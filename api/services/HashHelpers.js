@@ -28,7 +28,7 @@ exports.merge = function (item) {
     .exec(function (err, entries) {
       if (!err && entries.length) {
         if (isMostUpdated(entries[0], item)) {
-          if (CommandLineHelpers.config.removedead && item.seeders == 0 && item.leechers == 0) {
+          if (Settings.get('removedead') && item.seeders == 0 && item.leechers == 0) {
             //Remove dead torrent
             HashHelpers.remove(entries[0].uuid)
           } else {
@@ -50,7 +50,7 @@ exports.merge = function (item) {
         } else {
         }
       } else {
-        if (!(CommandLineHelpers.config.removedead && item.seeders == 0)) {
+        if (!(Settings.get('removedead')&& item.seeders == 0)) {
           delete item._id
           delete item.id
           Hash.create(item).exec(function (createErr, entry) {

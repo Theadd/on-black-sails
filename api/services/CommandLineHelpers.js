@@ -92,11 +92,9 @@ var defaultConfig = {
     'onempty': false
   },
   'live': false,
-  'datapath': '.data/',
-  'clusterid': -1,
-  'removedead': false,
-  'indexfiles': false,
   'autoqueue': false,
+  'datapath': false,
+  'removedead': false,
   'autogc': false
 }
 

@@ -17,7 +17,7 @@ module.exports.setup = function() {
     'silent': CommandLineHelpers.config.propagate.silent,
     'networkHost': CommandLineHelpers.config.propagate.host,
     'networkPort': CommandLineHelpers.config.propagate.port,
-    'path': CommandLineHelpers.config.datapath
+    'path': CommandLineHelpers.config.datapath || Settings.get('datapath')
   })
 
   var self = this;
@@ -35,7 +35,7 @@ module.exports.propagate = function() {
     self._isBusy = true;
 
     /*self.getExchangeNode*/
-    ExchangeNodeHelpers.getNode(CommandLineHelpers.config.clusterid, function(err, thisExchangeNode) {
+    ExchangeNodeHelpers.getNode(Settings.get('cluster'), function(err, thisExchangeNode) {
       self._propagate(err, thisExchangeNode);
     })
   } else {
@@ -90,7 +90,7 @@ module.exports._propagate = function(err, thisExchangeNode) {
 
 module.exports._propagateToActiveNodes = function(thisNode, remoteNodes) {
   var self = this,
-    clusterid = CommandLineHelpers.config.clusterid,
+    clusterid = Settings.get('cluster'),
     chunk = []
 
   self._activeOperations = 0

@@ -18,7 +18,7 @@ module.exports = {
     if (remoteUUID != null && exchangeKey != null) {
       ExchangeNodeHelpers.getNode(remoteUUID, function exchangeNodeCB(err, exchangeNode) {
         if (!err) {
-          ExchangeNodeHelpers.getNode(CommandLineHelpers.config.clusterid, function thisNodeCB(err, thisNode) {
+          ExchangeNodeHelpers.getNode(Settings.get('cluster'), function thisNodeCB(err, thisNode) {
             try {
               if (!err) {
                 if (exchangeKey == ExchangeNodeHelpers.getKey(thisNode.uuid, thisNode.key, exchangeNode.uuid, exchangeNode.key, exchangeData.length)) {
@@ -79,7 +79,7 @@ module.exports = {
     if (remoteUUID != null && exchangeKey != null) {
       ExchangeNodeHelpers.getNode(remoteUUID, function exchangeNodeCB(err, exchangeNode) {
         if (!err) {
-          ExchangeNodeHelpers.getNode(CommandLineHelpers.config.clusterid, function thisNodeCB(err, thisNode) {
+          ExchangeNodeHelpers.getNode(Settings.get('cluster'), function thisNodeCB(err, thisNode) {
             try {
               if (!err) {
                 if (exchangeKey == ExchangeNodeHelpers.getKey(thisNode.uuid, thisNode.key, exchangeNode.uuid, exchangeNode.key, exchangeData.length)) {

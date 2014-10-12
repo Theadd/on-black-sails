@@ -55,12 +55,12 @@ module.exports.deploy = function() {
 
     } else {
       //Standalone process NOT in linked entities (MASTER)
-      if (CommandLineHelpers.config.clusterid == -1 || typeof CommandLineHelpers.config.clusterid !== "number") {
+      /*if (CommandLineHelpers.config.clusterid == -1 || typeof CommandLineHelpers.config.clusterid !== "number") {
         console.log(CommandLineHelpers.usage())
         process.exit()
-      } else {
+      } else {*/
         Indexer.run()
-      }
+      //}
     }
   } else {
     //Child process (WORKER)
@@ -117,41 +117,8 @@ EntityObject.prototype.spawnChildProcesses = function () {
   LinkedEntity.find({enabled: true}).exec(function(err, entries) {
     if (!err && entries.length) {
       for (var i in entries) {
-        /*entries[i].config['name'] = entries[i].name
-        entries[i].config['enabled'] = entries[i].enabled
-        entries[i].config['respawn'] = entries[i].respawn
-        entries[i].config['storedId'] = entries[i].id
-        entries[i].config['port'] = entries[i].port
 
-        console.log("\n\nentries[i].id = " + entries[i].id + "\n\n")*/
-
-        //self._spawnChildProcessQueue.push(entries[i].config)
         self.getControlledEntity(entries[i].id).setRespawnByForce(false)
-        self._spawnChildProcessQueue.push(entries[i].id)
-      }
-      self.spawnNextChildProcess()
-    } else {
-      console.error("No linked entities found!")
-    }
-  })
-}
-
-EntityObject.prototype.spawnChildProcessByName = function (name, force) {
-  var self = this
-  force = force || false
-
-  LinkedEntity.find({name: name}).exec(function(err, entries) {
-    if (!err && entries.length) {
-      for (var i in entries) {
-        /*entries[i].config['name'] = entries[i].name
-        entries[i].config['enabled'] = entries[i].enabled
-        entries[i].config['respawn'] = entries[i].respawn
-        entries[i].config['port'] = entries[i].port
-        entries[i].config['storedId'] = entries[i].id
-        entries[i].config['force'] = force
-
-        self._spawnChildProcessQueue.push(entries[i].config)*/
-        self.getControlledEntity(entries[i].id).setRespawnByForce(true)
         self._spawnChildProcessQueue.push(entries[i].id)
       }
       self.spawnNextChildProcess()
