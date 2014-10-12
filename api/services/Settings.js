@@ -103,6 +103,9 @@ Settings.prototype.get = function (prop) {
       case 'autogc':
         value = self._config.autogc.value
         break
+      case 'onblacksails':
+        value = sails.config.onblacksails || false
+        break
       default:
         console.warn("[Settings] Unrecognized property: " + prop)
     }

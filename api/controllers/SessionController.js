@@ -44,31 +44,35 @@ module.exports = {
           var usernamePasswordMismatchError = [{name: 'usernamePasswordMismatch', message: 'Invalid username and password combination.'}];
           req.session.flash = {
             err: usernamePasswordMismatchError
-          };
-          res.redirect('/session/new');
-          return;
+          }
+          res.redirect('/session/new')
+          return
         }
 
-        req.session.authenticated = true;
-        req.session.User = user;
+        req.session.authenticated = true
+        req.session.User = user
 
         user.online = true;
         user.save(function(err, user) {
-          if (err) return next(err);
+          if (err) return next(err)
 
           User.publishUpdate(user.id, {
             loggedIn: true,
             id: user.id,
             name: user.name,
             action: ' has logged in.'
-          });
+          })
 
           if (req.session.User.admin) {
-            res.redirect('/');
-            return;
+            if (Settings.get('onblacksails')) {
+              res.redirect('/')
+            } else {
+              res.redirect('/settings')
+            }
+            return
           }
 
-          res.redirect('/user/show/' + user.id);
+          res.redirect('/user/show/' + user.id)
         });
       });
     });
