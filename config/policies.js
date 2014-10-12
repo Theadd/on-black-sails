@@ -39,7 +39,7 @@ module.exports.policies = {
     '*': "admin"
   },
   settings: {
-    index: "userCanSeeProfile",
+    index: "flash",
     '*': "admin"
   }
 
