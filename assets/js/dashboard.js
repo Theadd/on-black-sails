@@ -19,6 +19,18 @@ $(function() {
       this.cacheElements();
       this.bindEvents();
       this.checkViewport();
+      this.handleSwitches();
+      $('.selectpicker').selectpicker();
+      /*$('[title]').tooltip({container: 'body', title: 'hello'});
+
+      $('.selectpicker').change(function() {
+        var $button = $(this).data('selectpicker').$button;
+
+        $button
+          .tooltip('hide')
+          .attr('data-original-title', $button.attr('title'))
+          .tooltip('show');
+      });*/
     },
 
     /**
@@ -73,8 +85,41 @@ $(function() {
       }
     },
 
+    handleSwitches: function() {
+      //$('.btn-toggle').unbind( "click" );
+      $('.btn-toggle').click(function(ev) {
+        $(this).find('.btn').toggleClass('active');
+
+        if ($(this).find('.btn-primary').size()>0) {
+          $(this).find('.btn').toggleClass('btn-primary');
+        }
+        if ($(this).find('.btn-danger').size()>0) {
+          $(this).find('.btn').toggleClass('btn-danger');
+        }
+        if ($(this).find('.btn-success').size()>0) {
+          $(this).find('.btn').toggleClass('btn-success');
+        }
+        if ($(this).find('.btn-info').size()>0) {
+          $(this).find('.btn').toggleClass('btn-info');
+        }
+
+        if ($(this).find('input[type="radio"]').size() > 0) {
+          ev.preventDefault();
+          ev.stopPropagation();
+          $(this).find('.btn').each(function() {
+            var active = $(this).hasClass("active");
+            var $checkbox = $(this).find('input[type="radio"]').first();
+            $checkbox.prop("checked", active);
+          });
+        }
+
+        $(this).find('.btn').toggleClass('btn-default');
+      });
+    }
+
   };
 
   App.init();
 
 });
+

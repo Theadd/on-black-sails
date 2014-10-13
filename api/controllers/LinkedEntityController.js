@@ -11,6 +11,12 @@ module.exports = {
   },
 
   create: function(req, res, next) {
+
+    req.session.flash = {
+      msg: [{name: 'fields', message: JSON.stringify(req.body)}]
+    }
+    return res.redirect('/linkedentity/new')
+
     /*var userObj = {
       name: req.param('name'),
       title: req.param('title'),

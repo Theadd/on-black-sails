@@ -1,0 +1,16 @@
+<optgroup label="Target: Metadata"<%= (target != 'metadata') ? ' disabled' : '' %>>
+  <option data-subtext="<br />Add items to MetadataService<br /> queue which aren't downloaded yet."
+          <%= (selectedQueueModels.indexOf('emptyMetadataQueue') != -1) ? 'selected' : '' %>>emptyMetadataQueue</option>
+</optgroup>
+<optgroup label="Target: Tracker"<%= (target != 'tracker') ? ' disabled' : '' %>>
+  <option data-subtext="<br />Used to keep torrent peers up<br /> to date for newly created ones<br /> since its when they are more active"
+    >updatePeersOnRecent</option>
+</optgroup>
+<optgroup label="Target: Status"<%= (target != 'status') ? ' disabled' : '' %>>
+  <option data-subtext="<br />Add items to StatusService which<br /> are already downloaded."
+    >emptyStatusQueue</option>
+</optgroup>
+<optgroup label="Target: Media"<%= (target != 'media') ? ' disabled' : '' %>>
+  <option data-subtext="<br />Add items to MediaService which<br /> are already downloaded."
+    >emptyMediaQueue</option>
+</optgroup>

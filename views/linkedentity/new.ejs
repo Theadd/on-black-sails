@@ -1,0 +1,130 @@
+
+<% if(flash && (flash.err || flash.msg)) { %>
+<div class="row">
+  <div class="col-xs-12">
+
+    <% if(flash && flash.err) { %>
+    <% Object.keys(flash.err).forEach(function(error) { %>
+    <div class="alert alert-danger" role="alert">
+      <a href="#" class="close" data-dismiss="alert">&times;</a>
+      <%= flash.err[error].message %>
+    </div>
+    <% }) %>
+    <% } %>
+
+    <% if(flash && flash.msg) { %>
+    <% Object.keys(flash.msg).forEach(function(msg) { %>
+    <div class="alert alert-success" role="alert">
+      <a href="#" class="close" data-dismiss="alert">&times;</a>
+      <%= flash.msg[msg].message %>
+    </div>
+    <% }) %>
+    <% } %>
+
+  </div>
+</div>
+<% } %>
+
+<div class="row">
+
+  <form action="/linkedentity/create" method="POST" class="form-horizontal" role="form">
+
+    <div class="col-lg-6 no-padding">  <!-- left column -->
+
+      <div class="row">
+        <div class="col-lg-12">
+          <div class="widget">
+            <div class="widget-header">
+              <i class="fa fa-cog"></i> General Options
+              <div class="clearfix"></div>
+            </div>
+            <div class="widget-body narrow">  <!-- widget-body -->
+
+
+
+                <div class="form-group">
+                  <label for="label" class="col-sm-2 control-label">Name</label>
+                  <div class="col-sm-5">
+                    <input type="text" class="form-control" name="name" value="" />
+                  </div>
+                  <div class="col-sm-5">
+                    <div class="input-mask">Unique</div>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label for="label" class="col-sm-2 control-label">Port</label>
+                  <div class="col-sm-5">
+                    <input type="text" class="form-control" name="name" value="" />
+                  </div>
+                  <div class="col-sm-5">
+                    <div class="input-mask">Unique, integer from 1000 to 65536.</div>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label for="label" class="col-sm-2 control-label">Live</label>
+                  <div class="col-sm-5">
+
+                    <input type="checkbox" class="" name="live" /> Automatically queue torrents found in this process indexing task/s to the corresponding MetadataService.
+
+                  </div>
+                  <div class="col-sm-5">
+                    <div class="input-mask"></div>
+                  </div>
+                </div>
+
+
+
+            </div>  <!-- widget-body END -->
+
+          </div>
+        </div>
+      </div>
+
+    </div>  <!-- left column END -->
+
+    <div class="col-lg-6 no-padding">  <!-- right column -->
+
+      <% var target = "metadata", targetTitle = "Metadata", selectedQueueModels = [], targetIcon = 'fa-code' %>
+
+      <div class="row">
+        <div class="col-lg-12">
+          <% selectedQueueModels = ["emptyMetadataQueue"] %>
+          <% include service-widget %>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-lg-12">
+          <% target = "tracker"; targetTitle = "Tracker"; selectedQueueModels = []; targetIcon = 'fa-child' %>
+          <% include service-widget %>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-lg-12">
+          <% target = "status"; targetTitle = "Status"; selectedQueueModels = []; targetIcon = 'fa-heart' %>
+          <% include service-widget %>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-lg-12">
+          <% target = "media"; targetTitle = "Media"; selectedQueueModels = []; targetIcon = 'fa-film' %>
+          <% include service-widget %>
+        </div>
+      </div>
+
+    </div>  <!-- right column END -->
+
+    <div class="row">
+      <div class="col-lg-12">
+        <input type="submit" class="btn btn-lg btn-primary btn-block" value="Create"/>
+        <input type="hidden" name="_csrf" value="<%= _csrf %>" />
+      </div>
+    </div>
+
+  </form>
+
+</div>
