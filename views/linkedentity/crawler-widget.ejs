@@ -1,0 +1,31 @@
+<div class="widget">
+
+  <div class="widget-header">
+    <i class="fa <%= crawlerIcon %>"></i> Crawler: <%= crawlerTitle %>
+    <div class="btn-group btn-toggle pull-right" data-toggle="buttons">
+      <label class="btn btn-default">
+        <input name="<%= crawler %>" value="true" type="radio"> ON
+      </label>
+      <label class="btn btn-primary active">
+        <input name="<%= crawler %>" value="false" checked="checked" type="radio"> OFF
+      </label>
+    </div>
+    <div class="clearfix"></div>
+  </div>
+
+  <div class="widget-body narrow">  <!-- widget-body -->
+
+
+    <div class="form-group">
+      <label for="label" class="col-sm-2 control-label">Index full site</label>
+      <div class="col-sm-10">
+
+        <input type="checkbox" class="" name="<%= crawler %>-full" />
+        If enabled, indexes ALL torrents from <%= crawlerTitle %>, once. Otherwise, periodically indexes latest torrents only.
+
+      </div>
+    </div>
+
+  </div>  <!-- widget-body END -->
+
+</div>

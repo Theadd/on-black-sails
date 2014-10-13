@@ -64,13 +64,10 @@
 
                 <div class="form-group">
                   <label for="label" class="col-sm-2 control-label">Live</label>
-                  <div class="col-sm-5">
+                  <div class="col-sm-10">
 
-                    <input type="checkbox" class="" name="live" /> Automatically queue torrents found in this process indexing task/s to the corresponding MetadataService.
+                    <input type="checkbox" class="" name="live" /> Automatically queue torrents found from crawlers to the corresponding MetadataService.
 
-                  </div>
-                  <div class="col-sm-5">
-                    <div class="input-mask"></div>
                   </div>
                 </div>
 
@@ -79,6 +76,21 @@
             </div>  <!-- widget-body END -->
 
           </div>
+        </div>
+      </div>
+
+
+      <div class="row">
+        <div class="col-lg-12">
+          <% var crawler = "bitsnoop", crawlerTitle = "Bitsnoop.com", crawlerIcon = "fa-flask" %>
+          <% include crawler-widget %>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-lg-12">
+          <% crawler = "kickass"; crawlerTitle = "Kickass.to"; crawlerIcon = "fa-flask" %>
+          <% include crawler-widget.ejs %>
         </div>
       </div>
 
