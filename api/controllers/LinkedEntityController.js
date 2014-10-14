@@ -7,74 +7,57 @@
 
 module.exports = {
   'new': function(req, res) {
-    res.view();
+
+    var entity = new ControlledEntity({}),
+      result = entity.getClonedValues()
+
+    res.view({
+      linkedentity: result
+    })
   },
 
   create: function(req, res, next) {
+    //if (req.session.User && req.session.User.admin) {
+    var entity = new ControlledEntity({})
 
-    req.session.flash = {
-      msg: [{name: 'fields', message: JSON.stringify(req.body)}]
-    }
-    return res.redirect('/linkedentity/new')
-
-    /*var userObj = {
-      name: req.param('name'),
-      title: req.param('title'),
-      email: req.param('email'),
-      password: req.param('password'),
-      confirmation: req.param('confirmation')
-    };
-
-    User.count({}, function (err, numUsers) {
-      userObj['admin'] = Boolean(err || !numUsers)
-
-      User.create(userObj, function userCreated(err, user) {
+    if (entity) {
+      for (var i in req.body) {
+        if (i == '_csrf') continue
+        entity.set(i, req.body[i])
+      }
+      entity.create(function (err, result) {
         if (err) {
           req.session.flash = {
-            err: err
-          };
-
-          return res.redirect('/user/new');
+            err: [{name: 'createError', message: err.message}]
+          }
+          return res.redirect('/linkedentity/new')
+        } else {
+          req.session.flash = {
+            msg: [{name: 'createSuccess', message: '<span class="inline-pseudobox">' + result.name + '</span> was created successfully.'}]
+          }
+          return res.redirect('/linkedentity')
         }
+      })
+    } else {
+      req.session.flash = {
+        err: [{name: 'entityNotFound', message: 'Entity not found!'}]
+      }
+      return res.redirect('/linkedentity/new')
+    }
 
-        req.session.authenticated = true;
-        req.session.User = user;
-
-        user.online = true;
-        user.save(function(err, user) {
-          if (err) return next(err);
-
-          user.action = " signed-up and logged-in.";
-
-          User.publishCreate(user);
-
-          res.redirect('/user/show/'+user.id);
-        });
-      });
-    })*/
-
-  },
-
-  show: function(req, res, next) {
-    LinkedEntity.findOne(req.param('id'), function foundLinkedEntity(err, entity) {
-      if (err) return next(err);
-      if (!entity) return next();
-      res.view({
-        linkedentity: entity
-      });
-    });
   },
 
   index: function(req, res, next) {
+
     LinkedEntity.find(function foundLinkedEntities(err, entities) {
       if (err) return next(err)
 
       var result = [], i
       for (i in entities) {
-        try {
-          result.push(Entity.getControlledEntity(entities[i].id).getClonedValues())
-        } catch (e) {
-          console.log(e)
+        var entity = Entity.getControlledEntity(entities[i].id)
+
+        if (entity) {
+          result.push(entity.getClonedValues())
         }
       }
       res.view({
@@ -84,65 +67,57 @@ module.exports = {
   },
 
   edit: function(req, res, next) {
-    /*User.findOne(req.param('id'), function foundUser(err, user) {
-      if (err) return next(err);
-      if (!user) return next();
+    LinkedEntity.findOne(req.param('id'), function foundLinkedEntities(err, entity) {
+      if (err) return next(err)
+      var result = {}
+      try {
+        result = Entity.getControlledEntity(entity.id).getClonedValues()
+      } catch (e) {
+        console.log(e)
+        req.session.flash = {
+          err: [{name: 'Error', message: e.message}]
+        }
+        return res.redirect('/linkedentity/new')
+      }
 
       res.view({
-        user: user
+        linkedentity: result
       })
-    })*/
+    })
   },
 
   update: function(req, res, next) {
-    /*var userObj = {
-      name: req.param('name'),
-      title: req.param('title'),
-      email: req.param('email')
-    };
+    //if (req.session.User && req.session.User.admin) {
+    var entity = Entity.getControlledEntity(req.param('id'))
 
-    if (req.session.User.admin) {
-      // Changed this logic to here. I prefer to send clean stuff to models
-      var admin = false;
-      var adminParam = req.param('admin');
-
-      if (typeof adminParam !== 'undefined') {
-        if (adminParam === 'unchecked') {
-          admin = false;
-        } else  if (adminParam[1] === 'on') {
-          admin = true;
+    if (entity) {
+      for (var i in req.body) {
+        if (i == '_csrf' || i == 'id') continue
+        entity.set(i, req.body[i])
+      }
+      entity.update(function (err, result) {
+        if (err) {
+          req.session.flash = {
+            err: [{name: 'updateError', message: err.message}]
+          }
+          return res.redirect('/linkedentity/edit/' + req.param('id'));
+        } else {
+          req.session.flash = {
+            msg: [{name: 'restartNeeded', message: 'Restart <span class="inline-pseudobox">' + result.name + '</span> to apply changes.'}]
+          }
+          return res.redirect('/linkedentity')
         }
+      })
+    } else {
+      req.session.flash = {
+        err: [{name: 'entityNotFound', message: 'Entity not found!'}]
       }
-      userObj.admin = admin;
+      return res.redirect('/linkedentity')
     }
-
-    User.update(req.param('id'), userObj, function userUpdated (err) {
-      if (err) {
-        return res.redirect('/user/edit/' + req.param('id'));
-      }
-
-      res.redirect('/user/show/' + req.param('id'));
-    });*/
   },
 
   destroy: function(req, res, next) {
-    /*User.findOne(req.param('id'), function foundUser(err, user) {
-      if (err) return next(err);
-      if (!user) return next('User doesn\'t exist.');
 
-      User.destroy(req.param('id'), function userDestroyed(err) {
-        if (err) return next(err);
-
-        User.publishUpdate(user.id, {
-          name: user.name,
-          action: ' has been destroyed.'
-        });
-
-        User.publishDestroy(user.id);
-      });
-
-      res.redirect('/user');
-    });*/
   },
 
   subscribe: function(req, res) {

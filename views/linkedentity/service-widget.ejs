@@ -2,11 +2,11 @@
   <div class="widget-header">
     <i class="fa <%= targetIcon %>"></i> Service: <%= targetTitle %>
     <div class="btn-group btn-toggle pull-right" data-toggle="buttons">
-      <label class="btn btn-default">
-        <input name="<%= target %>" value="true" type="radio"> ON
+      <label class="btn <%= (values.active) ? 'btn-primary active' : 'btn-default' %>">
+        <input name="<%= target %>" value="true" <%= (values.active) ? 'checked="checked"' : '' %> type="radio"> ON
       </label>
-      <label class="btn btn-primary active">
-        <input name="<%= target %>" value="false" checked="checked" type="radio"> OFF
+      <label class="btn <%= (!values.active) ? 'btn-primary active' : 'btn-default' %>">
+        <input name="<%= target %>" value="false" <%= (!values.active) ? 'checked="checked"' : '' %> type="radio"> OFF
       </label>
     </div>
     <div class="clearfix"></div>
@@ -16,7 +16,7 @@
     <div class="form-group">
       <label for="label" class="col-sm-2 control-label">Host (IPC)</label>
       <div class="col-sm-5">
-        <input type="text" class="form-control" name="<%= target %>-host" value="localhost" />
+        <input type="text" class="form-control" name="<%= target %>-host" value="<%= values.host %>" />
       </div>
       <div class="col-sm-5">
         <div class="input-mask">localhost / FQDN / IP Address</div>
@@ -25,7 +25,7 @@
     <div class="form-group">
       <label for="label" class="col-sm-2 control-label">Port (IPC)</label>
       <div class="col-sm-5">
-        <input type="text" class="form-control" name="<%= target %>-port" value="8018" />
+        <input type="text" class="form-control" name="<%= target %>-port" value="<%= values.port %>" />
       </div>
       <div class="col-sm-5">
         <div class="input-mask">Integer</div>
@@ -34,7 +34,7 @@
     <div class="form-group">
       <label for="label" class="col-sm-2 control-label">Interval</label>
       <div class="col-sm-5">
-        <input type="text" class="form-control" name="<%= target %>-interval" value="250" />
+        <input type="text" class="form-control" name="<%= target %>-interval" value="<%= values.interval %>" />
       </div>
       <div class="col-sm-5">
         <div class="input-mask">Integer (in milliseconds)</div>

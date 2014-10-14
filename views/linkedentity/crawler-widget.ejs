@@ -3,11 +3,11 @@
   <div class="widget-header">
     <i class="fa <%= crawlerIcon %>"></i> Crawler: <%= crawlerTitle %>
     <div class="btn-group btn-toggle pull-right" data-toggle="buttons">
-      <label class="btn btn-default">
-        <input name="<%= crawler %>" value="true" type="radio"> ON
+      <label class="btn btn-default <%= (values.active) ? 'active' : '' %>">
+        <input name="<%= crawler %>" value="true" <%= (values.active) ? 'checked="checked"' : '' %> type="radio"> ON
       </label>
-      <label class="btn btn-primary active">
-        <input name="<%= crawler %>" value="false" checked="checked" type="radio"> OFF
+      <label class="btn btn-primary <%= (!values.active) ? 'active' : '' %>">
+        <input name="<%= crawler %>" value="false" <%= (!values.active) ? 'checked="checked"' : '' %> type="radio"> OFF
       </label>
     </div>
     <div class="clearfix"></div>
@@ -20,7 +20,7 @@
       <label for="label" class="col-sm-2 control-label">Index full site</label>
       <div class="col-sm-10">
 
-        <input type="checkbox" class="" name="<%= crawler %>-full" />
+        <input type="checkbox" class="" value="true" name="<%= crawler %>-full" <%= (values.full) ? 'checked="checked"' : '' %> />
         If enabled, indexes ALL torrents from <%= crawlerTitle %>, once. Otherwise, periodically indexes latest torrents only.
 
       </div>

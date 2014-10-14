@@ -33,9 +33,8 @@ module.exports.policies = {
     'new': "flash",
     subscribe: ["flash", "authenticated"],
     create: "flash",
-    show: "userCanSeeProfile",
-    edit: "userCanSeeProfile",
-    update: "userCanSeeProfile",
+    edit: "flash",
+    update: "userCanSeeProfile",  //TODO: admin
     '*': "admin"
   },
   settings: {

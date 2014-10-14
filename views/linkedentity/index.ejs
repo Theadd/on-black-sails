@@ -11,7 +11,7 @@
 
         <div class="list-group">
           <% _.each(linkedentities, function(entity) { %>
-          <a href="/linkedentity/show/<%= entity.id %>" class="list-group-item<%= (entity.ready) ? ' list-group-item-success' : '' %>" data-id="<%= entity.id %>" data-model="linkedentity">
+          <a href="/linkedentity/edit/<%= entity.id %>" class="list-group-item<%= (entity.ready) ? ' list-group-item-success' : '' %>" data-id="<%= entity.id %>" data-model="linkedentity">
             <div class="pull-right">
               <div class="toolbox-left">
                 <span data-target="linkedentity"

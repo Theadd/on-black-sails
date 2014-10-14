@@ -150,7 +150,7 @@ EntityObject.prototype.spawnChildProcess = function (controlledEntity, callback)
   var self = this,
     ports = controlledEntity.getRequiredPorts()
 
-  new TestPorts(ports, function (err, res) {
+  new Common.TestPorts(ports, function (err, res) {
     if (res.taken.length && !controlledEntity.getRespawnByForce()) {
       return callback(new Error("FAILED TO SPAWN CHILD PROCESS, ONE OR MORE REQUIRED PORTS ARE ALREADY TAKEN"))
     } else {
@@ -245,47 +245,6 @@ EntityObject.prototype.terminate = function (killProcess) {
 }
 
 ////////////////////////////////////////////////////////////////
-
-function TestPorts (ports, callback) {
-  var self = this
-  if (!(self instanceof TestPorts)) return new TestPorts(ports, callback)
-
-  self.queue = (ports || []).slice()
-  self.available = []
-  self.taken = []
-
-  self.next(callback)
-}
-
-TestPorts.prototype.isPortTaken = function (port, fn) {
-  var net = require('net')
-  var tester = net.createServer()
-    .once('error', function (err) {
-      if (err.code != 'EADDRINUSE') return fn(err)
-      fn(null, true)
-    })
-    .once('listening', function() {
-      tester.once('close', function() { fn(null, false) })
-        .close()
-    })
-    .listen(port)
-}
-
-TestPorts.prototype.next = function (callback) {
-  var self = this
-
-  if (self.queue.length) {
-    var port = self.queue.shift()
-    self.isPortTaken(port, function (err, taken) {
-      if (err || taken) {
-        self.taken.push(port)
-      } else {
-        self.available.push(port)
-      }
-      return self.next(callback)
-    })
-  } else return callback(false, {available: self.available, taken: self.taken})
-}
 
 
 

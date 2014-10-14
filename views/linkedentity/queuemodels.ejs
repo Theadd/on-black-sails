@@ -4,13 +4,13 @@
 </optgroup>
 <optgroup label="Target: Tracker"<%= (target != 'tracker') ? ' disabled' : '' %>>
   <option data-subtext="<br />Used to keep torrent peers up<br /> to date for newly created ones<br /> since its when they are more active"
-    >updatePeersOnRecent</option>
+    <%= (selectedQueueModels.indexOf('updatePeersOnRecent') != -1) ? 'selected' : '' %>>updatePeersOnRecent</option>
 </optgroup>
 <optgroup label="Target: Status"<%= (target != 'status') ? ' disabled' : '' %>>
   <option data-subtext="<br />Add items to StatusService which<br /> are already downloaded."
-    >emptyStatusQueue</option>
+    <%= (selectedQueueModels.indexOf('emptyStatusQueue') != -1) ? 'selected' : '' %>>emptyStatusQueue</option>
 </optgroup>
 <optgroup label="Target: Media"<%= (target != 'media') ? ' disabled' : '' %>>
   <option data-subtext="<br />Add items to MediaService which<br /> are already downloaded."
-    >emptyMediaQueue</option>
+    <%= (selectedQueueModels.indexOf('emptyMediaQueue') != -1) ? 'selected' : '' %>>emptyMediaQueue</option>
 </optgroup>
