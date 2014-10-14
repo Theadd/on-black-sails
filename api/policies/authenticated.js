@@ -16,6 +16,6 @@ module.exports = function(req, res, ok) {
     // }
     // res.redirect('/session/new');
     //   return;
-    res.send(403);
+    return res.forbidden('You must be signed in.');
   }
 };

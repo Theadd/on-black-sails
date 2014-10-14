@@ -30,11 +30,12 @@ module.exports.policies = {
     '*': "admin"
   },
   linkedentity: {
-    'new': "flash",
-    subscribe: ["flash", "authenticated"],
-    create: "flash",
-    edit: "flash",
-    update: "userCanSeeProfile",  //TODO: admin
+    'new': "admin",
+    subscribe: "flash",
+    index: "flash",
+    create: "admin",
+    edit: ["flash", "signedin"],
+    update: "admin",
     '*': "admin"
   },
   settings: {
