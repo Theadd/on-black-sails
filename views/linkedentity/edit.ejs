@@ -62,12 +62,30 @@
                 </div>
               </div>
 
+              <hr />
+
               <div class="form-group">
                 <label for="label" class="col-sm-2 control-label">Live</label>
                 <div class="col-sm-10">
 
                   <input type="checkbox" class="" value="true" name="live" <%= (linkedentity.live) ? 'checked="checked"' : '' %> /> Automatically queue torrents found from crawlers to the corresponding MetadataService.
 
+                </div>
+              </div>
+
+
+              <div class="form-group">
+                <label for="label" class="col-sm-2 control-label">Autoqueue Model</label>
+                <div class="col-sm-5">
+                  <select class="selectpicker"
+                          name="autoqueue"
+                          multiple>
+                    <% var target = false, selectedQueueModels = (linkedentity.config.autoqueue) ? [linkedentity.config.autoqueue] : [] %>
+                    <% include queuemodels %>
+                  </select>
+                </div>
+                <div class="col-sm-5">
+                  <div class="input-mask"></div>
                 </div>
               </div>
 
@@ -146,7 +164,7 @@
 
     <div class="col-lg-6 no-padding">  <!-- right column -->
 
-      <% var target = "metadata", targetTitle = "Metadata", selectedQueueModels = [], targetIcon = 'fa-code' %>
+      <% target = "metadata"; selectedQueueModels = []; var targetTitle = "Metadata", targetIcon = 'fa-code' %>
 
       <div class="row">
         <div class="col-lg-12">

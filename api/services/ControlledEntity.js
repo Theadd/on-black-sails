@@ -196,6 +196,7 @@ ControlledEntity.prototype.set = function (prop, value) {
       break
     //CONFIG PROPERTIES, THEY DON'T GET UPDATED UNTIL SAVE()
     case 'live': self._entity.config.live = Boolean(JSON.parse(value)); break
+    case 'autoqueue': self._entity.config.autoqueue = Common.ValueOfMultiSelect(value); break
     //crawlers
     case 'bitsnoop': self._entity.config.index.bitsnoop.active = Boolean(JSON.parse(value)); break
     case 'bitsnoop-full': self._entity.config.index.bitsnoop.full = Boolean(JSON.parse(value)); break
