@@ -96,6 +96,54 @@
         </div>
       </div>
 
+
+
+
+
+
+
+      <div class="row">
+        <div class="col-lg-12">
+          <% values = linkedentity.config.propagate %>
+          <div class="widget">
+            <div class="widget-header">
+              <i class="fa fa-bullseye"></i> Extra Service: Propagate
+              <div class="btn-group btn-toggle pull-right" data-toggle="buttons">
+                <label class="btn <%= (values.active) ? 'btn-primary active' : 'btn-default' %>">
+                  <input name="propagate" value="true" <%= (values.active) ? 'checked="checked"' : '' %> type="radio"> ON
+                </label>
+                <label class="btn <%= (!values.active) ? 'btn-primary active' : 'btn-default' %>">
+                  <input name="propagate" value="false" <%= (!values.active) ? 'checked="checked"' : '' %> type="radio"> OFF
+                </label>
+              </div>
+              <div class="clearfix"></div>
+            </div>
+            <div class="widget-body narrow">
+
+              <div class="message">
+                Propagate database items that were updated recently to remote nodes.
+              </div>
+
+              <hr />
+
+              <div class="form-group">
+                <label for="label" class="col-sm-2 control-label">Interval</label>
+                <div class="col-sm-5">
+                  <input type="text" class="form-control" name="propagate-interval" value="<%= values.interval %>" />
+                </div>
+                <div class="col-sm-5">
+                  <div class="input-mask">Integer (in milliseconds)</div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+
+
     </div>  <!-- left column END -->
 
     <div class="col-lg-6 no-padding">  <!-- right column -->

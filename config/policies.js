@@ -30,7 +30,7 @@ module.exports.policies = {
     '*': "admin"
   },
   linkedentity: {
-    'new': "admin",
+    'new': ["flash", "admin"],
     subscribe: "flash",
     index: "flash",
     create: "admin",
