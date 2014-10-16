@@ -39,6 +39,10 @@ var LinkedEntityIndexPage = {
       $runElement.removeClass('disabled');
       $killElement.addClass('disabled');
     }
+  },
+
+  addLinkedEntity: function(id, message) {
+    location.reload();
   }
 
 };

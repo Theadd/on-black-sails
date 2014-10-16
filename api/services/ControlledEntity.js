@@ -277,6 +277,16 @@ ControlledEntity.prototype.create = function (callback) {
 
     LinkedEntity.create(self._entity).exec(function(err, entity) {
       if (err) return callback(err)
+
+      var created = new ControlledEntity(entity)
+      Entity._controlledEntity[entity.id] = created
+
+      LinkedEntity.publishCreate({
+        id: created.get('id'),
+        name: created.get('name'),
+        action: 'created'
+      })
+
       callback(null, entity)
     })
 

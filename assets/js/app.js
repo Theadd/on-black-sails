@@ -48,6 +48,9 @@ function updateEntryInDom(message) {
       if (message.verb === 'updated') {
         LinkedEntityIndexPage.updateLinkedEntity(id, message);
       }
+      if (message.verb === 'created') {
+        LinkedEntityIndexPage.addLinkedEntity(id, message);
+      }
       break;
   }
 }
