@@ -91,6 +91,13 @@ module.exports = {
     var entity = Entity.getControlledEntity(req.param('id'))
 
     if (entity) {
+      //set default value for multi selects
+      req.body.autoqueue = req.body.autoqueue || false
+      req.body['metadata-onempty'] = req.body['metadata-onempty'] || false
+      req.body['tracker-onempty'] = req.body['tracker-onempty'] || false
+      req.body['status-onempty'] = req.body['status-onempty'] || false
+      req.body['media-onempty'] = req.body['media-onempty'] || false
+
       for (var i in req.body) {
         if (i == '_csrf' || i == 'id') continue
         entity.set(i, req.body[i])

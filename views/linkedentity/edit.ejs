@@ -80,7 +80,7 @@
                   <select class="selectpicker"
                           name="autoqueue"
                           multiple>
-                    <% var target = false, selectedQueueModels = (linkedentity.config.autoqueue) ? [linkedentity.config.autoqueue] : [] %>
+                    <% var target = false, selectedQueueModels = (linkedentity.config.autoqueue) ? linkedentity.config.autoqueue : [] %>
                     <% include queuemodels %>
                   </select>
                 </div>
@@ -168,7 +168,7 @@
 
       <div class="row">
         <div class="col-lg-12">
-          <% selectedQueueModels = (linkedentity.config.metadata.onempty) ? [linkedentity.config.metadata.onempty] : [] %>
+          <% selectedQueueModels = (linkedentity.config.metadata.onempty) ? linkedentity.config.metadata.onempty : [] %>
           <% values = linkedentity.config.metadata %>
           <% include service-widget %>
         </div>
@@ -177,7 +177,7 @@
       <div class="row">
         <div class="col-lg-12">
           <% target = "tracker"; targetTitle = "Tracker"; selectedQueueModels = []; targetIcon = 'fa-child' %>
-          <% selectedQueueModels = (linkedentity.config.tracker.onempty) ? [linkedentity.config.tracker.onempty] : [] %>
+          <% selectedQueueModels = (linkedentity.config.tracker.onempty) ? linkedentity.config.tracker.onempty : [] %>
           <% values = linkedentity.config.tracker %>
           <% include service-widget %>
         </div>
@@ -186,7 +186,7 @@
       <div class="row">
         <div class="col-lg-12">
           <% target = "status"; targetTitle = "Status"; selectedQueueModels = []; targetIcon = 'fa-heart' %>
-          <% selectedQueueModels = (linkedentity.config.status.onempty) ? [linkedentity.config.status.onempty] : [] %>
+          <% selectedQueueModels = (linkedentity.config.status.onempty) ? linkedentity.config.status.onempty : [] %>
           <% values = linkedentity.config.status %>
           <% include service-widget %>
         </div>
@@ -195,7 +195,7 @@
       <div class="row">
         <div class="col-lg-12">
           <% target = "media"; targetTitle = "Media"; selectedQueueModels = []; targetIcon = 'fa-film' %>
-          <% selectedQueueModels = (linkedentity.config.media.onempty) ? [linkedentity.config.media.onempty] : [] %>
+          <% selectedQueueModels = (linkedentity.config.media.onempty) ? linkedentity.config.media.onempty : [] %>
           <% values = linkedentity.config.media %>
           <% include service-widget %>
         </div>
