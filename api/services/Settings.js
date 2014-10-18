@@ -4,6 +4,7 @@
 
 var extend = require('util')._extend
 var bcrypt = require('bcrypt')
+var crypto = require('crypto')
 
 module.exports = new Settings()
 
@@ -70,7 +71,7 @@ function Settings () {
     },
     identitykey: {
       key: 'identitykey',
-      value: sails.config.identitykey || 0,
+      value: sails.config.identitykey || bcrypt.hashSync(crypto.randomBytes(Math.ceil(15 / 2)).toString('hex').slice(0, 15), 14),
       type: 'string',
       title: 'Cluster identity key',
       help: 'String',
@@ -136,7 +137,7 @@ Settings.prototype.get = function (prop) {
         value = self._config.clustername.value
         break
       case 'identitykey':
-        value = ''
+        value = self._config.identitykey.value
         break
       case 'datapath':
         value = self._config.datapath.value
@@ -158,6 +159,8 @@ Settings.prototype.get = function (prop) {
     }
   } else {
     value = extend({}, self._config)
+    delete value.identitykey
+    delete value.cluster
   }
 
   return value
@@ -184,16 +187,6 @@ Settings.prototype.set = function (prop, value) {
       break
     case 'clustername':
       self._config.clustername.value = String(value)
-      break
-    case 'identitykey':
-      if (String(value).length) {
-        var start = new Date().getTime()
-        console.log("calculating identity key, time: " + start)
-        self._config.identitykey.value = bcrypt.hashSync(value, 15)
-        console.log("\n############################################")
-        console.log("\tbcrypt.hashSync took: " + ((new Date().getTime()) - start) + " ms")
-        console.log("############################################\n")
-      }
       break
     case 'datapath':
       self._config.datapath.value = String(value)
@@ -237,11 +230,9 @@ Settings.prototype.save = function (callback) {
 }
 
 Settings.prototype.verify = function (key, data) {
-  console.log("in verify")
-  var crypto = require('crypto'),
-    dataHash = crypto.createHash('md5').update(JSON.stringify(data)).digest("hex")
+  var dataHash = crypto.createHash('md5').update(JSON.stringify(data)).digest("hex")
 
-  return bcrypt.compareSync(this._config.identitykey.value + dataHash, key)
+  return bcrypt.compareSync(this.get('identitykey') + dataHash, key)
 }
 
 Settings.prototype.registerClusterInRealm = function (callback) {
@@ -251,7 +242,7 @@ Settings.prototype.registerClusterInRealm = function (callback) {
   requestify.post(self.get('realm') + 'cluster/create', {
     url: self.get('publicaddress'),
     name: self.get('clustername'),
-    hash: self._config.identitykey.value
+    hash: self.get('identitykey')
   }).then(function(response) {
     response.getBody()
     var body = {}
