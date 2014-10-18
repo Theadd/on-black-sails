@@ -3,6 +3,7 @@
  */
 
 var extend = require('util')._extend
+var bcrypt = require('bcrypt')
 
 module.exports = new Settings()
 
@@ -41,6 +42,40 @@ function Settings () {
       title: 'Cluster ID',
       help: 'Integer',
       desc: ''
+    },
+    realm: {
+      key: 'realm',
+      value: sails.config.realm || 'http://localhost:42000/', //TODO: 'http://realm.onblacksails.com/',
+      type: 'string',
+      title: 'Realm',
+      help: 'URL',
+      desc: 'Please, don\'t edit this field if you are not told to.'
+    },
+    publicaddress: {
+      key: 'publicaddress',
+      value: sails.config.publicaddress || 'http://localhost:1337/', //TODO: 'http://',
+      type: 'string',
+      title: 'Public address',
+      help: 'URL',
+      desc: 'Public address that points to the root of this dashboard, like <span class="inline-pseudobox">\
+        http://yourdomain.com:1337/</span>. Required to communicate with the realm of clusters.'
+    },
+    clustername: {
+      key: 'clustername',
+      value: sails.config.clustername || 'Default',
+      type: 'string',
+      title: 'Cluster Name',
+      help: 'String',
+      desc: ''
+    },
+    identitykey: {
+      key: 'identitykey',
+      value: sails.config.identitykey || 0,
+      type: 'string',
+      title: 'Cluster identity key',
+      help: 'String',
+      desc: 'Specify a password/passphrase that you will remember for sure the next time you need to do a clean \
+        install. It will only be used internally to communicate with the realm of clusters.'
     },
     datapath: {
       key: 'datapath',
@@ -91,6 +126,18 @@ Settings.prototype.get = function (prop) {
       case 'cluster':
         value = self._config.cluster.value
         break
+      case 'realm':
+        value = self._config.realm.value
+        break
+      case 'publicaddress':
+        value = self._config.publicaddress.value
+        break
+      case 'clustername':
+        value = self._config.clustername.value
+        break
+      case 'identitykey':
+        value = ''
+        break
       case 'datapath':
         value = self._config.datapath.value
         break
@@ -129,6 +176,25 @@ Settings.prototype.set = function (prop, value) {
     case 'cluster':
       self._config.cluster.value = Number(value)
       break
+    case 'realm':
+      self._config.realm.value = String(value)
+      break
+    case 'publicaddress':
+      self._config.publicaddress.value = String(value)
+      break
+    case 'clustername':
+      self._config.clustername.value = String(value)
+      break
+    case 'identitykey':
+      if (String(value).length) {
+        var start = new Date().getTime()
+        console.log("calculating identity key, time: " + start)
+        self._config.identitykey.value = bcrypt.hashSync(value, 15)
+        console.log("\n############################################")
+        console.log("\tbcrypt.hashSync took: " + ((new Date().getTime()) - start) + " ms")
+        console.log("############################################\n")
+      }
+      break
     case 'datapath':
       self._config.datapath.value = String(value)
       break
@@ -145,7 +211,6 @@ Settings.prototype.set = function (prop, value) {
       console.warn("[Settings] Unrecognized property: " + prop)
   }
 }
-
 
 Settings.prototype.save = function (callback) {
   var self = this, content = "module.exports = {\n"
@@ -169,4 +234,46 @@ Settings.prototype.save = function (callback) {
   var fs = require('fs');
   fs.writeFile("./config/local.js", content, callback)
 
+}
+
+Settings.prototype.verify = function (key, data) {
+  console.log("in verify")
+  var crypto = require('crypto'),
+    dataHash = crypto.createHash('md5').update(JSON.stringify(data)).digest("hex")
+
+  return bcrypt.compareSync(this._config.identitykey.value + dataHash, key)
+}
+
+Settings.prototype.registerClusterInRealm = function (callback) {
+  var self = this,
+    requestify = require('requestify')
+
+  requestify.post(self.get('realm') + 'cluster/create', {
+    url: self.get('publicaddress'),
+    name: self.get('clustername'),
+    hash: self._config.identitykey.value
+  }).then(function(response) {
+    response.getBody()
+    var body = {}
+    try {
+      body = JSON.parse(response.body)
+      if (body.error) {
+        return callback(new Error(body.error))
+      } else {
+        var clusterId = Number(body.data.cluster)
+        if (clusterId > 0) {
+          self.set('cluster', clusterId)
+          return callback(null)
+        } else {
+          return callback(new Error('Cluster ID was expected from realm.'))
+        }
+      }
+    } catch (e) {
+      sails.log.error(e)
+      sails.log.error(response.body)
+      return callback(e)
+    }
+  }, function(error) {
+    callback(error)
+  })
 }

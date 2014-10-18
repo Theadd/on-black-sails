@@ -24,17 +24,32 @@ module.exports = {
         if (i == '_csrf') continue
         Settings.set(i, req.body[i])
       }
-      Settings.save(function (err) {
+      Settings.registerClusterInRealm(function (err) {
         if (err) {
           req.session.flash = {
-            err: [{name: 'saveSettingsError', message: err.message}]
+            err: [
+              {name: 'registerClusterInRealmError', message: err.message}
+            ]
           }
+          return res.redirect('/settings')
         } else {
-          req.session.flash = {
-            msg: [{name: 'restartNeeded', message: 'Restart this process to apply changes.'}]
-          }
+          Settings.save(function (err) {
+            if (err) {
+              req.session.flash = {
+                err: [
+                  {name: 'saveSettingsError', message: err.message}
+                ]
+              }
+            } else {
+              req.session.flash = {
+                msg: [
+                  {name: 'restartNeeded', message: 'Restart this process to apply changes.'}
+                ]
+              }
+            }
+            return res.redirect('/settings')
+          })
         }
-        return res.redirect('/settings')
       })
     } else {
       req.session.flash = {
@@ -43,6 +58,20 @@ module.exports = {
       return res.redirect('/settings')
     }
 
+  },
+
+  verify: function(req, res) {
+    var key = req.param('key')
+
+    if (Settings.verify(key, Settings.get('realm'))) {
+      res.json({
+        error: false
+      })
+    } else {
+      res.json({
+        error: 'Not part of this realm.'
+      })
+    }
   }
 
 };

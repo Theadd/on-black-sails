@@ -40,6 +40,7 @@ module.exports.policies = {
   },
   settings: {
     index: "flash",
+    verify: "flash",
     '*': "admin"
   }
 
