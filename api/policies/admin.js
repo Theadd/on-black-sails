@@ -1,14 +1,22 @@
 module.exports = function(req, res, ok) {
+
   if (req.session.User && req.session.User.admin) {
-    return ok();
+    if (Settings.get('ready') || req.url == '/settings/update') {
+      return ok()
+    } else {
+      req.session.flash = {
+        err: [{name: 'properSettingsRequired', message: 'Proper settings required to perform this action.'}]
+      }
+      return res.redirect('/settings')
+    }
   }
 
   else {
-    var requireAdminError = [{name: 'requireAdminError', message: 'You must be an admin.'}];
+    var requireAdminError = [{name: 'requireAdminError', message: 'You must be an admin.'}]
     req.session.flash = {
       err: requireAdminError
-    };
-    res.redirect('/session/new');
-    return;
+    }
+    return res.redirect('/session/new')
   }
-};
+
+}

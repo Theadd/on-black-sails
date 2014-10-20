@@ -64,7 +64,7 @@ module.exports = {
           })
 
           if (req.session.User.admin) {
-            if (Settings.get('onblacksails')) {
+            if (Settings.get('ready')) {
               res.redirect('/')
             } else {
               res.redirect('/settings')

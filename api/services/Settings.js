@@ -109,6 +109,14 @@ function Settings () {
       title: 'Force garbage collection',
       help: 'Boolean',
       desc: ''
+    },
+    ready: {
+      key: 'ready',
+      value: sails.config.ready || false,
+      type: 'boolean',
+      title: '',
+      help: '',
+      desc: ''
     }
   }
 
@@ -152,16 +160,18 @@ Settings.prototype.get = function (prop) {
       case 'autogc':
         value = self._config.autogc.value
         break
-      case 'onblacksails':
-        value = sails.config.onblacksails || false
+      case 'ready':
+        value = self._config.ready.value
         break
       default:
+        console.trace()
         console.warn("[Settings] Unrecognized property: " + prop)
     }
   } else {
     value = extend({}, self._config)
     delete value.identitykey
     delete value.cluster
+    delete value.ready
   }
 
   return value
@@ -201,7 +211,11 @@ Settings.prototype.set = function (prop, value) {
     case 'autogc':
       self._config.autogc.value = Boolean(JSON.parse(value))
       break
+    case 'ready':
+      self._config.ready.value = Boolean(JSON.parse(value))
+      break
     default:
+      console.trace()
       console.warn("[Settings] Unrecognized property: " + prop)
   }
 }
@@ -216,14 +230,16 @@ Settings.prototype.save = function (callback) {
     } else if (key == 'environment') {
       content += "process.env.NODE_ENV || "
     }
-    if (self._config[key].type == 'string') {
-      content += "'" + self.get(key) + "',\n"
+    if (key != 'ready') {
+      if (self._config[key].type == 'string') {
+        content += "'" + self.get(key) + "',\n"
+      } else {
+        content += self.get(key) + ",\n"
+      }
     } else {
-      content += self.get(key) + ",\n"
+      content += self.get(key) + "\n};\n"
     }
   })
-
-  content += "  onblacksails: true\n};\n"
 
   var fs = require('fs');
   fs.writeFile("./config/local.js", content, callback)
@@ -255,6 +271,7 @@ Settings.prototype.registerClusterInRealm = function (callback) {
         var clusterId = Number(body.data.cluster)
         if (clusterId > 0) {
           self.set('cluster', clusterId)
+          self.set('ready', true)
           return callback(null)
         } else {
           return callback(new Error('Cluster ID was expected from realm.'))
