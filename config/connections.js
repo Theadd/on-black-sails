@@ -32,6 +32,10 @@ module.exports.connections = {
     host: 'mongos.onblacksails.com',
     port: 27040,
     database: 'onblacksails'
+  },
+
+  memory: {
+    adapter: 'sails-memory'
   }
 
 };

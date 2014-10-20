@@ -24,7 +24,7 @@ module.exports = {
         if (i == '_csrf') continue
         Settings.set(i, req.body[i])
       }
-      Settings.registerClusterInRealm(function (err) {
+      Cluster.register(function (err) {
         if (err) {
           req.session.flash = {
             err: [

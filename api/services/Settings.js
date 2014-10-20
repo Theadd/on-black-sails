@@ -251,38 +251,3 @@ Settings.prototype.verify = function (key, data) {
 
   return bcrypt.compareSync(this.get('identitykey') + dataHash, key)
 }
-
-Settings.prototype.registerClusterInRealm = function (callback) {
-  var self = this,
-    requestify = require('requestify')
-
-  requestify.post(self.get('realm') + 'cluster/create', {
-    url: self.get('publicaddress'),
-    name: self.get('clustername'),
-    hash: self.get('identitykey')
-  }).then(function(response) {
-    response.getBody()
-    var body = {}
-    try {
-      body = JSON.parse(response.body)
-      if (body.error) {
-        return callback(new Error("[REPLY FROM REALM] " + body.error))
-      } else {
-        var clusterId = Number(body.data.cluster)
-        if (clusterId > 0) {
-          self.set('cluster', clusterId)
-          self.set('ready', true)
-          return callback(null)
-        } else {
-          return callback(new Error('Cluster ID was expected from realm.'))
-        }
-      }
-    } catch (e) {
-      sails.log.error(e)
-      sails.log.error(response.body)
-      return callback(e)
-    }
-  }, function(error) {
-    callback(error)
-  })
-}

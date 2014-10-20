@@ -1,0 +1,41 @@
+<div class="row">
+
+  <div class="col-lg-12">
+    <div class="widget">
+      <div class="widget-header">
+        <i class="fa fa-cubes"></i> Public Nodes
+        <div class="clearfix"></div>
+      </div>
+      <div class="widget-body narrow">
+
+        <div class="list-group">
+          <% _.each(clusters, function(cluster) { %>
+          <a href="/linkedentity/edit/<%= cluster.id %>" class="list-group-item" data-id="<%= cluster.id %>" data-model="realm">
+            <div class="pull-right">
+              <div class="toolbox-left">
+                <span class="label <%= (cluster.removedead) ? 'label-primary' : 'label-default' %>">
+                  <i class="fa fa-lg fa-recycle"></i>
+                </span>
+                <span class="label <%= (cluster.indexfiles) ? 'label-primary' : 'label-default' %>">
+                  <i class="fa fa-lg fa-database"></i>
+                </span>
+              </div>
+              <div class="toolbox-right">
+
+                <span class="label label-primary" style="width: 160px">
+                  <%= cluster.scraped %> / <%= cluster.downloaded %> / <%= cluster.total %>
+                </span>
+              </div>
+            </div>
+            <p class="list-group-item-heading" style="margin: 0 165px 0 75px;">
+              <%= cluster.name %> @ <%= cluster.url %>
+            </p>
+
+          </a>
+          <% }) %>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
