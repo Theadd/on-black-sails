@@ -46,7 +46,7 @@ function Settings () {
     },
     realm: {
       key: 'realm',
-      value: sails.config.realm || 'http://localhost:42000/', //TODO: 'http://realm.onblacksails.com/',
+      value: sails.config.realm || 'http://realm.onblacksails.com:42000/',
       type: 'string',
       title: 'Realm',
       help: 'URL',
@@ -111,6 +111,7 @@ function Settings () {
       desc: ''
     }
   }
+
 }
 
 Settings.prototype.get = function (prop) {
@@ -249,7 +250,7 @@ Settings.prototype.registerClusterInRealm = function (callback) {
     try {
       body = JSON.parse(response.body)
       if (body.error) {
-        return callback(new Error(body.error))
+        return callback(new Error("[REPLY FROM REALM] " + body.error))
       } else {
         var clusterId = Number(body.data.cluster)
         if (clusterId > 0) {

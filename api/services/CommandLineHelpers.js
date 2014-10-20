@@ -198,7 +198,7 @@ exports.usage = function () {
       --index-kickass\n\
         Indexes torrents from kickass.to\n\n\
       --index-bitsnoop\n\
-        Indexes torrents from bitsnoop.to\n\n\
+        Indexes torrents from bitsnoop.com\n\n\
     Options:\n\
       --full\n\
         If specified, indexes ALL torrents from specified action, once.\n\

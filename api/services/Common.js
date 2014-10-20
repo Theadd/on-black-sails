@@ -3,6 +3,7 @@
  */
 
 module.exports.ValueOfMultiSelect = ValueOfMultiSelect
+module.exports.RandomHexString = RandomHexString
 module.exports.TestPorts = TestPorts
 
 /** Sanitizes a value from user input in a multiple select (front-end).
@@ -27,6 +28,19 @@ function ValueOfMultiSelect (input) {
   }
 
   return output
+}
+
+/** Generate a random hex string.
+ *
+ * @param len
+ * @returns {string}
+ * @constructor
+ */
+function RandomHexString (len) {
+  var crypto = require('crypto')
+  len = len || 12
+
+  return crypto.randomBytes(Math.ceil(len / 2)).toString('hex').slice(0, len)
 }
 
 /** Tests specified ports for availability.
