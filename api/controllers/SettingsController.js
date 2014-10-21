@@ -58,20 +58,6 @@ module.exports = {
       return res.redirect('/settings')
     }
 
-  },
-
-  verify: function(req, res) {
-    var key = req.param('key')
-
-    if (Settings.verify(key, Settings.get('realm'))) {
-      res.json({
-        error: false
-      })
-    } else {
-      res.json({
-        error: 'Not part of this realm.'
-      })
-    }
   }
 
 };

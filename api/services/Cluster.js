@@ -5,7 +5,6 @@
 var extend = require('util')._extend
 var requestify = require('requestify')
 var bcrypt = require('bcrypt')
-var crypto = require('crypto')
 var objectHash = require('object-hash')
 
 module.exports = new Cluster()
@@ -39,14 +38,14 @@ Cluster.prototype.updateClusterStats = function (interval) {
 }
 
 Cluster.prototype.setStats = function (total, downloaded, scraped) {
-  this.send({
+  this.send('update', {
     total: total,
     downloaded: downloaded,
     scraped: scraped
   })
 }
 
-Cluster.prototype.send = function (data, callback) {
+Cluster.prototype.send = function (action, data, callback) {
   var self = this,
     _data = extend({}, data)
   if (typeof _data.key !== "undefined") {
@@ -60,9 +59,8 @@ Cluster.prototype.send = function (data, callback) {
   if (typeof callback !== "function") {
     callback = function(){}
   }
-  console.log("in buildkey... key:\n" + _data.key)
 
-  requestify.post(Settings.get('realm') + 'cluster/update', _data).then(function(response) {
+  requestify.post(Settings.get('realm') + 'cluster/' + action, _data).then(function(response) {
     response.getBody()
     var body = {}
     try {
@@ -88,6 +86,7 @@ Cluster.prototype.buildKey = function (key, data) {
 }
 
 Cluster.prototype.register = function (callback) {
+  Settings.set('ready', false)
 
   requestify.post(Settings.get('realm') + 'cluster/create', {
     url: Settings.get('publicaddress'),
@@ -207,4 +206,12 @@ Cluster.prototype._cleanCluster = function (data) {
     downloaded: Number(data.downloaded || 0),
     scraped: Number(data.scraped || 0)
   }
+}
+
+
+Cluster.prototype.validate = function (data) {
+  var key = data.key || ''
+
+  delete data.key
+  return (bcrypt.compareSync(Settings.get('identitykey') + objectHash(data), key)) ? data : false
 }

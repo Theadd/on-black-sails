@@ -10,14 +10,25 @@ module.exports = {
   index: function(req, res, next) {
 
     Cluster.getRealmClusters(function (err, response) {
-      console.log("\nIn callback of Cluster.getRealmClusters")
-      console.log(err)
-      console.log(response)
-
       res.view({
         clusters: response || []
       })
     })
+  },
+
+  verify: function(req, res) {
+    var params = req.params.all()
+    delete params.id
+    var data = Cluster.validate(params)
+    if (data != false && data.url == Settings.get('realm')) {
+      res.json({
+        error: false
+      })
+    } else {
+      res.json({
+        error: 'Not part of this realm.'
+      })
+    }
   }
 
 }

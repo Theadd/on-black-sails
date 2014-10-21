@@ -4,7 +4,6 @@
 
 var extend = require('util')._extend
 var bcrypt = require('bcrypt')
-var crypto = require('crypto')
 
 module.exports = new Settings()
 
@@ -244,10 +243,4 @@ Settings.prototype.save = function (callback) {
   var fs = require('fs');
   fs.writeFile("./config/local.js", content, callback)
 
-}
-
-Settings.prototype.verify = function (key, data) {
-  var dataHash = crypto.createHash('md5').update(JSON.stringify(data)).digest("hex")
-
-  return bcrypt.compareSync(this.get('identitykey') + dataHash, key)
 }
