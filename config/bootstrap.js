@@ -10,23 +10,22 @@
  */
 
 module.exports.bootstrap = function(cb) {
+
+  _.extend(sails.hooks.http.app.locals, sails.config.http.locals)
+
   Entity.deploy()
 
-  // It's very important to trigger this callack method when you are finished
-  // with the bootstrap!  (otherwise your server will never lift, since it's waiting on the bootstrap)
-  //TODO: Set online = false in public entity only
-  User.update({}, {
-      online: false
-    },
-    function userUpdated(err, users) {
-      if (err) {
-        console.log(err);
-      } else {
-        // console.log(users);
+  if (Entity.isMaster) {
+    User.update({}, {
+        online: false
+      },
+      function userUpdated(err, users) {
+        if (err) console.error(err)
+        cb()
       }
-      cb();
-    }
-  )
-};
+    )
+  } else {
+    cb()
+  }
 
-
+}

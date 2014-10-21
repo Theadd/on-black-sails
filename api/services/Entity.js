@@ -163,9 +163,7 @@ EntityObject.prototype.spawnChildProcess = function (controlledEntity, callback)
 
 EntityObject.prototype._spawnChildProcess = function (controlledEntity) {
   var self = this
-  //console.log("\t\tspawnChildProcess("+processConfig.port+")" + process.env.PORT + ",,, " + Number(sails.config.port))
 
-  //console.log("FORKING ON PORT: " + processConfig.port)
   process.env.PORT = controlledEntity.get('port')
   process.env.CHILD_PROCESS = true
   cluster.fork()

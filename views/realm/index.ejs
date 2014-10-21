@@ -24,7 +24,7 @@
               <div class="toolbox-right">
 
                 <span class="label label-primary" style="width: 160px">
-                  <%= cluster.scraped %> / <%= cluster.downloaded %> / <%= cluster.total %>
+                  <%=: cluster.scraped | formatBigNumber %> / <%=: cluster.downloaded | formatBigNumber %> / <%=: cluster.total | formatBigNumber %>
                 </span>
               </div>
             </div>

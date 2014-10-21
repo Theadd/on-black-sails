@@ -39,6 +39,23 @@ module.exports.http = {
 
   },
 
+  locals: {
+    filters: {
+      formatBigNumber: function(num) {
+        if (num >= 1000000000) {
+          return (num / 1000000000).toFixed(1).replace(/\.0$/, '') + 'G';
+        }
+        if (num >= 1000000) {
+          return (num / 1000000).toFixed(1).replace(/\.0$/, '') + 'M';
+        }
+        if (num >= 1000) {
+          return (num / 1000).toFixed(1).replace(/\.0$/, '') + 'K';
+        }
+        return num;
+      }
+    }
+  },
+
   // The number of seconds to cache flat files on disk being served by
   // Express static middleware (by default, these files are in `.tmp/public`)
   //

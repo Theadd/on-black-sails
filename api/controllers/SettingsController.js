@@ -43,7 +43,7 @@ module.exports = {
             } else {
               req.session.flash = {
                 msg: [
-                  {name: 'restartNeeded', message: 'Restart this process to apply changes.'}
+                  {name: 'restartNeeded', message: 'Restart this MASTER process to apply changes WITHOUT \'--port=*\'.'}
                 ]
               }
             }
