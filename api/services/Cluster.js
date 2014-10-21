@@ -4,6 +4,9 @@
 
 var extend = require('util')._extend
 var requestify = require('requestify')
+var bcrypt = require('bcrypt')
+var crypto = require('crypto')
+var objectHash = require('object-hash')
 
 module.exports = new Cluster()
 
@@ -13,12 +16,85 @@ function Cluster () {
 
 }
 
+Cluster.prototype.updateClusterStats = function (interval) {
+  var self = this, total = 0, downloaded = 0, scraped = 0
+  if (Settings.get('ready')) {
+    Hash.count({}, function (err, num) {
+      total = num || 0
+      Hash.count({downloaded: true}, function (err, num) {
+        downloaded = num || 0
+        Hash.count({updatedBy: {'>': 0}}, function (err, num) {
+          scraped = num || 0
+          self.setStats(total, downloaded, scraped)
+        })
+      })
+    })
+  }
+
+  if (interval || false) {
+    setInterval(function() {
+      self.updateClusterStats()
+    }, interval)
+  }
+}
+
+Cluster.prototype.setStats = function (total, downloaded, scraped) {
+  this.send({
+    total: total,
+    downloaded: downloaded,
+    scraped: scraped
+  })
+}
+
+Cluster.prototype.send = function (data, callback) {
+  var self = this,
+    _data = extend({}, data)
+  if (typeof _data.key !== "undefined") {
+    delete _data.key
+  }
+  if (typeof _data.id !== "undefined") {
+    delete _data.id
+  }
+  _data.url = Settings.get('publicaddress')
+  _data.key = self.buildKey(Settings.get('identitykey'), _data)
+  if (typeof callback !== "function") {
+    callback = function(){}
+  }
+  console.log("in buildkey... key:\n" + _data.key)
+
+  requestify.post(Settings.get('realm') + 'cluster/update', _data).then(function(response) {
+    response.getBody()
+    var body = {}
+    try {
+      body = JSON.parse(response.body)
+      if (body.error) {
+        return callback(new Error("[REPLY FROM REALM] " + body.error))
+      } else {
+        return callback(null, body)
+      }
+    } catch (e) {
+      sails.log.error(e)
+      sails.log.error(response.body)
+      return callback(e)
+    }
+  }, function(error) {
+    callback(error)
+  })
+
+}
+
+Cluster.prototype.buildKey = function (key, data) {
+  return bcrypt.hashSync(key + objectHash(data), 10)
+}
+
 Cluster.prototype.register = function (callback) {
 
   requestify.post(Settings.get('realm') + 'cluster/create', {
     url: Settings.get('publicaddress'),
     name: Settings.get('clustername'),
-    hash: Settings.get('identitykey')
+    hash: Settings.get('identitykey'),
+    indexfiles: Settings.get('indexfiles'),
+    removedead: Settings.get('removedead')
   }).then(function(response) {
     response.getBody()
     var body = {}

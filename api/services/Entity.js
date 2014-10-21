@@ -32,7 +32,7 @@ module.exports.deploy = function() {
       //Standalone process able to fork linked entities (MASTER)
       self.isMaster = true
       self._controlledEntity = {}
-      Cluster.updateClusterStats(15000)
+      Cluster.updateClusterStats(300000)
       cluster.on('exit', function(worker, code, signal) {
         worker._controlledEntity.set('ready', false)
         sails.log.error("Worker " + worker._controlledEntity.get('name') + " <" + worker._controlledEntity.get('pid') + "> died (" + (signal || code) + ")")
