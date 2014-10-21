@@ -4,6 +4,7 @@
 
 var extend = require('util')._extend
 var bcrypt = require('bcrypt')
+var crypto = require('crypto')
 
 module.exports = new Settings()
 
