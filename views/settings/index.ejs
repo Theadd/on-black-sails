@@ -10,13 +10,13 @@
 
         <% if(flash && flash.err) { %>
         <% Object.keys(flash.err).forEach(function(error) { %>
-        <div class="alert alert-danger" role="alert"><%= flash.err[error].message %></div>
+        <div class="alert alert-danger" role="alert"><%- flash.err[error].message %></div>
         <% }) %>
         <hr />
         <% } %>
         <% if(flash && flash.msg) { %>
         <% Object.keys(flash.msg).forEach(function(msg) { %>
-        <div class="alert alert-success" role="alert"><%= flash.msg[msg].message %></div>
+        <div class="alert alert-success" role="alert"><%- flash.msg[msg].message %></div>
         <% }) %>
         <hr />
         <% } %>

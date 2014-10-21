@@ -41,9 +41,17 @@ module.exports = {
                 ]
               }
             } else {
+              var message = ''
+              if (Settings.get('autogc')) {
+                message = 'Restart MASTER process WITHOUT \'--port=*\' to apply changes. Using forever with autogc \
+                  enabled would be: <span class="inline-pseudobox">forever start -c "node --expose-gc" app.js --master</span>'
+              } else {
+                message = 'Restart MASTER process WITHOUT \'--port=*\' to apply changes. Using forever with autogc \
+                  disabled would be: <span class="inline-pseudobox">forever start app.js --master</span>'
+              }
               req.session.flash = {
                 msg: [
-                  {name: 'restartNeeded', message: 'Restart this MASTER process to apply changes WITHOUT \'--port=*\'.'}
+                  {name: 'restartNeeded', message: message}
                 ]
               }
             }
