@@ -29,6 +29,39 @@ module.exports = {
         error: 'Not part of this realm.'
       })
     }
+  },
+
+  edit: function(req, res) {
+    Cluster.getProfile(function (err, response) {
+      res.view({
+        cluster: response || {}
+      })
+    })
+  },
+
+  update: function(req, res) {
+    var params = req.params.all()
+
+    delete params.id
+    delete params._csrf
+
+    Cluster.updateProfile(params, function (err, response) {
+      if (err) {
+        req.session.flash = {
+          err: [
+            {name: 'updateProfileError', message: err.message}
+          ]
+        }
+        return res.redirect('/realm/edit')
+      } else {
+        req.session.flash = {
+          msg: [
+            {name: 'updateProfileSuccess', message: 'Node updated successfully.'}
+          ]
+        }
+        return res.redirect('/realm/edit')
+      }
+    })
   }
 
 }

@@ -1,0 +1,106 @@
+<div class="row">
+
+  <div class="col-lg-12">
+    <div class="widget">
+      <div class="widget-header">
+        <i class="fa fa-cube"></i> Configure your Node
+        <div class="clearfix"></div>
+      </div>
+      <div class="widget-body narrow">
+
+        <% if(flash && flash.err) { %>
+        <% Object.keys(flash.err).forEach(function(error) { %>
+        <div class="alert alert-danger" role="alert"><%- flash.err[error].message %></div>
+        <% }) %>
+        <hr />
+        <% } %>
+        <% if(flash && flash.msg) { %>
+        <% Object.keys(flash.msg).forEach(function(msg) { %>
+        <div class="alert alert-success" role="alert"><%- flash.msg[msg].message %></div>
+        <% }) %>
+        <hr />
+        <% } %>
+
+        <form action="/realm/update" method="POST" class="form-horizontal form-signin" role="form">
+
+          <div class="form-group">
+            <label for="label" class="col-sm-2 control-label">Email</label>
+            <div class="col-sm-8">
+              <input type="text" class="form-control" name="email" value="<%= cluster.email %>" />
+            </div>
+            <div class="col-sm-2">
+              <div class="input-mask">
+                <strong>Required</strong> (Private)
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-sm-offset-2 col-sm-10">
+                <span class="help-block form-group-inline-message">
+                  It'll be used internally to notify you of new requests for agreements from other nodes.
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="label" class="col-sm-2 control-label">Note</label>
+            <div class="col-sm-8">
+              <textarea class="form-control" rows="3" name="note" placeholder="A public description/note about this node. Which kind of data you can provide to other nodes with an agreement, what you need from them, etc."><%= cluster.note %></textarea>
+            </div>
+            <div class="col-sm-2">
+              <div class="input-mask">
+                Optional
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="label" class="col-sm-2 control-label">Private</label>
+            <div class="col-sm-10">
+              <input type="checkbox" class="" value="true" name="private" <%= (cluster.private) ? 'checked="checked"' : '' %> />
+              Check to hide your public address in <strong>Public Nodes</strong> section.
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="label" class="col-sm-2 control-label">Allow agreements</label>
+            <div class="col-sm-10">
+              <input type="checkbox" class="" value="true" name="newagreements" <%= (cluster.newagreements) ? 'checked="checked"' : '' %> />
+              Check to allow other nodes to request for exchange agreements with you.
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="label" class="col-sm-2 control-label">Status</label>
+            <div class="col-sm-5">
+              <select class="selectpicker"
+                      name="status">
+
+                <optgroup label="Common">
+                  <option data-subtext="<br />Default status."
+                    <%= (cluster.status.indexOf('stable') != -1) ? 'selected' : '' %>>stable</option>
+                  <option data-subtext="<br />In maintenance mode."
+                    <%= (cluster.status.indexOf('maintenance') != -1) ? 'selected' : '' %>>maintenance</option>
+                  <option data-subtext="<br />Might contain corrupted data."
+                    <%= (cluster.status.indexOf('unstable') != -1) ? 'selected' : '' %>>unstable</option>
+                  <option data-subtext="<br />Cannot handle more work."
+                    <%= (cluster.status.indexOf('crowded') != -1) ? 'selected' : '' %>>crowded</option>
+                </optgroup>
+
+              </select>
+            </div>
+            <div class="col-sm-5">
+              <div class="input-mask"></div>
+            </div>
+          </div>
+
+          <input type="submit" class="btn btn-lg btn-primary btn-block" value="Send"/>
+          <input type="hidden" name="_csrf" value="<%= _csrf %>" />
+
+        </form>
+
+
+      </div>
+    </div>
+  </div>
+</div>

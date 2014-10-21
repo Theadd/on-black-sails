@@ -188,8 +188,6 @@ Cluster.prototype._setRealmCluster = function (data, callback) {
       })
     }
   })
-
-
 }
 
 Cluster.prototype._cleanCluster = function (data) {
@@ -208,10 +206,31 @@ Cluster.prototype._cleanCluster = function (data) {
   }
 }
 
-
 Cluster.prototype.validate = function (data) {
   var key = data.key || ''
 
   delete data.key
   return (bcrypt.compareSync(Settings.get('identitykey') + objectHash(data), key)) ? data : false
+}
+
+Cluster.prototype.getProfile = function (callback) {
+  var self = this
+  var data = {
+    url: Settings.get('publicaddress')
+  }
+  self.send('show', data, function (err, res) {
+    if (err) return callback(err)
+    return callback(null, res.data)
+  })
+}
+
+Cluster.prototype.updateProfile = function (params, callback) {
+  var self = this
+  var data = extend({}, params)
+  data.url = Settings.get('publicaddress')
+
+  self.send('update', data, function (err, res) {
+    if (err) return callback(err)
+    return callback(null, res.data)
+  })
 }
