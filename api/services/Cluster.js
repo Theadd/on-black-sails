@@ -38,7 +38,7 @@ Cluster.prototype.updateClusterStats = function (interval) {
 }
 
 Cluster.prototype.setStats = function (total, downloaded, scraped) {
-  this.send('update', {
+  this.send('cluster/update', {
     total: total,
     downloaded: downloaded,
     scraped: scraped
@@ -60,7 +60,7 @@ Cluster.prototype.send = function (action, data, callback) {
     callback = function(){}
   }
 
-  requestify.post(Settings.get('realm') + 'cluster/' + action, _data).then(function(response) {
+  requestify.post(Settings.get('realm') + action, _data).then(function(response) {
     response.getBody()
     var body = {}
     try {
@@ -218,7 +218,7 @@ Cluster.prototype.getProfile = function (callback) {
   var data = {
     url: Settings.get('publicaddress')
   }
-  self.send('show', data, function (err, res) {
+  self.send('cluster/show', data, function (err, res) {
     if (err) return callback(err)
     return callback(null, res.data)
   })
@@ -229,7 +229,7 @@ Cluster.prototype.updateProfile = function (params, callback) {
   var data = extend({}, params)
   data.url = Settings.get('publicaddress')
 
-  self.send('update', data, function (err, res) {
+  self.send('cluster/update', data, function (err, res) {
     if (err) return callback(err)
     return callback(null, res.data)
   })

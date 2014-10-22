@@ -3,7 +3,7 @@
  */
 
 $(".list-group-item .label").on("click", function (ev) {
-  ev.preventDefault()
+  ev.preventDefault();
   var target = $(this).data("target"),
     id = $(this).data("id"),
     action = $(this).data("action"),
@@ -13,5 +13,12 @@ $(".list-group-item .label").on("click", function (ev) {
   $.getJSON(url, {
     prop: prop
   }).done(function (data) {});
+});
+
+$(".list-group-item-toggle-next").on("click", function (ev) {
+  ev.preventDefault();
+
+  $(this).next().slideToggle("slow");
+
 });
 

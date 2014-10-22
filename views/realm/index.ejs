@@ -17,7 +17,7 @@
 
         <div class="list-group">
           <% _.each(clusters, function(cluster) { %>
-          <a href="/linkedentity/edit/<%= cluster.id %>" class="list-group-item" data-id="<%= cluster.id %>" data-model="realm">
+          <a href="#" class="list-group-item list-group-item-toggle-next" data-id="<%= cluster.id %>" data-model="realm">
             <div class="pull-right">
               <div class="toolbox-left">
                 <span class="label <%= (cluster.removedead) ? 'label-primary' : 'label-default' %>">
@@ -39,6 +39,14 @@
             </p>
 
           </a>
+
+          <div class="list-group-item list-group-item-collapsed" data-id="<%= cluster.id %>">
+            <div class="pull-right">
+              <a href="/agreement/new/<%= cluster.id %>" class="btn btn-sm btn-info"><i class="fa fa-share-alt-square"></i> Request Agreement</a>
+            </div>
+            <div><strong>Status:</strong> <%= cluster.status %></div>
+            <p><strong>Note:</strong> <%= cluster.note %></p>
+          </div>
           <% }) %>
         </div>
 
