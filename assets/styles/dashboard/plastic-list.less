@@ -42,6 +42,13 @@
     }
   }
 
+  &.multiline {
+    overflow: visible;
+    > * {
+      overflow: visible;
+    }
+  }
+
   &.box-default > * {
     border-radius: 3px;
     border: 1px solid rgba(0,0,0,0.1);
@@ -93,9 +100,9 @@ ul.plastic-list {
     border: 1px solid rgba(0, 0, 0, 0.5);
     min-height: @item-row-height;
     padding: 0;
+    overflow: hidden;
     margin-bottom: (@padding / 2) * -1;
     width: 100%;
-    .transition(2s, linear);
 
     &:hover {
       background-color: fadeout(@item-color, 10%);
@@ -112,6 +119,10 @@ ul.plastic-list {
     > .body {
       padding: 0 (@padding / 2);
       width: 100%;
+      .cell.multiline {
+        position: absolute;
+        border-right: 10px solid transparent;
+      }
     }
 
     &:nth-child(2n + 1) {
@@ -156,7 +167,6 @@ ul.plastic-list {
   &.small {
     font-size: 0.8em;
     line-height: 1.6em;
-    //padding-top: 6px;
   }
 
   &.center {
