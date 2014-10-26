@@ -1,0 +1,89 @@
+
+<% if(flash && (flash.err || flash.msg)) { %>
+<div class="row">
+  <div class="col-xs-12">
+
+    <% if(flash && flash.err) { %>
+    <% Object.keys(flash.err).forEach(function(error) { %>
+    <div class="alert alert-danger" role="alert">
+      <a href="#" class="close" data-dismiss="alert">&times;</a>
+      <%= flash.err[error].message %>
+    </div>
+    <% }) %>
+    <% } %>
+
+    <% if(flash && flash.msg) { %>
+    <% Object.keys(flash.msg).forEach(function(msg) { %>
+    <div class="alert alert-success" role="alert">
+      <a href="#" class="close" data-dismiss="alert">&times;</a>
+      <%= flash.msg[msg].message %>
+    </div>
+    <% }) %>
+    <% } %>
+
+  </div>
+</div>
+<% } %>
+
+<div class="row">
+
+  <div class="col-lg-12">
+    <div class="widget">
+      <div class="widget-header">
+        <i class="fa fa-share-alt-square"></i> Agreements
+        <div class="pull-right">
+          <a href="/agreement" class="btn btn-sm btn-info"><i class="fa fa-refresh"></i> Refresh</a>
+        </div>
+        <div class="clearfix"></div>
+      </div>
+      <div class="widget-body narrow">
+
+        <ul class="plastic-list">
+          <% _.each(agreements, function(agreement) { %>
+
+          <li class="item" data-id="<%= agreement.id %>">
+            <div class="body">
+              <span class="cell col-md-1 col-sm-2 col-xs-2 box-success">
+                <span class="plastic-tag uppercase white small center shadow"><%= agreement.status %></span>
+              </span>
+              <span class="cell col-md-2 box-default hidden-xs hidden-sm">
+                <span class="plastic-tag center shadow small">
+                  <%=: agreement.remotenode.scraped | formatBigNumber %> /
+                  <%=: agreement.remotenode.downloaded | formatBigNumber %> /
+                  <%=: agreement.remotenode.total | formatBigNumber %>
+                </span>
+              </span>
+              <span class="cell col-md-8 col-sm-8 col-xs-7 box-lightblue">
+                <span class="plastic-tag title">[<%= agreement.remotenode.name %>] <%= agreement.title %></span>
+              </span>
+              <div class="btn-group cell col-md-1 col-sm-2 col-xs-3 multiline no-action box-align-right pull-right">
+                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+                  Action <span class="caret"></span>
+                </button>
+                <ul class="dropdown-menu no-display" role="menu">
+                  <li><a href="#">Accept</a></li>
+                  <li class="divider"></li>
+                  <li><a href="#">Decline</a></li>
+                </ul>
+              </div>
+            </div>
+            <div class="expansion">
+
+              <div class="cell col-sm-12 multiline">
+                <div class="form-group">
+                  <label for="label" class="col-sm-2 col-md-1 control-label">Note</label>
+                  <div class="col-sm-10 col-md-11">
+                    <textarea class="form-control" rows="3" placeholder=""><%= agreement.note %></textarea>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </li>
+          <% }) %>
+        </ul>
+
+      </div>
+    </div>
+  </div>
+</div>

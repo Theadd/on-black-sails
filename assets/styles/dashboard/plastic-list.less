@@ -1,0 +1,284 @@
+
+@item-color: hsla(208, 71%, 81%, 0.3);
+@item-color-odd: rgba(255, 255, 203, 0.3);
+@border-radius: 5px;
+@padding: 8px;
+@item-row-height: 46px;
+
+.cell() {
+  display: inline-block;
+  float: left;
+  margin: 0;
+  padding: @padding (@padding / 2);
+
+  &:not(.primitive) > * {
+    font-size: inherit;
+    font-weight: inherit;
+    line-height: inherit;
+    width: 100%;
+
+    padding: 5px 10px;
+
+    &:not(.no-display) {
+      display: block;
+    }
+
+    &.small {
+      .plastic-tag.small;
+    }
+
+    &.plastic-tag.title {
+      line-height: 1.1em;
+    }
+  }
+
+  &:not(.multiline) {
+    height: @item-row-height;
+    overflow: hidden;
+    > * {
+      box-sizing: border-box;
+      max-height: @item-row-height - (@padding * 2);
+      overflow: hidden;
+    }
+  }
+
+  &.box-default > * {
+    border-radius: 3px;
+    border: 1px solid rgba(0,0,0,0.1);
+    background-color: rgba(0,0,0,0.05);
+  }
+
+  &.box-success > * {
+    border-radius: 3px;
+    border: 1px solid rgba(0,0,0,0.1);
+    background-color: rgba(92, 184, 92,0.3);
+  }
+
+  &.box-lightblue > * {
+    background-color: rgba(75, 127, 255, 0.05);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 3px;
+  }
+
+  &.box-align-center > * {
+    text-align: center;
+  }
+
+  &.box-align-right > * {
+    text-align: right;
+  }
+
+  &.box-uppercase > * {
+    text-transform: uppercase;
+  }
+
+  &.no-select {
+    .user-select(none);
+  }
+}
+
+
+ul.plastic-list {
+  padding: 0;
+  margin: 0;
+  border-radius: @border-radius;
+  .horizontal-gradient(rgba(79, 133, 178, 0.05), rgba(188, 230, 255, 0.5));
+
+  > .item:first-child {
+    border-radius: @border-radius @border-radius 0 0;
+  }
+
+  & > .item {
+    display: inline-block;
+    border: 1px solid rgba(0, 0, 0, 0.5);
+    min-height: @item-row-height;
+    padding: 0;
+    margin-bottom: (@padding / 2) * -1;
+    width: 100%;
+    .transition(2s, linear);
+
+    &:hover {
+      background-color: fadeout(@item-color, 10%);
+    }
+
+    > .expansion {
+      display: none;
+      border-top: 1px solid rgba(0, 0, 0, 0.5);
+      background-color: rgba(255, 255, 255, 0.5);
+      width: 100%;
+      padding: 0 (@padding / 2);
+    }
+
+    > .body {
+      padding: 0 (@padding / 2);
+      width: 100%;
+    }
+
+    &:nth-child(2n + 1) {
+      background-color: @item-color-odd;
+      &:hover {
+        background-color: fadein(@item-color-odd, 20%);
+      }
+    }
+
+    &:last-child {
+      border-radius: 0 0 @border-radius @border-radius;
+    }
+
+    &:not(:last-child) {
+      border-bottom: none;
+    }
+
+    .cell {
+      .cell;
+    }
+
+    .makeIndexProp(100, cell-size-, width, 5);
+  }
+
+}
+
+
+.plastic-tag {
+
+
+  height: 100%;
+
+
+  &.uppercase {
+    text-transform: uppercase;
+  }
+
+  &.white {
+    color: white;
+  }
+
+  &.small {
+    font-size: 0.8em;
+    line-height: 1.6em;
+    //padding-top: 6px;
+  }
+
+  &.center {
+    text-align: center;
+  }
+
+  &.shadow {
+
+    &.white {
+      text-shadow: 0 1px 1px rgba(0, 0, 0, 0.5);
+    }
+
+    &:not(.white) {
+      text-shadow: 0 1px 1px rgba(255, 255, 255, 0.75);
+    }
+  }
+
+  &.title {
+    color: rgba(35, 69, 156, 0.48);
+    height: 100%;
+    letter-spacing: 0.05em;
+    line-height: 1.1em;
+    text-shadow: 0 1px 1px rgba(35, 69, 156, 0.75);
+  }
+}
+
+/** MIXINS **/
+
+.transition(@duration:0.2s, @ease:ease-out) {
+  -webkit-transition: all @duration @ease;
+  -moz-transition: all @duration @ease;
+  -o-transition: all @duration @ease;
+  transition: all @duration @ease;
+}
+
+.user-select(@argument: none) {
+  -webkit-user-select: @argument;
+  -moz-user-select: @argument;
+  -ms-user-select: @argument;
+  user-select: @argument;
+}
+
+.makeIndexProp(@max, @class-prefix, @prop: width,  @i:1) when (@i <= @max) {
+  .@{class-prefix}@{i} {
+    @{prop}: percentage(@i / 100);  //unit(@i, @unit);
+  }
+  .makeIndexProp(@max, @class-prefix, @i:(@i+5));
+}
+
+/*.makeIndexProp(@max, @class-prefix, @unit: px, @prop: width,  @i:1) when (@i <= @max) {
+  .@{class-prefix}@{i} {
+    @{prop}: unit(@i, @unit);
+  }
+  .makeIndexProp(@max, @class-prefix, @i:(@i+5));
+}*/
+
+
+
+
+
+.border-radius(@topright: 0, @bottomright: 0, @bottomleft: 0, @topleft: 0) {
+  -webkit-border-top-right-radius: @topright;
+  -webkit-border-bottom-right-radius: @bottomright;
+  -webkit-border-bottom-left-radius: @bottomleft;
+  -webkit-border-top-left-radius: @topleft;
+  -moz-border-radius-topright: @topright;
+  -moz-border-radius-bottomright: @bottomright;
+  -moz-border-radius-bottomleft: @bottomleft;
+  -moz-border-radius-topleft: @topleft;
+  border-top-right-radius: @topright;
+  border-bottom-right-radius: @bottomright;
+  border-bottom-left-radius: @bottomleft;
+  border-top-left-radius: @topleft;
+  .background-clip(padding-box);
+}
+
+.gradient(@color: #F5F5F5, @start: #EEE, @stop: #FFF) {
+  background: @color;
+  background: -webkit-gradient(linear,
+  left bottom,
+  left top,
+  color-stop(0, @start),
+  color-stop(1, @stop));
+  background: -ms-linear-gradient(bottom,
+  @start,
+  @stop);
+  background: -moz-linear-gradient(center bottom,
+  @start 0%,
+  @stop 100%);
+  background: -o-linear-gradient(@stop,
+  @start);
+  filter: e(%("progid:DXImageTransform.Microsoft.gradient(startColorstr='%d', endColorstr='%d', GradientType=0)",@stop,@start));
+}
+.bw-gradient(@color: #F5F5F5, @start: 0, @stop: 255) {
+  background: @color;
+  background: -webkit-gradient(linear,
+  left bottom,
+  left top,
+  color-stop(0, rgb(@start,@start,@start)),
+  color-stop(1, rgb(@stop,@stop,@stop)));
+  background: -ms-linear-gradient(bottom,
+  rgb(@start,@start,@start) 0%,
+  rgb(@stop,@stop,@stop) 100%);
+  background: -moz-linear-gradient(center bottom,
+  rgb(@start,@start,@start) 0%,
+  rgb(@stop,@stop,@stop) 100%);
+  background: -o-linear-gradient(rgb(@stop,@stop,@stop),
+  rgb(@start,@start,@start));
+  filter: e(%("progid:DXImageTransform.Microsoft.gradient(startColorstr='%d', endColorstr='%d', GradientType=0)",rgb(@stop,@stop,@stop),rgb(@start,@start,@start)));
+}
+
+.horizontal-gradient (@startColor: #eee, @endColor: white) {
+  background-color: @startColor;
+  background-image: -webkit-gradient(linear, left top, right top, from(@startColor), to(@endColor));
+  background-image: -webkit-linear-gradient(left, @startColor, @endColor);
+  background-image: -moz-linear-gradient(left, @startColor, @endColor);
+  background-image: -ms-linear-gradient(left, @startColor, @endColor);
+  background-image: -o-linear-gradient(left, @startColor, @endColor);
+}
+
+.animation (@name, @duration: 300ms, @delay: 0, @ease: ease) {
+  -webkit-animation: @name @duration @delay @ease;
+  -moz-animation:    @name @duration @delay @ease;
+  -ms-animation:     @name @duration @delay @ease;
+}
