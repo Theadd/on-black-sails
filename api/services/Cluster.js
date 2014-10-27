@@ -13,6 +13,7 @@ function Cluster () {
   var self = this
   if (!(self instanceof Cluster)) return new Cluster()
 
+  self._agreement = {}
 }
 
 Cluster.prototype.updateClusterStats = function (interval) {
@@ -233,4 +234,28 @@ Cluster.prototype.updateProfile = function (params, callback) {
     if (err) return callback(err)
     return callback(null, res.data)
   })
+}
+
+Cluster.prototype.requestAndBuildAgreements = function (callback) {
+  var self = this
+  callback = callback || function () {}
+
+  self.send('agreement', {}, function (err, response) {
+    if (err) return callback(err)
+
+    for (var i in response.data) {
+      var agreement = new ClusterAgreement(response.data[i])
+      self._agreement[agreement.getId()] = agreement
+    }
+
+    return callback(null, true)
+  })
+}
+
+Cluster.prototype.getAgreementById = function (id) {
+  return this._agreement[id] || false
+}
+
+Cluster.prototype.getAgreements = function () {
+  return this._agreement
 }

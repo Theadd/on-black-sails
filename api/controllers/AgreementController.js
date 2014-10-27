@@ -9,57 +9,19 @@ var extend = require('util')._extend
 
 module.exports = {
   index: function(req, res, next) {
-    var requestify = require('requestify')
+
+    var clusterAgreements = Cluster.getAgreements(),
+      agreements = []
+
+    for (var id in clusterAgreements) {
+      var agreement = clusterAgreements[id].get()
+      agreement.actions = clusterAgreements[id].getActions()
+      console.log(agreement)
+      agreements.push(agreement)
+    }
 
     console.log("in agreement index")
-
-
-    Cluster.send('agreement', {}, function (err, response) {
-      if (err) {
-        console.log(err)
-        res.view({ agreements: {
-          pending: [],
-          cluster: Settings.get('cluster')
-        }})
-      } else {
-        console.log(response.data)
-        var agreements = []
-
-        for (var i in response.data) {
-          var agreement = {}, raw = extend({}, response.data[i])
-          if (Settings.get('cluster') != raw.sender.id) {
-            agreement.issender = false;
-            agreement.localnode = extend({}, raw.receiver)
-            agreement.remotenode = extend({}, raw.sender)
-            //sender is remotenode, outgoing (remote offer)
-            agreement.remotenode.allsources = raw.outgoingallsources
-            agreement.remotenode.filters = raw.outgoingfilters
-            //receiver is localnode, incoming (our offer)
-            agreement.localnode.allsources = raw.incomingallsources
-            agreement.localnode.filters = raw.incomingfilters
-          } else {
-            agreement.issender = true;
-            agreement.localnode = extend({}, raw.sender)
-            agreement.remotenode = extend({}, raw.receiver)
-            //sender is localnode, outgoing (our offer)
-            agreement.localnode.allsources = raw.outgoingallsources
-            agreement.localnode.filters = raw.outgoingfilters
-            //receiver is remotenode, incoming (remote offer)
-            agreement.remotenode.allsources = raw.incomingallsources
-            agreement.remotenode.filters = raw.incomingfilters
-          }
-          agreement.title = raw.title
-          agreement.status = raw.status
-          agreement.note = raw.note
-          agreement.id = raw.id
-          agreement.createdAt = raw.createdAt
-          agreements.push(agreement)
-        }
-
-        res.view({ agreements: agreements})
-      }
-    })
-
+    res.view({ agreements: agreements})
 
   },
 

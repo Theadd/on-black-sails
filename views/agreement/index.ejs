@@ -61,9 +61,12 @@
                   Action <span class="caret"></span>
                 </button>
                 <ul class="dropdown-menu no-display" role="menu">
-                  <li><a href="#">Accept</a></li>
-                  <li class="divider"></li>
-                  <li><a href="#">Decline</a></li>
+                  <% _.each(agreement.actions, function(action) { %>
+                  <li>
+                    <a class="btn pull-right<%= (action.enabled) ? '' : ' disabled' %>" href="/agreement/<%= action.key %>/<%= agreement.id %>"
+                      title="<%= action.help %>"><%- action.display %></a>
+                  </li>
+                  <% }) %>
                 </ul>
               </div>
             </div>

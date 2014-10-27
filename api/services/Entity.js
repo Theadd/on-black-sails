@@ -33,6 +33,7 @@ module.exports.deploy = function() {
       self.isMaster = true
       self._controlledEntity = {}
       Cluster.updateClusterStats(300000)
+      Cluster.requestAndBuildAgreements()
       cluster.on('exit', function(worker, code, signal) {
         worker._controlledEntity.set('ready', false)
         sails.log.error("Worker " + worker._controlledEntity.get('name') + " <" + worker._controlledEntity.get('pid') + "> died (" + (signal || code) + ")")
