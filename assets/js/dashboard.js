@@ -21,6 +21,12 @@ $(function() {
       this.checkViewport();
       this.handleSwitches();
       $('.selectpicker').selectpicker();
+      $(".markdown-editor").markdown({iconlibrary: 'fa'});
+      $('.markdown-preview').each(function( index ) {
+        var data = $( this ).data('markdown');
+        console.log("CONVERTING '"+data+"' TO HTML!");
+        $( this).html(markdown.toHTML(data));
+      });
       /*$('[title]').tooltip({container: 'body', title: 'hello'});
 
       $('.selectpicker').change(function() {

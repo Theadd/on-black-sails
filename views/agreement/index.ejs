@@ -68,17 +68,16 @@
               </div>
             </div>
             <div class="expansion">
-
               <div class="cell col-sm-12 multiline">
                 <div class="form-group">
                   <label for="label" class="col-sm-2 col-md-1 control-label">Note</label>
-                  <div class="col-sm-10 col-md-11">
-                    <textarea class="form-control" rows="3" placeholder=""><%= agreement.note %></textarea>
+                  <div class="col-sm-10 col-md-11 cell box-default multiline">
+                    <div class="markdown-preview" data-markdown="<%= agreement.note %>"></div>
                   </div>
                 </div>
               </div>
-
             </div>
+
           </li>
           <% }) %>
         </ul>

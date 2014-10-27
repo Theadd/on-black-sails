@@ -26,6 +26,10 @@ var jsFilesToInject = [
   // Dependencies like sails.io.js, jQuery, or Angular
   // are brought in here
   'js/dependencies/jquery.js',
+  'js/dependencies/bootstrap.js',
+  'js/dependencies/sails.io.js',
+  'js/dependencies/underscore.js',
+  'js/dependencies/markdown.js',
   'js/dependencies/**/*.js',
 
   // All of the rest of your client-side js files
