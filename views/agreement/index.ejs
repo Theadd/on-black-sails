@@ -68,10 +68,115 @@
               </div>
             </div>
             <div class="expansion">
+
+              <div class="cell col-sm-6 multiline box-lightblue">
+                <div>
+                  <div class="cell col-sm-1">
+                    <span class="label <%= (agreement.localnode.removedead) ? 'label-primary' : 'label-default' %>">
+                      <i class="fa fa-lg fa-recycle"></i>
+                    </span>
+                  </div>
+                  <div class="cell col-sm-1">
+                    <span class="label <%= (agreement.localnode.indexfiles) ? 'label-primary' : 'label-default' %>">
+                      <i class="fa fa-lg fa-database"></i>
+                    </span>
+                  </div>
+                  <div class="cell col-sm-1">
+                    <span class="label <%= (agreement.localnode.allsources) ? 'label-primary' : 'label-default' %>">
+                      <i class="fa fa-lg fa-cubes"></i>
+                    </span>
+                  </div>
+                  <div class="cell col-sm-9 box-default">
+                    <span class="plastic-tag title">
+                      [<%= agreement.localnode.name %>] <%= agreement.localnode.url %>
+                    </span>
+                  </div>
+
+                  <div class="cell col-sm-12 multiline box-default">
+                    <div class="form-group">
+                      <label for="label" class="col-sm-3 col-md-2 control-label plastic-tag uppercase white shadow">Provides</label>
+                      <div class="col-sm-9 col-md-10 cell multiline no-padding">
+
+
+                        <ul class="media-list">
+                          <% _.each(agreement.localnode.filters, function(filter) { %>
+                          <li class="media">
+                            <a class="pull-left" href="#">
+                              <i class="fa fa-lg fa-fw <%=: filter | getAgreementFilterIcon %>"></i>
+                            </a>
+                            <div class="media-body">
+                              <h4 class="media-heading"><%=: filter | getAgreementFilterDisplay %></h4>
+                              <%=: filter | getAgreementFilterDescription %>
+                            </div>
+                          </li>
+                          <% }) %>
+                        </ul>
+
+                      </div>
+                      <div class="clearfix"></div>
+                    </div>
+
+                  </div>
+                  <div class="clearfix"></div>
+                </div>
+              </div>
+
+              <div class="cell col-sm-6 multiline box-lightblue">
+                <div>
+                  <div class="cell col-sm-1">
+                    <span class="label <%= (agreement.remotenode.removedead) ? 'label-primary' : 'label-default' %>">
+                      <i class="fa fa-lg fa-recycle"></i>
+                    </span>
+                  </div>
+                  <div class="cell col-sm-1">
+                    <span class="label <%= (agreement.remotenode.indexfiles) ? 'label-primary' : 'label-default' %>">
+                      <i class="fa fa-lg fa-database"></i>
+                    </span>
+                  </div>
+                  <div class="cell col-sm-1">
+                    <span class="label <%= (agreement.remotenode.allsources) ? 'label-primary' : 'label-default' %>">
+                      <i class="fa fa-lg fa-cubes"></i>
+                    </span>
+                  </div>
+                  <div class="cell col-sm-9 box-default">
+                    <span class="plastic-tag title">
+                      [<%= agreement.remotenode.name %>] <%= agreement.remotenode.url %>
+                    </span>
+                  </div>
+
+                  <div class="cell col-sm-12 multiline box-default">
+                    <div class="form-group">
+                      <label for="label" class="col-sm-3 col-md-2 control-label plastic-tag uppercase white shadow">Provides</label>
+                      <div class="col-sm-9 col-md-10 cell multiline no-padding">
+
+
+                        <ul class="media-list">
+                          <% _.each(agreement.remotenode.filters, function(filter) { %>
+                          <li class="media">
+                            <a class="pull-left" href="#">
+                              <i class="fa fa-lg fa-fw <%=: filter | getAgreementFilterIcon %>"></i>
+                            </a>
+                            <div class="media-body">
+                              <h4 class="media-heading"><%=: filter | getAgreementFilterDisplay %></h4>
+                              <%=: filter | getAgreementFilterDescription %>
+                            </div>
+                          </li>
+                          <% }) %>
+                        </ul>
+
+                      </div>
+                      <div class="clearfix"></div>
+                    </div>
+
+                  </div>
+                  <div class="clearfix"></div>
+                </div>
+              </div>
+
               <div class="cell col-sm-12 multiline">
-                <div class="form-group">
-                  <label for="label" class="col-sm-2 col-md-1 control-label">Note</label>
-                  <div class="col-sm-10 col-md-11 cell box-default multiline">
+                <div class="form-group no-padding">
+                  <label for="label" class="col-sm-2 col-md-1 control-label plastic-tag uppercase center shadow">Note</label>
+                  <div class="col-sm-10 col-md-11 cell box-light multiline no-padding">
                     <div class="markdown-preview" data-markdown="<%= agreement.note %>"></div>
                   </div>
                 </div>

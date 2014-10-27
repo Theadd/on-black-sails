@@ -30,6 +30,10 @@
     &.plastic-tag.title {
       line-height: 1.1em;
     }
+
+    &.no-padding {
+      padding: 0;
+    }
   }
 
   &:not(.multiline) {
@@ -53,6 +57,12 @@
     border-radius: 3px;
     border: 1px solid rgba(0,0,0,0.1);
     background-color: rgba(0,0,0,0.05);
+  }
+
+  &.box-light > * {
+    border-radius: 3px;
+    border: 1px solid rgba(0,0,0,0.1);
+    background-color: rgba(255, 255, 255, 0.5);
   }
 
   &.box-success > * {
@@ -142,6 +152,10 @@ ul.plastic-list {
 
     .cell {
       .cell;
+    }
+
+    .no-padding {
+      padding: 0;
     }
 
     .makeIndexProp(100, cell-size-, width, 5);
