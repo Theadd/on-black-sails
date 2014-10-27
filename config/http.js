@@ -122,6 +122,19 @@ module.exports.http = {
         }
 
         return 'fa-exclamation-triangle';
+      },
+
+      getStatusStyle: function (name) {
+        switch (String(name).toLowerCase()) {
+          case 'pending': return 'primary'; break;
+          case 'accepted': return 'success'; break;
+          case 'denied': return 'danger'; break;
+          case 'cancelled': return 'danger'; break;
+          case 'paused': return 'warning'; break;
+          case 'deleted': return 'default'; break;
+        }
+
+        return 'fa-exclamation-triangle';
       }
     }
   },

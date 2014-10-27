@@ -43,7 +43,7 @@
 
           <li class="item" data-id="<%= agreement.id %>">
             <div class="body">
-              <span class="cell col-md-1 col-sm-2 col-xs-2 box-success">
+              <span class="cell col-md-1 col-sm-2 col-xs-2 box-<%=: agreement.status | getStatusStyle %>">
                 <span class="plastic-tag uppercase white small center shadow"><%= agreement.status %></span>
               </span>
               <span class="cell col-md-2 box-default hidden-xs hidden-sm">
