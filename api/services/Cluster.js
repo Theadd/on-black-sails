@@ -244,8 +244,7 @@ Cluster.prototype.requestAndBuildAgreements = function (callback) {
     if (err) return callback(err)
 
     for (var i in response.data) {
-      var agreement = new ClusterAgreement(response.data[i])
-      self._agreement[agreement.getId()] = agreement
+      self.updateAgreement(response.data[i])
     }
 
     return callback(null, true)
@@ -258,4 +257,15 @@ Cluster.prototype.getAgreementById = function (id) {
 
 Cluster.prototype.getAgreements = function () {
   return this._agreement
+}
+
+Cluster.prototype.updateAgreement = function (data) {
+  var self = this
+
+  if (typeof self._agreement[data.id] !== "undefined") {
+    self._agreement[data.id].rebuild(data)
+  } else {
+    var agreement = new ClusterAgreement(data)
+    self._agreement[agreement.getId()] = agreement
+  }
 }

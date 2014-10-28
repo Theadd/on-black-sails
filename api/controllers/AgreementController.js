@@ -15,9 +15,13 @@ module.exports = {
 
     for (var id in clusterAgreements) {
       var agreement = clusterAgreements[id].get()
-      agreement.actions = clusterAgreements[id].getActions()
-      console.log(agreement)
-      agreements.push(agreement)
+      var actions = clusterAgreements[id].getActions()
+      agreement.actions = []
+      for (var i in actions) {
+        agreement.actions.unshift(actions[i])
+      }
+
+      agreements.unshift(agreement)
     }
 
     console.log("in agreement index")

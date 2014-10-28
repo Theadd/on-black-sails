@@ -2,7 +2,10 @@
  * Created by Theadd on 14/10/2014.
  */
 
+var extend = require('util')._extend
+
 module.exports.ValueOfMultiSelect = ValueOfMultiSelect
+module.exports.RevertSanitizeRequestParameters = RevertSanitizeRequestParameters
 module.exports.RandomHexString = RandomHexString
 module.exports.ValidURL = ValidURL
 module.exports.TestPorts = TestPorts
@@ -28,6 +31,28 @@ function ValueOfMultiSelect (input) {
     }
   }
 
+  return output
+}
+
+
+function RevertSanitizeRequestParameters (input) {
+  input = input || {}
+  var output = extend({}, input)
+  //console.log("\nIN SanitizeRequestParameters:")
+  for (var i in output) {
+    switch (i) {
+      case 'updatedAt':
+      case 'createdAt':
+        output[i] = new Date(Number(output[i]))
+        break;
+      case 'sender':
+      case 'receiver':
+      case 'agreement':
+        output[i] = JSON.parse(output[i])
+        break;
+    }
+    //console.log("\tTYPEOF " + i + ": " + (typeof output[i]) + ", VALUE: " + output[i])
+  }
   return output
 }
 

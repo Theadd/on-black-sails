@@ -42,6 +42,11 @@ module.exports.policies = {
     index: "flash",
     verify: "flash",
     '*': "admin"
+  },
+  message: {
+    index: "flash", //TODO: admin
+    create: "flash",
+    '*': "admin"
   }
 
 	// Here's an example of mapping some policies to run before
