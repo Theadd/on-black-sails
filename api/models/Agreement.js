@@ -100,13 +100,13 @@ module.exports = {
         //not yet created
         Agreement.convert(raw, function (err, data) {
           Agreement.create(data).exec(function (err, agreement) {
-            console.log("AGREEMENT CREATED! ")
             var values = extend({}, agreement)
             var actions = agreement.getActions()
             values.actions = []
             for (var i in actions) {
               values.actions.unshift(actions[i])
             }
+            delete values.hash
             Agreement.publishCreate({
               id: agreement.id,
               name: agreement.title,
@@ -119,15 +119,26 @@ module.exports = {
       } else {
         //already created, update...
         Agreement.convert(raw, function (err, data) {
+          var differs = (entry.status != data.status)
           entry = extend(entry, data)
-          console.log("AGREEMENT UPDATED! ")
-          entry.save(callback)
-          Agreement.publishUpdate(entry.id, {
-            name: entry.title,
-            property: 'data',
-            value: data,
-            action: 'updated'
+          entry.save(function (err, response) {
+            if (!err && differs) {
+              var actions = response.getActions()
+              data.actions = []
+              for (var i in actions) {
+                data.actions.unshift(actions[i])
+              }
+              delete data.hash
+              Agreement.publishUpdate(data.id, {
+                name: data.title,
+                property: 'data',
+                value: data,
+                action: 'updated'
+              })
+            }
+            return callback(err, response)
           })
+
         })
       }
     })

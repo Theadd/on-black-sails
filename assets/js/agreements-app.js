@@ -5,9 +5,13 @@
 var AgreementIndexPage = {
 
   updateAgreement: function(id, message) {
-    var prop = message.data.property;
-    console.log("updateAgreement, prop: " + prop)
+    var obj = {
+      agreement: message.data.value
+    };
 
+    $('.dashboard-agreement-list .item[data-id="' + id + '"]').replaceWith(
+      JST['assets/templates/addAgreement.ejs'](obj)
+    );
   },
 
   addAgreement: function(message) {
