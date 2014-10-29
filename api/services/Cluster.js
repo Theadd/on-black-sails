@@ -13,7 +13,7 @@ function Cluster () {
   var self = this
   if (!(self instanceof Cluster)) return new Cluster()
 
-  self._agreement = {}
+  //self._agreement = {}
 }
 
 Cluster.prototype.updateClusterStats = function (interval) {
@@ -251,21 +251,8 @@ Cluster.prototype.requestAndBuildAgreements = function (callback) {
   })
 }
 
-Cluster.prototype.getAgreementById = function (id) {
-  return this._agreement[id] || false
-}
-
-Cluster.prototype.getAgreements = function () {
-  return this._agreement
-}
-
 Cluster.prototype.updateAgreement = function (data) {
-  var self = this
+  Agreement.import(data, function (err, imported) {
 
-  if (typeof self._agreement[data.id] !== "undefined") {
-    self._agreement[data.id].rebuild(data)
-  } else {
-    var agreement = new ClusterAgreement(data)
-    self._agreement[agreement.getId()] = agreement
-  }
+  })
 }

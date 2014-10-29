@@ -10,22 +10,27 @@ var extend = require('util')._extend
 module.exports = {
   index: function(req, res, next) {
 
-    var clusterAgreements = Cluster.getAgreements(),
-      agreements = []
+    var agreements = []
 
-    for (var id in clusterAgreements) {
-      var agreement = clusterAgreements[id].get()
-      var actions = clusterAgreements[id].getActions()
-      agreement.actions = []
-      for (var i in actions) {
-        agreement.actions.unshift(actions[i])
+    Agreement.find({}).exec(function (err, clusterAgreements) {
+      for (var id in clusterAgreements) {
+        var agreement = clusterAgreements[id]
+        var actions = clusterAgreements[id].getActions()
+        agreement.actions = []
+        for (var i in actions) {
+          agreement.actions.unshift(actions[i])
+        }
+
+        agreements.unshift(agreement)
       }
 
-      agreements.unshift(agreement)
-    }
+      console.log("in agreement index")
+      res.view({ agreements: agreements})
+    })
 
-    console.log("in agreement index")
-    res.view({ agreements: agreements})
+
+
+
 
   },
 
@@ -54,6 +59,34 @@ module.exports = {
       console.log(err)
       console.log(response)
       return res.redirect('/realm')
+    })
+  },
+
+  /** ACTIONS **/
+
+  'accept': function(req, res) {
+    var id = req.param('id')
+    Cluster.send('agreement/action', {agreement: id, type: 'accept'}, function (err, response) {
+      console.log("IN Cluster.send('agreement/action', {agreement: id, type: 'accept'} callback:")
+      console.error(err)
+      console.log(response)
+      res.json({
+        error: err || false,
+        data: response || {}
+      })
+    })
+  },
+
+  'cancel': function(req, res) {
+    var id = req.param('id')
+    Cluster.send('agreement/action', {agreement: id, type: 'cancel'}, function (err, response) {
+      console.log("IN Cluster.send('agreement/action', {agreement: id, type: 'cancel'} callback:")
+      console.error(err)
+      console.log(response)
+      res.json({
+        error: err || false,
+        data: response || {}
+      })
     })
   }
 
