@@ -62,27 +62,33 @@ module.exports = {
     })
   },
 
-  /** ACTIONS **/
+  /** PUBLISH SUBSCRIBE **/
 
-  'accept': function(req, res) {
-    var id = req.param('id')
-    Cluster.send('agreement/action', {agreement: id, type: 'accept'}, function (err, response) {
-      console.log("IN Cluster.send('agreement/action', {agreement: id, type: 'accept'} callback:")
-      console.error(err)
-      console.log(response)
-      res.json({
-        error: err || false,
-        data: response || {}
-      })
+  subscribe: function(req, res) {
+    Agreement.find(function foundAgreements(err, agreements) {
+      if (err) return next(err);
+
+      Agreement.watch(req.socket);
+
+      Agreement.subscribe(req.socket, agreements);
+
+      res.send(200);
     })
   },
 
-  'cancel': function(req, res) {
-    var id = req.param('id')
-    Cluster.send('agreement/action', {agreement: id, type: 'cancel'}, function (err, response) {
-      console.log("IN Cluster.send('agreement/action', {agreement: id, type: 'cancel'} callback:")
+  /** ACTIONS **/
+
+  'action': function(req, res) {
+    var id = req.param('id'),
+      action = req.param('action')
+
+    console.log({agreement: id, type: action})
+
+    Cluster.send('agreement/action', {agreement: id, type: action}, function (err, response) {
+      console.log("IN Cluster.send('agreement/action', {agreement: id, type: '" + action + "'} callback:")
       console.error(err)
       console.log(response)
+      if (!err) Cluster.requestAndBuildAgreements()
       res.json({
         error: err || false,
         data: response || {}

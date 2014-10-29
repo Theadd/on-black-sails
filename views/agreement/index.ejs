@@ -38,7 +38,7 @@
       </div>
       <div class="widget-body narrow">
 
-        <ul class="plastic-list">
+        <ul class="plastic-list dashboard-agreement-list">
           <% _.each(agreements, function(agreement) { %>
 
           <li class="item" data-id="<%= agreement.id %>">
@@ -63,7 +63,8 @@
                 <ul class="dropdown-menu no-display" role="menu">
                   <% _.each(agreement.actions, function(action) { %>
                   <li>
-                    <a class="btn pull-right<%= (action.enabled) ? '' : ' disabled' %>" href="/agreement/<%= action.key %>/<%= agreement.id %>"
+                    <a class="btn dashboard-agreement-action pull-right<%= (action.enabled) ? '' : ' disabled' %>"
+                      data-action="<%= action.key %>" data-id="<%= agreement.id %>" href="#"
                       title="<%= action.help %>"><%- action.display %></a>
                   </li>
                   <% }) %>

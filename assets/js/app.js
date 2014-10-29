@@ -4,6 +4,9 @@ io.socket.on('connect', function() {
 
   io.socket.on('linkedentity', cometMessageReceivedFromServer);
   io.socket.get('/linkedentity/subscribe');
+
+  io.socket.on('agreement', cometMessageReceivedFromServer);
+  io.socket.get('/agreement/subscribe');
 });
 
 function cometMessageReceivedFromServer(message) {
@@ -50,6 +53,14 @@ function updateEntryInDom(message) {
       }
       if (message.verb === 'created') {
         LinkedEntityIndexPage.addLinkedEntity(id, message);
+      }
+      break;
+    case '/agreement':
+      if (message.verb === 'updated') {
+        AgreementIndexPage.updateAgreement(id, message);
+      }
+      if (message.verb === 'created') {
+        AgreementIndexPage.addAgreement(message);
       }
       break;
   }
