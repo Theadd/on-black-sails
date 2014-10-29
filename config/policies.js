@@ -47,6 +47,9 @@ module.exports.policies = {
     index: "flash", //TODO: admin
     create: "flash",
     '*': "admin"
+  },
+  agreement: {
+    '*': "flash"
   }
 
 	// Here's an example of mapping some policies to run before

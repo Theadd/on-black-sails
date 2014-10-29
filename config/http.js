@@ -30,7 +30,7 @@ module.exports.http = {
       'favicon',
       '404',
       '500'
-    ],
+    ]
 
     // The body parser that will handle incoming multipart HTTP requests.
     // By default as of v0.10, Sails uses [skipper](http://github.com/balderdashy/skipper).
@@ -40,7 +40,10 @@ module.exports.http = {
   },
 
   locals: {
-    filters: {
+
+    /** Helpers (Server side). Replica of /assets/js/helpers.js */
+    Helpers: {
+
       formatBigNumber: function (num) {
         if (num >= 1000000000) {
           return (num / 1000000000).toFixed(1).replace(/\.0$/, '') + 'G';
@@ -89,39 +92,6 @@ module.exports.http = {
         } else {
           return obj;
         }
-      },
-
-      getAgreementFilterIcon: function (name) {
-        switch (String(name).toLowerCase()) {
-          case 'indexed': return 'fa-archive'; break;
-          case 'downloaded': return 'fa-code'; break;
-          case 'media': return 'fa-film'; break;
-          case 'peers': return 'fa-child'; break;
-        }
-
-        return 'fa-exclamation-triangle';
-      },
-
-      getAgreementFilterDisplay: function (name) {
-        switch (String(name).toLowerCase()) {
-          case 'indexed': return 'Indexed'; break;
-          case 'downloaded': return 'Downloaded'; break;
-          case 'media': return 'Media'; break;
-          case 'peers': return 'Peers'; break;
-        }
-
-        return 'fa-exclamation-triangle';
-      },
-
-      getAgreementFilterDescription: function (name) {
-        switch (String(name).toLowerCase()) {
-          case 'indexed': return 'Latest indexed torrents (w/o metadata).'; break;
-          case 'downloaded': return 'Latest downloaded torrents (w/ metadata).'; break;
-          case 'media': return 'Latest torrents with media info.'; break;
-          case 'peers': return 'Latest torrents with updated peers.'; break;
-        }
-
-        return 'fa-exclamation-triangle';
       },
 
       getStatusStyle: function (name) {

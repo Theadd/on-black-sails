@@ -30,7 +30,9 @@
               <div class="toolbox-right">
 
                 <span class="label label-primary" style="width: 160px">
-                  <%=: cluster.scraped | formatBigNumber %> / <%=: cluster.downloaded | formatBigNumber %> / <%=: cluster.total | formatBigNumber %>
+                  <%= Helpers.formatBigNumber(cluster.scraped) %> /
+                  <%= Helpers.formatBigNumber(cluster.downloaded) %> /
+                  <%= Helpers.formatBigNumber(cluster.total) %>
                 </span>
               </div>
             </div>

@@ -43,14 +43,14 @@
 
           <li class="item" data-id="<%= agreement.id %>">
             <div class="body">
-              <span class="cell col-md-1 col-sm-2 col-xs-2 box-<%=: agreement.status | getStatusStyle %>">
+              <span class="cell col-md-1 col-sm-2 col-xs-2 box-<%= Helpers.getStatusStyle(agreement.status) %>">
                 <span class="plastic-tag uppercase white small center shadow"><%= agreement.status %></span>
               </span>
               <span class="cell col-md-2 box-default hidden-xs hidden-sm">
                 <span class="plastic-tag center shadow small">
-                  <%=: agreement.remotenode.scraped | formatBigNumber %> /
-                  <%=: agreement.remotenode.downloaded | formatBigNumber %> /
-                  <%=: agreement.remotenode.total | formatBigNumber %>
+                  <%= Helpers.formatBigNumber(agreement.remotenode.scraped) %> /
+                  <%= Helpers.formatBigNumber(agreement.remotenode.downloaded) %> /
+                  <%= Helpers.formatBigNumber(agreement.remotenode.total) %>
                 </span>
               </span>
               <span class="cell col-md-8 col-sm-8 col-xs-7 box-lightblue">
@@ -64,8 +64,8 @@
                   <% _.each(agreement.actions, function(action) { %>
                   <li>
                     <a class="btn dashboard-agreement-action pull-right<%= (action.enabled) ? '' : ' disabled' %>"
-                      data-action="<%= action.key %>" data-id="<%= agreement.id %>" href="#"
-                      title="<%= action.help %>"><%- action.display %></a>
+                       data-action="<%= action.key %>" data-id="<%= agreement.id %>" href="#"
+                       title="<%= action.help %>"><%- action.display %></a>
                   </li>
                   <% }) %>
                 </ul>
@@ -106,11 +106,11 @@
                           <% _.each(agreement.localnode.filters, function(filter) { %>
                           <li class="media">
                             <a class="pull-left" href="#">
-                              <i class="fa fa-lg fa-fw <%=: filter | getAgreementFilterIcon %>"></i>
+                              <i class="fa fa-lg fa-fw <%= Helpers.getAgreementFilterObject(filter, 'icon') %>"></i>
                             </a>
                             <div class="media-body">
-                              <h4 class="media-heading"><%=: filter | getAgreementFilterDisplay %></h4>
-                              <%=: filter | getAgreementFilterDescription %>
+                              <h4 class="media-heading"><%= Helpers.getAgreementFilterObject(filter, 'display') %></h4>
+                              <%= Helpers.getAgreementFilterObject(filter, 'description') %>
                             </div>
                           </li>
                           <% }) %>
@@ -158,11 +158,11 @@
                           <% _.each(agreement.remotenode.filters, function(filter) { %>
                           <li class="media">
                             <a class="pull-left" href="#">
-                              <i class="fa fa-lg fa-fw <%=: filter | getAgreementFilterIcon %>"></i>
+                              <i class="fa fa-lg fa-fw <%= Helpers.getAgreementFilterObject(filter, 'icon') %>"></i>
                             </a>
                             <div class="media-body">
-                              <h4 class="media-heading"><%=: filter | getAgreementFilterDisplay %></h4>
-                              <%=: filter | getAgreementFilterDescription %>
+                              <h4 class="media-heading"><%= Helpers.getAgreementFilterObject(filter, 'display') %></h4>
+                              <%= Helpers.getAgreementFilterObject(filter, 'description') %>
                             </div>
                           </li>
                           <% }) %>

@@ -1,4 +1,5 @@
 
+/** Helpers (Client side). Replicated in /config/http.js for server side. */
 var Helpers = {
 
   formatBigNumber: function (num) {
