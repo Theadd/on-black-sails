@@ -47,6 +47,11 @@ module.exports = {
       defaultsTo: {}
     },
 
+    params: {
+      type: 'json',
+      defaultsTo: {}
+    },
+
     sender: {
       type: 'integer',
       required: true
@@ -58,11 +63,45 @@ module.exports = {
       defaultsTo: 'pending'
     },
 
-    isSender: function (){
+    toJSON: function () {
+      var obj = this.toObject()
+      delete obj.hash
+      delete  obj.params
+      return obj
+    },
+
+    isSender: function () {
       return (this.localnode.id == this.sender)
     },
 
-    getActions: function (){
+    getParam: function (filter, param) {
+      if (filter) {
+        if (param) {
+          if (this.params[filter]) {
+            return this.params[filter][param] || null
+          }
+        } else {
+          return this.params[filter] || {}
+        }
+      } else {
+        return this.params
+      }
+    },
+
+    setParam: function (filter, param, value, cb) {
+      cb = cb || function () {}
+      if (!this.params[filter]) this.params[filter] = {}
+      this.params[filter][param] = value
+      this.save(cb)
+    },
+
+    setParams: function (filter, params, cb) {
+      cb = cb || function () {}
+      this.params[filter] = params
+      this.save(cb)
+    },
+
+    getActions: function () {
       var actions = extend({}, {
         accept: {
           key: 'accept',

@@ -2,6 +2,8 @@
  * Created by Theadd on 21/09/2014.
  */
 
+var extend = require('util')._extend
+
 exports.run = function (modelName) {
   var model = ServiceQueueModels[modelName] || false
 
@@ -21,31 +23,37 @@ exports.run = function (modelName) {
   }
 }
 
-exports.runOnce = function (modelName, cb) {
+exports.runOnce = function (modelName, opts, cb) {
   var model = ServiceQueueModels[modelName] || false
+  if (typeof opts === "function") {
+    cb = opts
+    opts = {}
+  }
   cb = cb || false
+  opts = opts || {}
 
   if (model) {
-    var targetName = model.defaults.target || false
+    var options = extend(extend({}, model.defaults || {}), opts)
+    var targetName = options.target || false
     if (targetName) {
       var targetService = getTargetService(targetName)
       if (targetService) {
-        model.getQuery(model.defaults).exec(function(err, entries) {
+        model.getQuery(options).exec(function(err, entries) {
           if (!err && entries.length) {
-            var i, skipRecentPool = model.defaults.skipRecentPool || false
+            var i, skipRecentPool = options.skipRecentPool || false
             if (typeof model.filter === "function") {
               for (i in entries) {
-                if (model.filter(entries[i])) {
-                  targetService.queue(entries[i].uuid, model.defaults.prioritize || false, skipRecentPool)
+                if (model.filter(entries[i], options)) {
+                  targetService.queue(entries[i].uuid, options.prioritize || false, skipRecentPool)
                 }
               }
             } else {
               for (i in entries) {
-                targetService.queue(entries[i].uuid, model.defaults.prioritize || false, skipRecentPool)
+                targetService.queue(entries[i].uuid, options.prioritize || false, skipRecentPool)
               }
             }
             if (cb) {
-              cb(null, entries.length)
+              cb(null, entries.length, extend({}, options))
             }
           } else {
             if (cb) {
@@ -81,6 +89,9 @@ var getTargetService = exports.getTargetService = function (target) {
       break
     case 'status':
       targetService = StatusService
+      break
+    case 'propagate':
+      targetService = PropagateService
       break
     default:
       console.log("Unrecognized service: " + target)

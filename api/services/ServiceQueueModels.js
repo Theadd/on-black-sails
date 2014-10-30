@@ -73,6 +73,28 @@ module.exports = {
         .sort('updatedAt ASC')
         .limit(120)
     }
+  },
+  /** Add latest torrents with updated peers to PropagateService. */
+  peers: {
+    defaults: {
+      interval: 60000,      //1min
+      target: 'propagate',  //add items to TrackerService queue (REQUIRED).
+      prioritize: true,      //prioritize items in the queue (OPTIONAL).
+      //skipRecentPool: true  //do not check service recent pool if items already exist (OPTIONAL).
+    },
+    getQuery: function(options) {
+      options.startAt = options.startAt || new Date(0)
+
+      return Hash.find()
+        .where({ peersUpdatedAt: { '>=': options.startAt } })
+        .sort('peersUpdatedAt ASC')
+        .limit(250)
+    },
+    filter: function(entry, options) {
+      options.startAt = (options.startAt ||
+        entry.peersUpdatedAt > options.startAt) ? entry.peersUpdatedAt : options.startAt
+
+      return true
+    }
   }
 }
-

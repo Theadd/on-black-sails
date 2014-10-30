@@ -30,6 +30,12 @@ module.exports = {
     port: {
       type: 'integer',
       required: true
+    },
+
+    type: {
+      type: 'string',
+      enum: ['public', 'private', 'agreement'],
+      defaultsTo: 'public'
     }
 
   }

@@ -50,7 +50,7 @@ exports.run = function() {
 
   if (CommandLineHelpers.config.propagate.active) {
     PropagateService.server() //TODO: useless?
-    PropagateService.run()
+    PropagateService.start()
   }
 
   if (CommandLineHelpers.config.autoqueue != false) {

@@ -89,7 +89,8 @@ var defaultConfig = {
     'silent': true,
     'host': 'localhost',
     'port': 8011,
-    'onempty': false
+    'onempty': false,
+    'agreement': 0
   },
   'live': false,
   'autoqueue': false,
