@@ -1,9 +1,7 @@
 
 jQuery(document).ready(function () {
 
-  jQuery(".plastic-list > .item > .body > *:not(.no-action)").click(function () {
-
-    console.log("click on body");
+  jQuery(".plastic-list").on("click", ".item > .body > *:not(.no-action)", function () {
     var parent = $(this).parent();
 
     var item = parent.closest('.item');
@@ -16,7 +14,6 @@ jQuery(document).ready(function () {
       expansion.slideToggle("slow").css('display', 'inline-block');
       item.addClass('open');
     }
-
   });
 
 });

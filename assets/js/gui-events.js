@@ -22,11 +22,9 @@ $(".list-group-item-toggle-next").on("click", function (ev) {
 
 });
 
-$(".dashboard-agreement-action").on("click", function (ev) {
+$(".dashboard-agreement-list").on("click", "a.dashboard-agreement-action", function (ev) {
   ev.preventDefault();
-/*<a class="btn dashboard-agreement-action pull-right<%= (action.enabled) ? '' : ' disabled' %>"
- data-action="<%= action.key %>" data-id="<%= agreement.id %>" href="#"
- title="<%= action.help %>"><%- action.display %></a>*/
+
   if (!$(this).hasClass("disabled")) {
     var action = $(this).data("action"),
       id = $(this).data("id"),

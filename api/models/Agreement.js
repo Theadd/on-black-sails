@@ -63,7 +63,44 @@ module.exports = {
     },
 
     getActions: function (){
-      var actions = extend({}, agreementActions)
+      var actions = extend({}, {
+        accept: {
+          key: 'accept',
+          display: 'Accept',
+          help: 'Accept',
+          enabled: false
+        },
+        refuse: {
+          key: 'refuse',
+          display: 'Refuse',
+          help: 'Refuse',
+          enabled: false
+        },
+        cancel: {
+          key: 'cancel',
+          display: 'Cancel',
+          help: 'Cancel',
+          enabled: false
+        },
+        pause: {
+          key: 'pause',
+          display: 'Pause',
+          help: 'Pause',
+          enabled: false
+        },
+        resume: {
+          key: 'resume',
+          display: 'Resume',
+          help: 'Resume',
+          enabled: false
+        },
+        delete: {
+          key: 'delete',
+          display: 'Delete',
+          help: 'Delete',
+          enabled: false
+        }
+      })
 
       switch (this.status) {
         case 'pending':
@@ -73,7 +110,6 @@ module.exports = {
           break;
         case 'accepted':
           actions.pause.enabled = true
-          actions.resume.enabled = true
           actions.cancel.enabled = true
           break;
         case 'denied':
@@ -178,44 +214,5 @@ module.exports = {
     agreement.updatedAt = raw.updatedAt
 
     return callback(null, agreement)
-  }
-}
-
-var agreementActions = {
-  accept: {
-    key: 'accept',
-    display: 'Accept',
-    help: 'Accept',
-    enabled: false
-  },
-  refuse: {
-    key: 'refuse',
-    display: 'Refuse',
-    help: 'Refuse',
-    enabled: false
-  },
-  cancel: {
-    key: 'cancel',
-    display: 'Cancel',
-    help: 'Cancel',
-    enabled: false
-  },
-  pause: {
-    key: 'pause',
-    display: 'Pause',
-    help: 'Pause',
-    enabled: false
-  },
-  resume: {
-    key: 'resume',
-    display: 'Resume',
-    help: 'Resume',
-    enabled: false
-  },
-  delete: {
-    key: 'delete',
-    display: 'Delete',
-    help: 'Delete',
-    enabled: false
   }
 }
