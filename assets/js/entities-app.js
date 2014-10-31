@@ -30,14 +30,30 @@ var LinkedEntityIndexPage = {
       $runElement = $('.label[data-id="' + id + '"][data-prop="run"]').first(),
       $killElement = $('.label[data-id="' + id + '"][data-prop="kill"]').first();
 
-    if (Boolean(value)) {
-      $element.addClass('list-group-item-success');
-      $runElement.addClass('disabled');
-      $killElement.removeClass('disabled');
+    if ($element.length) {
+      if (Boolean(value)) {
+        $element.addClass('list-group-item-success');
+        $runElement.addClass('disabled');
+        $killElement.removeClass('disabled');
+      } else {
+        $element.removeClass('list-group-item-success');
+        $runElement.removeClass('disabled');
+        $killElement.addClass('disabled');
+      }
     } else {
-      $element.removeClass('list-group-item-success');
-      $runElement.removeClass('disabled');
-      $killElement.addClass('disabled');
+      $element = $('.dashboard-agreement-processes .item[data-id="' + id + '"] .dashboard-agreement-process-ready');
+      if ($element.length) {
+        var $parent = $element.parent();
+        if (Boolean(value)) {
+          $parent.addClass('box-success');
+          $parent.removeClass('box-danger');
+          $element.html('ON');
+        } else {
+          $parent.removeClass('box-success');
+          $parent.addClass('box-danger');
+          $element.html('OFF');
+        }
+      }
     }
   },
 

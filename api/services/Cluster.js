@@ -288,12 +288,16 @@ Cluster.prototype.handleSpecialControlledEntities = function (agreement, prevSta
     if (prevStatus == 'paused') {
       if (agreement.status == 'accepted') {
         action = 'resume'
+      } else if (agreement.status == 'paused') {
+        action = 'pause'
       } else {
         action = 'stop'
       }
     } else {
       if (agreement.status == 'accepted') {
         action = 'start'
+      } else if (agreement.status == 'paused') {
+        action = 'pause'
       }
     }
   }
@@ -309,8 +313,7 @@ Cluster.prototype.handleSpecialControlledEntities = function (agreement, prevSta
         '[' + agreement.remotenode.name + '] ' + agreement.title + ' #' + agreement.id,
         function (err, controlled) {
           if (!err && controlled) {
-            console.log("\t\tready: " + controlled.get('ready'))
-            //TODO: pause & resume
+
             switch (action) {
               case 'start':
                 if (!controlled.get('ready')) {
@@ -318,22 +321,29 @@ Cluster.prototype.handleSpecialControlledEntities = function (agreement, prevSta
                   controlled.set('respawn', true)
                   controlled.setRespawnByForce(true)
                   Entity._spawnChildProcessQueue.push(controlled.get('id'))
-                  console.log("\t\t\tACTION: " + action + ", spawn id: " + controlled.get('id'))
-                  console.log(controlled)
                   Entity.spawnNextChildProcess()
                 }
                 break
               case 'stop':
                 if (controlled.get('ready')) {
-                  console.log("\t\t\tACTION: " + action + ", kill id: " + controlled.get('id'))
                   controlled.set('enabled', false)
                   controlled.send('kill')
                 }
                 break
+              case 'pause':
+                controlled.set('ready', false)
+                controlled.send('pause', 'propagate')
+                break
+              case 'resume':
+                controlled.send('resume', 'propagate')
+                controlled.set('ready', true)
+                break
             }
+
           }
         }
       )
+
     }
   }
 

@@ -105,7 +105,10 @@ module.exports.start = function () {
       self._exclude = agreement.remotenode.id
 
       if (agreement.status == 'accepted') {
-        console.log("\nstatus accepted, run!")
+        self.run()
+      } else if (agreement.status == 'paused') {
+        self.active(false)
+        Entity.send('ready', false)
         self.run()
       }
     }

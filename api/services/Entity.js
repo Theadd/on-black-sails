@@ -64,7 +64,7 @@ module.exports.deploy = function() {
       self.handleMessageOnWorker(msg)
     })
     self.id = cluster.worker.id
-    process.send({ cmd: 'ready', id: self.id })
+    self.send('ready', true)
   }
 }
 
@@ -261,8 +261,10 @@ EntityObject.prototype.handleMessageOnMaster = function (msg) {
   if (msg.cmd || false) {
     switch (msg.cmd) {
       case 'ready':
-        cluster.workers[msg.id]._controlledEntity.set('ready', true)
-        cluster.workers[msg.id].send({ cmd: 'configure', val: cluster.workers[msg.id]._controlledEntity.get('config') })
+        cluster.workers[msg.id]._controlledEntity.set('ready', msg.val)
+        if (msg.val) {
+          cluster.workers[msg.id].send({ cmd: 'configure', val: cluster.workers[msg.id]._controlledEntity.get('config') })
+        }
         break
       case 'configured':
         cluster.workers[msg.id].send({ cmd: 'run'})
@@ -289,12 +291,23 @@ EntityObject.prototype.handleMessageOnWorker = function (msg) {
       case 'kill':
         self.terminate(true)
         break
+      case 'pause':
+        var service = ServiceQueueModel.getTargetService(msg.val)
+        if (service) {
+          service.active(false)
+        }
+        break
+      case 'resume':
+        var service = ServiceQueueModel.getTargetService(msg.val)
+        if (service) {
+          service.active(true)
+        }
+        break
       default:
         console.error("Unrecognized message on worker: " + msg)
     }
   }
 }
-
 
 EntityObject.prototype.terminate = function (killProcess) {
   killProcess = killProcess || false
@@ -312,7 +325,12 @@ EntityObject.prototype.terminate = function (killProcess) {
   }
 }
 
-////////////////////////////////////////////////////////////////
+EntityObject.prototype.send = function (command, value) {
+  var self = this
+  value = value || false
+  command = String(command)
 
-
-
+  if (!cluster.isMaster) {
+    process.send({ cmd: command, val: value, id: self.id })
+  }
+}
