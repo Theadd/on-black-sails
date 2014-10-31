@@ -4,6 +4,7 @@
 
 var requestify = require('requestify')
 var extend = require('util')._extend
+
 module.exports = new (require('ipc-service').Service)()
 
 module.exports.setup = function() {
@@ -48,6 +49,9 @@ module.exports.setup = function() {
       console.log("We got " + self._stack.length + " items in the stack ready to propagate!")
       self._isWorking = true
       self.propagate(function (err, res) {
+        console.log("in callback of propagate")
+        console.error(err)
+        console.log(res)
         if (!err) {
           console.log("\t\tPropagated.")
           self._stack = []
@@ -117,7 +121,46 @@ module.exports.updateFilterParams = function (options, callback) {
 module.exports.propagate = function (callback) {
   var self = this
 
-  //TODO: propagate
-  callback(null, true)
+  Hash.find({
+    uuid : self._stack
+  }).exec( function (err, entries) {
+    if (err) {
+      console.error("Error in PropagateService.propagate > Hash.find().exec() callback!")
+      console.error(err)
+      return callback(err)
+    }
+    if (entries && entries.length) {
+      var data = []
+      for (var i in entries) {
+        data.push(entries[i])
+      }
+      console.log("sending data...")
+      self._send(data, callback)
+    } else {
+      console.error("NO ENTRIES FOUND in PropagateService.propagate > Hash.find().exec() callback!")
+      return callback(null, true)
+    }
+  })
 }
 
+module.exports._send = function(data, callback) {
+  var self = this,
+    url = self._agreement.remotenode.url + "agreement/propagate"
+
+  requestify.get(url, {
+    params: {
+      agreement: self._agreement.id,
+      filter: self.config('onempty'),
+      data: Common.Encode(data, self._agreement.hash)
+    }
+  }).then(function(response) {
+    response.getBody()
+    try {
+      callback(null, JSON.parse(response.body))
+    } catch (e) {
+      callback(e, response.body)
+    }
+  }, function(error) {
+    callback(error)
+  })
+}

@@ -94,6 +94,15 @@ module.exports = {
         data: response || {}
       })
     })
+  },
+
+  /** IMPORT PROPAGATION OF REMOTE NODE **/
+
+  'propagate': function(req, res) {
+    //TODO
+    var params = req.params.all()
+    console.log("In AgreementController > propagate, params:")
+    console.log(params)
   }
 
 }

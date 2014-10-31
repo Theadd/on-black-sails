@@ -39,17 +39,29 @@ function ValueOfMultiSelect (input) {
 
 function Encode (input, key){
   var cipher = crypto.createCipher('aes-256-cbc', key)
-  var crypted = cipher.update(input, 'utf8', 'hex')
-  crypted += cipher.final('hex');
-  return crypted;
+  var crypted = cipher.update(JSON.stringify(input), 'utf8', 'hex')
+  crypted += cipher.final('hex')
+  return crypted
 }
 
+/**
+ *
+ * @param input
+ * @param key
+ * @returns {*}
+ * @constructor
+ */
 function Decode (input, key){
   var decipher = crypto.createDecipher('aes-256-cbc', key)
   var dec = decipher.update(input, 'hex', 'utf8')
-  dec += decipher.final('utf8');
-  return dec;
+  dec += decipher.final('utf8')
+  try {
+    return JSON.parse(dec)
+  } catch (e) {
+    return false
+  }
 }
+
 
 function RevertSanitizeRequestParameters (input) {
   input = input || {}
