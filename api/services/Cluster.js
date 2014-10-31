@@ -307,6 +307,7 @@ Cluster.prototype.handleSpecialControlledEntities = function (agreement, prevSta
         agreement.id,
         filter,
         (action == 'start' || action == 'resume'),
+        '[' + agreement.remotenode.name + '] ' + agreement.title + ' #' + agreement.id,
         function (err, controlled) {
           console.log("\t\tIn callback, err: " + err + ", controlled: " + Boolean(controlled))
           if (!err && controlled) {

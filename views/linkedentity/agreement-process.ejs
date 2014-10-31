@@ -1,0 +1,20 @@
+<li class="item" data-id="<%= entity.id %>">
+
+  <div class="body">
+
+    <span class="cell col-md-2 col-sm-3 col-xs-3 box-default">
+      <span class="plastic-tag uppercase center shadow small">
+        <%= entity.config.propagate.onempty %>
+      </span>
+    </span>
+    <span class="cell col-md-9 col-sm-8 col-xs-7 box-lightblue">
+      <span class="plastic-tag title"><%= entity.name %> @ [<%= entity.port %>, <%= entity.config.propagate.port %>]</span>
+    </span>
+
+    <span class="cell col-md-1 col-sm-1 col-xs-2 box-<%= (entity.ready) ? 'success' : 'default' %>">
+      <span class="plastic-tag uppercase white small center shadow"><%= (entity.ready) ? 'ON' : 'OFF' %></span>
+    </span>
+  </div>
+
+</li>
+

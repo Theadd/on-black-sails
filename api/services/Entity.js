@@ -180,10 +180,13 @@ EntityObject.prototype.getControlledEntity = function (id) {
   return (typeof this._controlledEntity[id] !== "undefined") ? this._controlledEntity[id] : false
 }
 
-EntityObject.prototype.getSpecialControlledEntity = function (agreement, filter, createIfNotExist, callback) {
+EntityObject.prototype.getSpecialControlledEntity = function (agreement, filter, createIfNotExist, createWithName, callback) {
   var self = this
 
-  sails.log.debug(">>> IN getSpecialControlledEntity")
+  if (typeof createWithName === "function") {
+    callback = createWithName
+    createWithName = "Agreement ID: " + agreement
+  }
 
   for (var i in self._controlledEntity) {
     var controlled = self._controlledEntity[i]
@@ -196,14 +199,14 @@ EntityObject.prototype.getSpecialControlledEntity = function (agreement, filter,
     }
   }
   if (createIfNotExist) {
-    self.createSpecialControlledEntity(agreement, filter, callback)
+    self.createSpecialControlledEntity(agreement, filter, createWithName, callback)
   } else {
     sails.log.debug(">>> IN getSpecialControlledEntity > return false")
     return false
   }
 }
 
-EntityObject.prototype.createSpecialControlledEntity = function (agreement, filter, callback) {
+EntityObject.prototype.createSpecialControlledEntity = function (agreement, filter, name, callback) {
   var self = this,
     entity = new ControlledEntity({})
 
@@ -213,7 +216,7 @@ EntityObject.prototype.createSpecialControlledEntity = function (agreement, filt
     if (err || !port) return callback(err || new Error('Ports not available.'))
 
     entity.set('port', port)
-    entity.set('name', 'Agreement for filter ' + filter + " in port " + port)
+    entity.set('name', name)
     entity.set('type', 'agreement')
     entity.set('propagate', true)
     entity.set('propagate-onempty', filter)

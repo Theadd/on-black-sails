@@ -1,5 +1,6 @@
-<div class="row">
+<% var display = false; %>
 
+<div class="row">
   <div class="col-lg-12">
     <div class="widget">
       <div class="widget-header">
@@ -11,36 +12,12 @@
 
         <div class="list-group">
           <% _.each(linkedentities, function(entity) { %>
-          <a href="/linkedentity/edit/<%= entity.id %>" class="list-group-item<%= (entity.ready) ? ' list-group-item-success' : '' %>" data-id="<%= entity.id %>" data-model="linkedentity">
-            <div class="pull-right">
-              <div class="toolbox-left">
-                <span data-target="linkedentity"
-                      data-id="<%= entity.id %>"
-                      data-action="command"
-                      data-prop="run"
-                      class="label label-success<%= (entity.ready) ? ' disabled' : '' %>">
-                  <i class="fa fa-lg fa-play"></i>
-                </span>
-
-                <span data-target="linkedentity"
-                      data-id="<%= entity.id %>"
-                      data-action="command"
-                      data-prop="kill"
-                      class="label label-danger<%= (entity.ready) ? '' : ' disabled' %>">
-                  <i class="fa fa-lg fa-stop"></i>
-                </span>
-              </div>
-              <div class="toolbox-right">
-
-                <span data-target="linkedentity" data-id="<%= entity.id %>" data-action="toggle" data-prop="enabled" class="label <%= (entity.enabled) ? 'label-primary' : 'label-default' %>"><i class="fa fa-lg fa-power-off"></i></span>
-                <span data-target="linkedentity" data-id="<%= entity.id %>" data-action="toggle" data-prop="respawn" class="label <%= (entity.respawn) ? 'label-primary' : 'label-default' %>"><i class="fa fa-lg fa-refresh"></i></span>
-              </div>
-            </div>
-            <p class="list-group-item-heading">
-              <%= entity.name %> @ <%= entity.port %>
-            </p>
-
-          </a>
+            <% display = false; %>
+            <% if (entity.type == 'private' && session.authenticated && session.User.admin) display = true; %>
+            <% if (entity.type == 'public') display = true; %>
+            <% if (display) { %>
+              <% include entity-process.ejs %>
+            <% } %>
           <% }) %>
         </div>
 
@@ -49,5 +26,28 @@
   </div>
 </div>
 
-<!--<p class="list-group-item-text">Serving: <strong>TrackerService</strong>, <strong>MetadataService</strong></p>
-<span class="label label-primary"><i class="fa fa-thumbs-up"></i>ENABLED</span>-->
+
+<div class="row">
+  <div class="col-lg-12">
+    <div class="widget">
+      <div class="widget-header">
+        <i class="fa fa-share-alt-square"></i> Agreements Child Processes
+        <div class="clearfix"></div>
+      </div>
+      <div class="widget-body narrow">
+
+        <ul class="plastic-list dashboard-agreement-processes">
+          <% _.each(linkedentities, function(entity) { %>
+          <% display = false; %>
+          <% if (entity.type == 'agreement') display = true; %>
+          <% if (display) { %>
+            <% include agreement-process.ejs %>
+          <% } %>
+          <% }) %>
+        </ul>
+
+      </div>
+    </div>
+  </div>
+</div>
+

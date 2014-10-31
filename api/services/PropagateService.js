@@ -8,14 +8,10 @@ var extend = require('util')._extend
 module.exports = new (require('ipc-service').Service)()
 
 module.exports.setup = function() {
-  var modelObj = ServiceQueueModel.getModel(CommandLineHelpers.config.propagate.onempty)
-
-  if (!modelObj) throw new Error("Unrecognized ServiceQueueModel: " + CommandLineHelpers.config.propagate.onempty)
 
   this.config({
-    'recentPoolMaxSize': modelObj.options.stacksize,
-    'poolMinSize': modelObj.options.stacksize,
-    'runInterval': modelObj.options.interval,
+    'recentPoolMaxSize': 250,
+    'runInterval': CommandLineHelpers.config.propagate.interval,
     'appspace': 'onblacksails.',
     'id': 'propagate',
     'retry': CommandLineHelpers.config.propagate.retry,
@@ -87,6 +83,16 @@ module.exports.setup = function() {
 
 module.exports.start = function () {
   var self = this
+
+  var modelObj = ServiceQueueModel.getModel(CommandLineHelpers.config.propagate.onempty)
+
+  if (!modelObj) throw new Error("Unrecognized ServiceQueueModel: " + CommandLineHelpers.config.propagate.onempty)
+
+  self.config({
+    'recentPoolMaxSize': modelObj.options.stacksize,
+    'poolMinSize': modelObj.options.stacksize,
+    'runInterval': modelObj.options.interval
+  })
 
   Agreement.findOne({id: self.config('agreement')}).exec( function (err, agreement) {
     if (err) {
