@@ -31,9 +31,11 @@ module.exports.setup = function() {
   self._stats['force-idle'] = 0
   self._filterOptions = {}
   self._agreement = false
+  self._allsources = false
+  self._exclude = -1
 
   self.on('process', function(item) {
-    console.log("IN: self.on('process', function(item)... POOL SIZE: " + (self._pool.length + 1))
+    sails.log.debug("IN: self.on('process', function(item)... POOL SIZE: " + (self._pool.length + 1))
     if (self._stack.length) {
       ++self._stats['force-idle']
       self.queue(item, true, true)
@@ -46,14 +48,11 @@ module.exports.setup = function() {
     }
 
     if (self._stack.length && !self._isWorking) {
-      console.log("We got " + self._stack.length + " items in the stack ready to propagate!")
+      sails.log.debug("We got " + self._stack.length + " items in the stack ready to propagate!")
       self._isWorking = true
       self.propagate(function (err, res) {
-        console.log("in callback of propagate")
-        console.error(err)
-        console.log(res)
+        if (err) sails.log.error(err)
         if (!err) {
-          console.log("\t\tPropagated.")
           self._stack = []
 
         }
@@ -100,10 +99,10 @@ module.exports.start = function () {
       return console.error(err)
     }
     if (agreement) {
-      console.log("IN .start, agreement found!")
-      console.log(agreement)
       self._agreement = agreement
       self._filterOptions = agreement.getParam(self.config('onempty')) || {}
+      self._allsources = agreement.localnode.allsources
+      self._exclude = agreement.remotenode.id
 
       if (agreement.status == 'accepted') {
         console.log("\nstatus accepted, run!")
@@ -129,7 +128,8 @@ module.exports.updateFilterParams = function (options, callback) {
 }
 
 module.exports.propagate = function (callback) {
-  var self = this
+  var self = this,
+    localnode = Settings.get('cluster')
 
   Hash.find({
     uuid : self._stack
@@ -142,10 +142,20 @@ module.exports.propagate = function (callback) {
     if (entries && entries.length) {
       var data = []
       for (var i in entries) {
-        data.push(entries[i])
+        if (self._allsources) {
+          if (self._exclude != entries[i].updatedBy) {
+            data.push(entries[i])
+          }
+        } else if (entries[i].updatedBy == localnode) {
+          data.push(entries[i])
+        }
       }
-      console.log("sending data...")
-      self._send(data, callback)
+      if (data.length) {
+        self._send(data, callback)
+      } else {
+        callback(null, true)
+      }
+
     } else {
       console.error("NO ENTRIES FOUND in PropagateService.propagate > Hash.find().exec() callback!")
       return callback(null, true)

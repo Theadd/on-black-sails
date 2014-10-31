@@ -298,18 +298,16 @@ Cluster.prototype.handleSpecialControlledEntities = function (agreement, prevSta
     }
   }
 
-  console.log("\n>>> HANDLE! agreement.id: " + agreement.id + ", status: " + agreement.status + ", prevStatus: " + prevStatus + ", action: " + action)
   if (action) {
     for (var i in agreement.localnode.filters) {
       var filter = agreement.localnode.filters[i]
-      console.log("\tGET IT! filter: " + filter + ", createIfNotExist: " + (action == 'start' || action == 'resume'))
+
       Entity.getSpecialControlledEntity(
         agreement.id,
         filter,
         (action == 'start' || action == 'resume'),
         '[' + agreement.remotenode.name + '] ' + agreement.title + ' #' + agreement.id,
         function (err, controlled) {
-          console.log("\t\tIn callback, err: " + err + ", controlled: " + Boolean(controlled))
           if (!err && controlled) {
             console.log("\t\tready: " + controlled.get('ready'))
             //TODO: pause & resume
