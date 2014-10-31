@@ -36,6 +36,14 @@ function Settings () {
         You should always put your app in production mode before you deploy it to a server-\
         This helps ensure that your Sails app remains stable, performant, and scalable.'
     },
+    autoportstart: {
+      key: 'autoportstart',
+      value: sails.config.autoportstart || 1633,
+      type: 'integer',
+      title: 'Port auto start',
+      help: 'Integer up to 65536',
+      desc: 'The starting port to use when port is automatically assigned.'
+    },
     cluster: {
       key: 'cluster',
       value: sails.config.cluster || 0,
@@ -133,6 +141,9 @@ Settings.prototype.get = function (prop) {
       case 'environment':
         value = self._config.environment.value
         break
+      case 'autoportstart':
+        value = self._config.autoportstart.value
+        break
       case 'cluster':
         value = self._config.cluster.value
         break
@@ -186,6 +197,9 @@ Settings.prototype.set = function (prop, value) {
       break
     case 'environment':
       self._config.environment.value = String(value)
+      break
+    case 'autoportstart':
+      self._config.autoportstart.value = Number(value)
       break
     case 'cluster':
       self._config.cluster.value = Number(value)

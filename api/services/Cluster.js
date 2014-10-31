@@ -254,7 +254,7 @@ Cluster.prototype.requestAndBuildAgreements = function (callback) {
 Cluster.prototype.updateAgreement = function (data) {
   var self = this
 
-  Agreement.import(data, function (err, imported) {
+  Agreement.import(data, function (err, imported, prevStatus) {
     if (!imported.hash && imported.status == 'accepted') {
       self.send('agreement/hash', {agreement: imported.id}, function (err, response) {
         if (response.data) {
@@ -262,12 +262,80 @@ Cluster.prototype.updateAgreement = function (data) {
           if (decoded.length > 20) {
             imported.hash = decoded
             imported.save(function (err, res) {
-              //TODO: Handle linked/controlled entities of each agreement.localnode.filters
+              if (err) sails.log.error(err)
+
+              self.handleSpecialControlledEntities(imported, prevStatus || '')
             })
           }
         }
-
       })
+    } else {
+      self.handleSpecialControlledEntities(imported, prevStatus || '')
     }
   })
+}
+
+Cluster.prototype.handleSpecialControlledEntities = function (agreement, prevStatus) {
+  var action = ''
+
+  if (prevStatus == 'accepted') {
+    if (agreement.status == 'paused') {
+      action = 'pause'
+    } else if (agreement.status != 'accepted') {
+      action = 'stop'
+    }
+  } else {
+    if (prevStatus == 'paused') {
+      if (agreement.status == 'accepted') {
+        action = 'resume'
+      } else {
+        action = 'stop'
+      }
+    } else {
+      if (agreement.status == 'accepted') {
+        action = 'start'
+      }
+    }
+  }
+
+  console.log("\n>>> HANDLE! agreement.id: " + agreement.id + ", status: " + agreement.status + ", prevStatus: " + prevStatus + ", action: " + action)
+  if (action) {
+    for (var i in agreement.localnode.filters) {
+      var filter = agreement.localnode.filters[i]
+      console.log("\tGET IT! filter: " + filter + ", createIfNotExist: " + (action == 'start' || action == 'resume'))
+      Entity.getSpecialControlledEntity(
+        agreement.id,
+        filter,
+        (action == 'start' || action == 'resume'),
+        function (err, controlled) {
+          console.log("\t\tIn callback, err: " + err + ", controlled: " + Boolean(controlled))
+          if (!err && controlled) {
+            console.log("\t\tready: " + controlled.get('ready'))
+            //TODO: pause & resume
+            switch (action) {
+              case 'start':
+                if (!controlled.get('ready')) {
+                  controlled.set('enabled', true)
+                  controlled.set('respawn', true)
+                  controlled.setRespawnByForce(true)
+                  Entity._spawnChildProcessQueue.push(controlled.get('id'))
+                  console.log("\t\t\tACTION: " + action + ", spawn id: " + controlled.get('id'))
+                  console.log(controlled)
+                  Entity.spawnNextChildProcess()
+                }
+                break
+              case 'stop':
+                if (controlled.get('ready')) {
+                  console.log("\t\t\tACTION: " + action + ", kill id: " + controlled.get('id'))
+                  controlled.set('enabled', false)
+                  controlled.send('kill')
+                }
+                break
+            }
+          }
+        }
+      )
+    }
+  }
+
 }

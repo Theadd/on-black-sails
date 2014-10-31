@@ -9,6 +9,7 @@ var defaultEntity = {
   port: 1500,
   enabled: false,
   respawn: false,
+  type: 'public',
   config: {
     'index': {
       'kickass': {
@@ -63,7 +64,8 @@ var defaultEntity = {
       'silent': true,
       'host': 'localhost',
       'port': 8011,
-      'onempty': false
+      'onempty': false,
+      'agreement': 0
     },
     'live': false,
     'autoqueue': false
@@ -157,6 +159,15 @@ ControlledEntity.prototype.get = function (prop) {
     case 'id':
       value = self._entity.id || false
       break
+    case 'type':
+      value = self._entity.type || 'public'
+      break
+    case 'propagate-onempty':
+      value = self._entity.config.propagate.onempty || false
+      break
+    case 'propagate-agreement':
+      value = self._entity.config.propagate.agreement || 0
+      break
     default:
       console.warn("[ControlledEntity] Unrecognized property: " + prop)
   }
@@ -194,6 +205,12 @@ ControlledEntity.prototype.set = function (prop, value) {
       self._entity.respawn = Boolean(JSON.parse(value))
       self._update(prop, self._entity.respawn)
       break
+    case 'type':
+      if (['public', 'private', 'agreement'].indexOf(String(value)) != -1) {
+        self._entity.type = String(value)
+        self._update(prop, self._entity.type)
+      }
+      break
     //CONFIG PROPERTIES, THEY DON'T GET UPDATED UNTIL SAVE()
     case 'live': self._entity.config.live = Boolean(JSON.parse(value)); break
     case 'autoqueue': self._entity.config.autoqueue = Common.ValueOfMultiSelect(value); break
@@ -228,7 +245,11 @@ ControlledEntity.prototype.set = function (prop, value) {
     case 'media-onempty': self._entity.config.media.onempty = Common.ValueOfMultiSelect(value); break
     //Propagate
     case 'propagate': self._entity.config.propagate.active = Boolean(JSON.parse(value)); break
+    case 'propagate-host': self._entity.config.propagate.host = String(value); break
+    case 'propagate-port': self._entity.config.propagate.port = Number(value); break
     case 'propagate-interval': self._entity.config.propagate.interval = Number(value); break
+    case 'propagate-onempty': self._entity.config.propagate.onempty = String(value); break
+    case 'propagate-agreement': self._entity.config.propagate.agreement = Number(value); break
 
     default:
       console.warn("[ControlledEntity] Unrecognized property: " + prop)

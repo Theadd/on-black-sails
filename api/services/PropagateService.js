@@ -8,10 +8,14 @@ var extend = require('util')._extend
 module.exports = new (require('ipc-service').Service)()
 
 module.exports.setup = function() {
+  var modelObj = ServiceQueueModel.getModel(CommandLineHelpers.config.propagate.onempty)
+
+  if (!modelObj) throw new Error("Unrecognized ServiceQueueModel: " + CommandLineHelpers.config.propagate.onempty)
+
   this.config({
-    'recentPoolMaxSize': 20,  //250,
-    /*'poolMinSize': -1,*/'poolMinSize': 30,
-    'runInterval': 3000, //30s //CommandLineHelpers.config.propagate.interval,
+    'recentPoolMaxSize': modelObj.options.stacksize,
+    'poolMinSize': modelObj.options.stacksize,
+    'runInterval': modelObj.options.interval,
     'appspace': 'onblacksails.',
     'id': 'propagate',
     'retry': CommandLineHelpers.config.propagate.retry,

@@ -56,13 +56,7 @@ module.exports.deploy = function() {
       })
 
     } else {
-      //Standalone process NOT in linked entities (MASTER)
-      /*if (CommandLineHelpers.config.clusterid == -1 || typeof CommandLineHelpers.config.clusterid !== "number") {
-        console.log(CommandLineHelpers.usage())
-        process.exit()
-      } else {*/
-        Indexer.run()
-      //}
+      Indexer.run()
     }
   } else {
     //Child process (WORKER)
@@ -184,6 +178,77 @@ EntityObject.prototype._spawnChildProcess = function (controlledEntity) {
 
 EntityObject.prototype.getControlledEntity = function (id) {
   return (typeof this._controlledEntity[id] !== "undefined") ? this._controlledEntity[id] : false
+}
+
+EntityObject.prototype.getSpecialControlledEntity = function (agreement, filter, createIfNotExist, callback) {
+  var self = this
+
+  sails.log.debug(">>> IN getSpecialControlledEntity")
+
+  for (var i in self._controlledEntity) {
+    var controlled = self._controlledEntity[i]
+    if (controlled.get('type') == 'agreement') {
+      if (controlled.get('propagate-agreement') == agreement) {
+        if (controlled.get('propagate-onempty') == filter) {
+          return callback(null, controlled)
+        }
+      }
+    }
+  }
+  if (createIfNotExist) {
+    self.createSpecialControlledEntity(agreement, filter, callback)
+  } else {
+    sails.log.debug(">>> IN getSpecialControlledEntity > return false")
+    return false
+  }
+}
+
+EntityObject.prototype.createSpecialControlledEntity = function (agreement, filter, callback) {
+  var self = this,
+    entity = new ControlledEntity({})
+
+  sails.log.debug(">>> IN createSpecialControlledEntity")
+
+  self.getNextPortAuto( function (err, port) {
+    if (err || !port) return callback(err || new Error('Ports not available.'))
+
+    entity.set('port', port)
+    entity.set('name', 'Agreement for filter ' + filter + " in port " + port)
+    entity.set('type', 'agreement')
+    entity.set('propagate', true)
+    entity.set('propagate-onempty', filter)
+    entity.set('propagate-agreement', agreement)
+    entity.set('propagate-port', port + 1)
+console.log("... creating...")
+    entity.create(function (err, result) {
+      if (err) return callback(err)
+      return callback(null, Entity._controlledEntity[result.id])
+    })
+
+  })
+}
+
+EntityObject.prototype.getNextPortAuto = function (callback) {
+  var min = Settings.get('autoportstart')
+
+  LinkedEntity.find({port: {'>=': min}}).sort({port: 1}).exec( function (err, entities) {
+    if (err) return callback(err)
+    if (!(entities && entities.length)) return callback(null, min)
+    for (var i in entities) {
+      var port = entities[i].port
+      console.log(">>> getNextPortAuto: min: " + min + ", found: " + port)
+      if (port >= min) {
+        if (port == min) {
+          min = port + 4
+        } else if (min + 12 <= port) {
+          return callback(null, min)
+        } else {
+          min = port + 4
+        }
+      }
+    }
+    return callback(null, min)
+  })
 }
 
 

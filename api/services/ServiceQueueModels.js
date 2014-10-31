@@ -2,17 +2,18 @@
  * Created by Theadd on 22/09/2014.
  */
 
-//Example return value: Hash.find({ where: { title: 'foo' }, skip: 20, limit: 10, sort: 'title DESC' })
 module.exports = {
   /** Predefined model that add items to TrackerService queue that had been updated by a TrackerService within the last
    * two hours and were added within last 24 hours. Used to keep torrent peers up to date for newly created ones since
    * its when they are more active. */
   updatePeersOnRecent: {
-    defaults: {
-      interval: 900000,     //15min (REQUIRED).
-      target: 'tracker',    //add items to TrackerService queue (REQUIRED).
-      prioritize: true,     //prioritize items in the queue (OPTIONAL).
-      skipRecentPool: true  //do not check service recent pool if items already exist (OPTIONAL).
+    config: {
+      defaults: {
+        interval: 900000,     //15min (REQUIRED).
+        target: 'tracker',    //add items to TrackerService queue (REQUIRED).
+        prioritize: true,     //prioritize items in the queue (OPTIONAL).
+        skipRecentPool: true  //do not check service recent pool if items already exist (OPTIONAL).
+      }
     },
     getQuery: function() {
       var fromDate = new Date(),
@@ -31,9 +32,11 @@ module.exports = {
   },
   /** Add items to MetadataService queue which aren't downloaded yet. */
   emptyMetadataQueue: {
-    defaults: {
-      interval: 120000,
-      target: 'metadata'
+    config: {
+      defaults: {
+        interval: 120000,
+        target: 'metadata'
+      }
     },
     getQuery: function() {
       return Hash.find({
@@ -45,9 +48,11 @@ module.exports = {
   },
   /** Add items to StatusService which are already downloaded. */
   emptyStatusQueue: {
-    defaults: {
-      interval: 120000,
-      target: 'status'
+    config: {
+      defaults: {
+        interval: 120000,
+        target: 'status'
+      }
     },
     getQuery: function() {
       return Hash.find()
@@ -63,9 +68,11 @@ module.exports = {
   },
   /** Add items to MediaService which are already downloaded. */
   emptyMediaQueue: {
-    defaults: {
-      interval: 120000,
-      target: 'status'
+    config: {
+      defaults: {
+        interval: 120000,
+        target: 'status'
+      }
     },
     getQuery: function() {
       return Hash.find()
@@ -76,19 +83,24 @@ module.exports = {
   },
   /** Add latest torrents with updated peers to PropagateService. */
   peers: {
-    defaults: {
-      interval: 60000,      //1min
-      target: 'propagate',  //add items to TrackerService queue (REQUIRED).
-      prioritize: true,      //prioritize items in the queue (OPTIONAL).
-      //skipRecentPool: true  //do not check service recent pool if items already exist (OPTIONAL).
+    config: {
+      defaults: {
+        standalone: false,    //Not allowed as a global task, i.e. ServiceQueueModel.run('peers') is not allowed.
+        type: 'agreement',    //Show only in agreement multi select
+        stacksize: 20,        //Number of torrents propagated in each http request
+        limit: 250,           //Number of torrents to queue each time the service pool is empty
+        startAt: new Date(0), //Start propagating torrents with peersUpdatedAt greater than this date.
+        interval: 3000,       //Interval between each http request to the remote node
+        target: 'propagate',  //Add items to PropagateService queue.
+        prioritize: true      //Prioritize items in the queue.
+      }
     },
     getQuery: function(options) {
-      options.startAt = options.startAt || new Date(0)
 
       return Hash.find()
         .where({ peersUpdatedAt: { '>=': options.startAt } })
         .sort('peersUpdatedAt ASC')
-        .limit(250)
+        .limit(options.limit)
     },
     filter: function(entry, options) {
       options.startAt = (options.startAt ||

@@ -195,7 +195,9 @@ module.exports = {
       } else {
         //already created, update...
         Agreement.convert(raw, function (err, data) {
-          var differs = (entry.status != data.status)
+          var differs = (entry.status != data.status),
+            prevStatus = entry.status
+
           entry = extend(entry, data)
           entry.save(function (err, response) {
             if (!err && differs) {
@@ -212,7 +214,7 @@ module.exports = {
                 action: 'updated'
               })
             }
-            return callback(err, response)
+            return callback(err, response, prevStatus)
           })
 
         })

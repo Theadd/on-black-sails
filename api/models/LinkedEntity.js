@@ -34,7 +34,7 @@ module.exports = {
 
     type: {
       type: 'string',
-      enum: ['public', 'private', 'agreement'],
+      enum: ['public', 'private', 'agreement'], //ON EDIT: Check ControlledEntity.set('type') also.
       defaultsTo: 'public'
     }
 
