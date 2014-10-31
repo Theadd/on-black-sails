@@ -50,6 +50,9 @@ module.exports.policies = {
   },
   agreement: {
     '*': "flash"
+  },
+  realm: {
+    '*': "flash"
   }
 
 	// Here's an example of mapping some policies to run before

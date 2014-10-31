@@ -18,7 +18,7 @@ module.exports = {
   attributes: {
 
     id: {
-      type: 'string',
+      type: 'integer',
       primaryKey: true,
       unique: true
     },
@@ -34,7 +34,8 @@ module.exports = {
     },
 
     hash: {
-      type: 'string'
+      type: 'string',
+      defaultsTo: ''
     },
 
     localnode: {

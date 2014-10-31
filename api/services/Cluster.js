@@ -258,10 +258,13 @@ Cluster.prototype.updateAgreement = function (data) {
     if (!imported.hash && imported.status == 'accepted') {
       self.send('agreement/hash', {agreement: imported.id}, function (err, response) {
         if (response.data) {
-          imported.hash = Common.Decode(response.data, Settings.get('identitykey'))
-          imported.save( function (err, res) {
-            console.log("\tSAVED!, err:" + err)
-          })
+          var decoded = Common.Decode(response.data, Settings.get('identitykey'))
+          if (decoded.length > 20) {
+            imported.hash = decoded
+            imported.save(function (err, res) {
+              //TODO: Handle linked/controlled entities of each agreement.localnode.filters
+            })
+          }
         }
 
       })

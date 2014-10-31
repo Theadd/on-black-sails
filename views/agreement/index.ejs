@@ -7,7 +7,7 @@
     <% Object.keys(flash.err).forEach(function(error) { %>
     <div class="alert alert-danger" role="alert">
       <a href="#" class="close" data-dismiss="alert">&times;</a>
-      <%= flash.err[error].message %>
+      <%- flash.err[error].message %>
     </div>
     <% }) %>
     <% } %>
@@ -16,7 +16,7 @@
     <% Object.keys(flash.msg).forEach(function(msg) { %>
     <div class="alert alert-success" role="alert">
       <a href="#" class="close" data-dismiss="alert">&times;</a>
-      <%= flash.msg[msg].message %>
+      <%- flash.msg[msg].message %>
     </div>
     <% }) %>
     <% } %>

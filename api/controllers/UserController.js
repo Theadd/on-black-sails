@@ -130,7 +130,7 @@ module.exports = {
     });
   },
 
-  subscribe: function(req, res) {
+  subscribe: function(req, res, next) {
     User.find(function foundUsers(err, users) {
       if (err) return next(err);
 

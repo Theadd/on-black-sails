@@ -187,7 +187,7 @@ module.exports.sockets = {
   'browser client cache': true,
 
   // Does Socket.IO need to send a minified build of the static client script?
-  'browser client minification': false,
+  'browser client minification': true,
 
   // Does Socket.IO need to send an ETag header for the static requests?
   'browser client etag': false,
@@ -199,7 +199,7 @@ module.exports.sockets = {
   // Does Socket.IO need to GZIP the static files?
   // This process is only done once and the computed output is stored in memory.
   // So we don't have to spawn a gzip process for each request.
-  'browser client gzip': false,
+  'browser client gzip': true,
 
   // Optional override function to serve all static files,
   // including socket.io.js et al.

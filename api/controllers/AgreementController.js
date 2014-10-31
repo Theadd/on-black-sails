@@ -34,15 +34,15 @@ module.exports = {
 
   },
 
-  'new': function(req, res, next) {
+  'new': function(req, res) {
     var id = req.param('id')
-    console.log("receiver id: " + id)
+
     res.view({
       receiver: id
     })
   },
 
-  create: function(req, res, next) {
+  create: function(req, res) {
     var params = req.params.all()
     params.outgoingfilters = params.outgoingfilters || []
     params.incomingfilters = params.incomingfilters || []
@@ -54,25 +54,29 @@ module.exports = {
     delete params._csrf
     delete params.id
 
-    Cluster.send('agreement/create', params, function (err, response) {
-      console.log("in callback of cluster.send agreement/create")
-      console.log(err)
-      console.log(response)
-      return res.redirect('/realm')
+    Cluster.send('agreement/create', params, function (err) {
+      if (err) {
+        req.session.flash = {
+          err: [
+            {name: 'createAgreementError', message: err.message}
+          ]
+        }
+      }
+      return res.redirect('/agreement')
     })
   },
 
   /** PUBLISH SUBSCRIBE **/
 
-  subscribe: function(req, res) {
+  subscribe: function(req, res, next) {
     Agreement.find(function foundAgreements(err, agreements) {
-      if (err) return next(err);
+      if (err) return next(err)
 
-      Agreement.watch(req.socket);
+      Agreement.watch(req.socket)
 
-      Agreement.subscribe(req.socket, agreements);
+      Agreement.subscribe(req.socket, agreements)
 
-      res.send(200);
+      res.send(200)
     })
   },
 
@@ -82,12 +86,7 @@ module.exports = {
     var id = req.param('id'),
       action = req.param('action')
 
-    console.log({agreement: id, type: action})
-
     Cluster.send('agreement/action', {agreement: id, type: action}, function (err, response) {
-      console.log("IN Cluster.send('agreement/action', {agreement: id, type: '" + action + "'} callback:")
-      console.error(err)
-      console.log(response)
       if (!err) Cluster.requestAndBuildAgreements()
       res.json({
         error: err || false,
@@ -119,7 +118,7 @@ module.exports = {
             for (var i in _data) {
               HashHelpers.merge(_data[i])
             }
-            console.log(_data.length + " ITEMS MERGED.")
+            sails.log.debug(">>> " + _data.length + " ITEMS MERGED.")
           } else {
             res.json({
               error: err || "Unexpected data."
