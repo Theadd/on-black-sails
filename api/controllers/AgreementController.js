@@ -99,10 +99,39 @@ module.exports = {
   /** IMPORT PROPAGATION OF REMOTE NODE **/
 
   'propagate': function(req, res) {
-    //TODO
-    var params = req.params.all()
-    console.log("In AgreementController > propagate, params:")
-    console.log(params)
+    var agreement = req.param('agreement'),
+      filter = req.param('filter'),
+      data = req.param('data')
+
+    if (agreement && filter && data) {
+      Agreement.findOne({id: agreement}).exec( function (err, entry) {
+        if (err || !(entry && entry.hash)) {
+          res.json({
+            error: err || "Unexpected error."
+          })
+        } else {
+          var _data = Common.Decode(data, entry.hash)
+          if (_data instanceof Array) {
+            res.json({
+              error: false,
+              data: true
+            })
+            for (var i in _data) {
+              HashHelpers.merge(_data[i])
+            }
+            console.log(_data.length + " ITEMS MERGED.")
+          } else {
+            res.json({
+              error: err || "Unexpected data."
+            })
+          }
+        }
+      })
+    } else {
+      res.json({
+        error: "Missing required parameters."
+      })
+    }
   }
 
 }
