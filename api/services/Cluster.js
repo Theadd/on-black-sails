@@ -252,7 +252,19 @@ Cluster.prototype.requestAndBuildAgreements = function (callback) {
 }
 
 Cluster.prototype.updateAgreement = function (data) {
-  Agreement.import(data, function (err, imported) {
+  var self = this
 
+  Agreement.import(data, function (err, imported) {
+    if (!imported.hash && imported.status == 'accepted') {
+      self.send('agreement/hash', {agreement: imported.id}, function (err, response) {
+        if (response.data) {
+          imported.hash = Common.Decode(response.data, Settings.get('identitykey'))
+          imported.save( function (err, res) {
+            console.log("\tSAVED!, err:" + err)
+          })
+        }
+
+      })
+    }
   })
 }
