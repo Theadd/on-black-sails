@@ -12,6 +12,8 @@ module.exports = function(req, res, ok) {
   }
 
   else {
+    req.session.redirectTo = req.url
+
     var requireAdminError = [{name: 'requireAdminError', message: 'You must be an admin.'}]
     req.session.flash = {
       err: requireAdminError

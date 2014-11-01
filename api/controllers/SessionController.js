@@ -63,16 +63,29 @@ module.exports = {
             action: ' has logged in.'
           })
 
+          var redirectTo
+
           if (req.session.User.admin) {
             if (Settings.get('ready')) {
-              res.redirect('/')
+              if (req.session.redirectTo) {
+                redirectTo = req.session.redirectTo
+                delete req.session.redirectTo
+                res.redirect(redirectTo)
+              } else {
+                res.redirect('/')
+              }
             } else {
               res.redirect('/settings')
             }
-            return
+          } else {
+            if (req.session.redirectTo) {
+              redirectTo = req.session.redirectTo
+              delete req.session.redirectTo
+              res.redirect(redirectTo)
+            } else {
+              res.redirect('/user/show/' + user.id)
+            }
           }
-
-          res.redirect('/user/show/' + user.id)
         });
       });
     });
