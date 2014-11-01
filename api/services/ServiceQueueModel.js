@@ -4,7 +4,8 @@
 
 var extend = require('util')._extend
 
-exports.run = function (modelName) {
+exports.run = function (modelName, opts) {
+  opts = opts || {}
   var modelObj = getModel(modelName, opts),
     model, options
 
@@ -113,3 +114,22 @@ var getTargetService = exports.getTargetService = function (target) {
   return targetService
 }
 
+exports.getListOfModels = function () {
+  var list = {}
+
+  for (var model in ServiceQueueModels) {
+    if (['identity', 'globalId'].indexOf(model) != -1) continue
+    var config = ServiceQueueModels[model].config
+    var options = extend({}, config.defaults)
+    options.name = model
+    list[options.name] = extend({}, options)
+    for (var i in config) {
+      if (i == 'defaults') continue
+      var subOptions = extend(extend({}, options), config[i])
+      subOptions.name = subOptions.name + '-' + i
+      list[subOptions.name] = extend({}, subOptions)
+    }
+  }
+
+  return list
+}

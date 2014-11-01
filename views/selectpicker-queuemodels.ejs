@@ -1,0 +1,20 @@
+
+<% if(servicequeuemodels) { %>
+  <optgroup label="Available Models">
+    <% Object.keys(servicequeuemodels).forEach(function(sqm) {
+      var show = true, selection = []
+      if (selectfilters) {
+        if (selectfilters.selected) selection = selectfilters.selected;
+        if (selectfilters.type && servicequeuemodels[sqm].type != selectfilters.type) show = false;
+        if (selectfilters.standalone && servicequeuemodels[sqm].standalone != selectfilters.standalone) show = false;
+        if (selectfilters.notOfType && servicequeuemodels[sqm].type == selectfilters.notOfType) show = false;
+      }
+      if (show) {
+      %>
+        <option data-content='<p class="" data-toggle="tooltip" data-original-title="<%- servicequeuemodels[sqm].tooltip %>"><%- servicequeuemodels[sqm].display %><br /><small><%- servicequeuemodels[sqm].desc %></small></p>'
+          <%= (selection.indexOf(servicequeuemodels[sqm].name) != -1) ? 'selected' : '' %>><%- servicequeuemodels[sqm].name %></option>
+      <% } %>
+    <% }) %>
+  </optgroup>
+<% } %>
+

@@ -4,24 +4,37 @@
 
 var AgreementIndexPage = {
 
-  updateAgreement: function(id, message) {
-    var obj = {
-      agreement: message.data.value
-    };
+  updateAgreement: function (id, message) {
 
-    $('.dashboard-agreement-list .item[data-id="' + id + '"]').replaceWith(
-      JST['assets/templates/addAgreement.ejs'](obj)
-    );
+    io.socket.get('/session/sqm', function (response) {
+
+      var obj = {
+        agreement: message.data.value,
+        servicequeuemodels: response.data
+      };
+
+      $('.dashboard-agreement-list .item[data-id="' + id + '"]').replaceWith(
+        JST['assets/templates/addAgreement.ejs'](obj)
+      );
+
+    });
   },
 
-  addAgreement: function(message) {
-    var obj = {
-      agreement: message.data.value
-    };
+  addAgreement: function (message) {
 
-    $('.dashboard-agreement-list').prepend(
-      JST['assets/templates/addAgreement.ejs'](obj)
-    );
+    io.socket.get('/session/sqm', function (response) {
+
+      var obj = {
+        agreement: message.data.value,
+        servicequeuemodels: response.data
+      };
+
+      $('.dashboard-agreement-list').prepend(
+        JST['assets/templates/addAgreement.ejs'](obj)
+      );
+
+    });
+
   }
 
 };

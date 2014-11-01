@@ -50,7 +50,8 @@
                 name="<%= target %>-onempty"
                 multiple>
 
-          <% include queuemodels %>
+          <% selectfilters = { type: target, selected: selectedQueueModels } %>
+          <% include ../selectpicker-queuemodels.ejs %>
         </select>
       </div>
       <div class="col-sm-5">

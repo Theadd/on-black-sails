@@ -30,11 +30,11 @@ module.exports.policies = {
     '*': "admin"
   },
   linkedentity: {
-    'new': ["flash", "admin"],
+    'new': ["flash", "servicequeuemodels", "admin"],
     subscribe: "flash",
     index: "flash",
     create: "admin",
-    edit: ["flash", "signedin"],
+    edit: ["flash", "servicequeuemodels", "signedin"],
     update: "admin",
     '*': "admin"
   },
@@ -49,6 +49,8 @@ module.exports.policies = {
     '*': "admin"
   },
   agreement: {
+    'new': ["flash", "servicequeuemodels"],
+    index: ["flash", "servicequeuemodels"],
     '*': "flash"
   },
   realm: {

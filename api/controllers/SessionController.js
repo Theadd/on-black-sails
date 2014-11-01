@@ -105,6 +105,12 @@ module.exports = {
         res.redirect('/session/new');
       }
     });
+  },
+
+  sqm: function(req, res) {
+    return res.json({
+      error: false,
+      data: (req.session.servicequeuemodels) ? req.session.servicequeuemodels : ServiceQueueModel.getListOfModels()
+    })
   }
 };
-

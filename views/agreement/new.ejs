@@ -52,12 +52,8 @@
                       name="outgoingfilters"
                       multiple>
 
-                <optgroup label="Common">
-                  <option data-subtext="<br />Latest indexed torrents (w/o metadata).">indexed</option>
-                  <option data-subtext="<br />Latest downloaded torrents (w/ metadata).">downloaded</option>
-                  <option data-subtext="<br />Latest torrents with media info.">media</option>
-                  <option data-subtext="<br />Latest torrents with updated peers.">peers</option>
-                </optgroup>
+                <% selectfilters = { type: 'agreement' } %>
+                <% include ../selectpicker-queuemodels.ejs %>
 
               </select>
             </div>
@@ -91,12 +87,8 @@
                       name="incomingfilters"
                       multiple>
 
-                <optgroup label="Common">
-                  <option data-subtext="<br />Latest indexed torrents (w/o metadata).">indexed</option>
-                  <option data-subtext="<br />Latest downloaded torrents (w/ metadata).">downloaded</option>
-                  <option data-subtext="<br />Latest torrents with media info.">media</option>
-                  <option data-subtext="<br />Latest torrents with updated peers.">peers</option>
-                </optgroup>
+                <% selectfilters = { type: 'agreement' } %>
+                <% include ../selectpicker-queuemodels.ejs %>
 
               </select>
             </div>

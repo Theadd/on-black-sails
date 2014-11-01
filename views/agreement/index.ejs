@@ -106,14 +106,16 @@
 
 
                         <ul class="media-list">
-                          <% _.each(agreement.localnode.filters, function(filter) { %>
-                          <li class="media">
+                          <% _.each(agreement.localnode.filters, function(filter) {
+                            var sqm = servicequeuemodels[filter];
+                          %>
+                          <li class="media" data-toggle="tooltip" data-original-title="<%- sqm.tooltip %>">
                             <a class="pull-left" href="#">
-                              <i class="fa fa-lg fa-fw <%= Helpers.getAgreementFilterObject(filter, 'icon') %>"></i>
+                              <i class="fa fa-lg fa-fw fa-check-square-o"></i>
                             </a>
                             <div class="media-body">
-                              <h4 class="media-heading"><%= Helpers.getAgreementFilterObject(filter, 'display') %></h4>
-                              <%= Helpers.getAgreementFilterObject(filter, 'description') %>
+                              <h4 class="media-heading"><%- sqm.display %></h4>
+                              <%- sqm.desc %>
                             </div>
                           </li>
                           <% }) %>
@@ -159,16 +161,17 @@
                       <label for="label" class="col-sm-3 col-md-2 control-label plastic-tag uppercase white shadow">Provides</label>
                       <div class="col-sm-9 col-md-10 cell multiline no-padding">
 
-
                         <ul class="media-list">
-                          <% _.each(agreement.remotenode.filters, function(filter) { %>
-                          <li class="media">
+                          <% _.each(agreement.remotenode.filters, function(filter) {
+                            var sqm = servicequeuemodels[filter];
+                          %>
+                          <li class="media" data-toggle="tooltip" data-original-title="<%- sqm.tooltip %>">
                             <a class="pull-left" href="#">
-                              <i class="fa fa-lg fa-fw <%= Helpers.getAgreementFilterObject(filter, 'icon') %>"></i>
+                              <i class="fa fa-lg fa-fw fa-check-square-o"></i>
                             </a>
                             <div class="media-body">
-                              <h4 class="media-heading"><%= Helpers.getAgreementFilterObject(filter, 'display') %></h4>
-                              <%= Helpers.getAgreementFilterObject(filter, 'description') %>
+                              <h4 class="media-heading"><%- sqm.display %></h4>
+                              <%- sqm.desc %>
                             </div>
                           </li>
                           <% }) %>

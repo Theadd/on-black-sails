@@ -20,7 +20,7 @@ $(function() {
       this.bindEvents();
       this.checkViewport();
       this.handleSwitches();
-      $('.selectpicker').selectpicker();
+      $('.selectpicker').selectpicker({showContent: false});
       $(".markdown-editor").markdown({iconlibrary: 'fa'});
       $('.markdown-preview').each(function( index ) {
         var data = $( this ).data('markdown');
