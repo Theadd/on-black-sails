@@ -27,16 +27,8 @@ $(function() {
         console.log("CONVERTING '"+data+"' TO HTML!");
         $( this).html(markdown.toHTML(data));
       });
-      /*$('[title]').tooltip({container: 'body', title: 'hello'});
 
-      $('.selectpicker').change(function() {
-        var $button = $(this).data('selectpicker').$button;
-
-        $button
-          .tooltip('hide')
-          .attr('data-original-title', $button.attr('title'))
-          .tooltip('show');
-      });*/
+      $("[data-toggle='tooltip']").tooltip({container: 'body', delay: 500, html: true});
     },
 
     /**

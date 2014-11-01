@@ -76,17 +76,20 @@
               <div class="cell col-sm-6 multiline box-lightblue">
                 <div>
                   <div class="cell col-sm-1">
-                    <span class="label <%= (agreement.localnode.removedead) ? 'label-primary' : 'label-default' %>">
+                    <span class="label <%= (agreement.localnode.removedead) ? 'label-primary' : 'label-default' %>"
+                      data-toggle="tooltip" data-original-title="Remove dead torrents">
                       <i class="fa fa-lg fa-recycle"></i>
                     </span>
                   </div>
                   <div class="cell col-sm-1">
-                    <span class="label <%= (agreement.localnode.indexfiles) ? 'label-primary' : 'label-default' %>">
+                    <span class="label <%= (agreement.localnode.indexfiles) ? 'label-primary' : 'label-default' %>"
+                      data-toggle="tooltip" data-original-title='Index torrent files'>
                       <i class="fa fa-lg fa-database"></i>
                     </span>
                   </div>
                   <div class="cell col-sm-1">
-                    <span class="label <%= (agreement.localnode.allsources) ? 'label-primary' : 'label-default' %>">
+                    <span class="label <%= (agreement.localnode.allsources) ? 'label-primary' : 'label-default' %>"
+                      data-toggle="tooltip" data-original-title='Propagate torrents updated from all sources'>
                       <i class="fa fa-lg fa-cubes"></i>
                     </span>
                   </div>
@@ -128,17 +131,20 @@
               <div class="cell col-sm-6 multiline box-lightblue">
                 <div>
                   <div class="cell col-sm-1">
-                    <span class="label <%= (agreement.remotenode.removedead) ? 'label-primary' : 'label-default' %>">
+                    <span class="label <%= (agreement.remotenode.removedead) ? 'label-primary' : 'label-default' %>"
+                      data-toggle="tooltip" data-original-title="Remove dead torrents">
                       <i class="fa fa-lg fa-recycle"></i>
                     </span>
                   </div>
                   <div class="cell col-sm-1">
-                    <span class="label <%= (agreement.remotenode.indexfiles) ? 'label-primary' : 'label-default' %>">
+                    <span class="label <%= (agreement.remotenode.indexfiles) ? 'label-primary' : 'label-default' %>"
+                      data-toggle="tooltip" data-original-title='Index torrent files'>
                       <i class="fa fa-lg fa-database"></i>
                     </span>
                   </div>
                   <div class="cell col-sm-1">
-                    <span class="label <%= (agreement.remotenode.allsources) ? 'label-primary' : 'label-default' %>">
+                    <span class="label <%= (agreement.remotenode.allsources) ? 'label-primary' : 'label-default' %>"
+                      data-toggle="tooltip" data-original-title='Propagate torrents updated from all sources'>
                       <i class="fa fa-lg fa-cubes"></i>
                     </span>
                   </div>
