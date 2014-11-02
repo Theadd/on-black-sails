@@ -8,7 +8,7 @@
 var extend = require('util')._extend
 
 module.exports = {
-  index: function(req, res, next) {
+  index: function(req, res) {
 
     var agreements = []
 
@@ -24,13 +24,8 @@ module.exports = {
         agreements.unshift(agreement)
       }
 
-      console.log("in agreement index")
       res.view({ agreements: agreements})
     })
-
-
-
-
 
   },
 
@@ -110,15 +105,21 @@ module.exports = {
           })
         } else {
           var _data = Common.Decode(data, entry.hash)
+
           if (_data instanceof Array) {
-            res.json({
-              error: false,
-              data: true
+            var jobName = '' + agreement + "#" + filter
+
+            HashHelpers.onMergeJobReady(jobName, function () {
+              res.json({
+                error: false,
+                data: true
+              })
+
+              HashHelpers.mergeAllJob (jobName, _data, function (err, response) {
+                sails.log.debug(response)
+              })
+
             })
-            for (var i in _data) {
-              HashHelpers.merge(_data[i])
-            }
-            sails.log.debug(">>> " + _data.length + " ITEMS MERGED.")
           } else {
             res.json({
               error: err || "Unexpected data."

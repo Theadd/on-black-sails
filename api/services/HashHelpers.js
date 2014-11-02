@@ -2,7 +2,10 @@
  * Created by Theadd on 11/09/2014.
  */
 
+var extend = require('util')._extend
+
 var deadTorrentsPool = []
+var mergeJob = {}
 
 var isMostUpdated = exports.isMostUpdated = function (existing, received) {
   var mostUpdated = false
@@ -22,7 +25,54 @@ var isMostUpdated = exports.isMostUpdated = function (existing, received) {
   return mostUpdated
 }
 
-exports.merge = function (item) {
+var onMergeJobReady = exports.onMergeJobReady = function (jobName, callback) {
+
+  if (mergeJob[jobName] && mergeJob[jobName].busy) {
+    sails.log.debug("[BUSY] " + jobName)
+    process.nextTick(function () {
+      onMergeJobReady(jobName, callback)
+    })
+  } else {
+    sails.log.debug("\t" + jobName + " not busy")
+    callback()
+  }
+}
+
+exports.mergeAllJob = function (jobName, data, callback) {
+
+  mergeJob[jobName] = {
+    busy: true,
+    remaining: data.length,
+    result: {
+      count: data.length,
+      deadmarked: 0,
+      error: 0,
+      updated: 0,
+      uptodate: 0,
+      created: 0,
+      deadnotcreated: 0
+    }
+  }
+
+  for (var i in data) {
+    HashHelpers.merge(data[i], function (err, response) {
+      if (!err && response) {
+        ++mergeJob[jobName]['result'][response]
+      }
+
+      if (--mergeJob[jobName].remaining == 0) {
+        var obj = extend({}, mergeJob[jobName].result)
+        mergeJob[jobName].busy = false
+        return callback(null, obj)
+      }
+    })
+  }
+
+}
+
+exports.merge = function (item, callback) {
+  callback = callback || function () {}
+
   Hash.find()
     .where({ uuid: item.uuid })
     .exec(function (err, entries) {
@@ -31,6 +81,7 @@ exports.merge = function (item) {
           if (Settings.get('removedead') && item.seeders == 0 && item.leechers == 0) {
             //Remove dead torrent
             HashHelpers.remove(entries[0].uuid)
+            return callback(null, 'deadmarked')
           } else {
             var recentUpdatedAt = (entries[0].updatedAt < item.updatedAt),
               rateMatch = (entries[0].rate == item.rate)
@@ -45,20 +96,27 @@ exports.merge = function (item) {
               media: (!rateMatch && recentUpdatedAt) ? item.media : entries[0].media
             }, function (err, hashes) {
               //updated
+              if (err) return callback(null, 'error')
+              return callback(null, 'updated')
             })
           }
         } else {
+          return callback(null, 'uptodate')
         }
       } else {
-        if (!(Settings.get('removedead')&& item.seeders == 0)) {
+        if (!(Settings.get('removedead') && item.seeders == 0 && item.leechers == 0)) {
           delete item._id
           delete item.id
           Hash.create(item).exec(function (createErr, entry) {
             if (createErr) {
-              console.error("\nERROR on Hash.create! " + JSON.stringify(item))
-              console.log(createErr)
+              sails.log.error(createErr)
+              return callback(null, 'error')
+            } else {
+              return callback(null, 'created')
             }
           })
+        } else {
+          return callback(null, 'deadnotcreated')
         }
       }
     })
