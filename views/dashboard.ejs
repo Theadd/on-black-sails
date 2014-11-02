@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <title><%- title %></title>
+  <title><%= Helpers.pageTitle(req.url) %> :: OnBlackSails!</title>
 
   <link href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css" rel="stylesheet">
   <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
@@ -35,7 +35,7 @@
           <span class="menu-icon glyphicon glyphicon-transfer"></span>
         </a>
       </li>
-      <li class="sidebar-title"><span>NAVIGATION</span></li>
+      <li class="sidebar-title"><span>LOCAL CLUSTER</span></li>
       <li class="sidebar-list">
         <a href="/">Dashboard <span class="menu-icon fa fa-tachometer"></span></a>
       </li>
@@ -124,10 +124,18 @@
           </div>
           <div class="meta">
             <div class="page">
-              Dashboard
+              <%= Helpers.pageTitle(req.url) %>
             </div>
             <div class="breadcrumb-links">
-              Home / Dashboard
+              <% var breadcrumb = Helpers.pageBreadcrumb(req.url),
+                  count = 0;
+
+               _.each(breadcrumb, function(bc) {
+                if (bc.url) { %>
+                <a href="<%- bc.url %>"><%- bc.title %></a> <%= (++count != breadcrumb.length) ? '/ ' : '' %>
+                <% } else { %>
+              <%- bc.title %> <%= (++count != breadcrumb.length) ? '/ ' : '' %>
+              <% } }) %>
             </div>
           </div>
         </div>

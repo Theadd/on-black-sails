@@ -57,41 +57,112 @@ module.exports.http = {
         return num;
       },
 
-      getAgreementFilterObject: function (name, param) {
-        var obj = {
-          display: 'Error',
-          description: 'Unknown',
-          icon: 'fa-exclamation-triangle'
-        };
+      pageTitle: function (page) {
+        page = page.replace(/(\/[0-9]*)$/, '');
 
-        switch (String(name).toLowerCase()) {
-          case 'indexed':
-            obj.description = 'Latest indexed torrents (w/o metadata).';
-            obj.display = 'Indexed';
-            obj.icon = 'fa-archive';
-            break;
-          case 'downloaded':
-            obj.description = 'Latest downloaded torrents (w/ metadata).';
-            obj.display = 'Downloaded';
-            obj.icon = 'fa-code';
-            break;
-          case 'media':
-            obj.description = 'Latest torrents with media info.';
-            obj.display = 'Media';
-            obj.icon = 'fa-film';
-            break;
-          case 'peers':
-            obj.description = 'Latest torrents with updated peers.';
-            obj.display = 'Peers';
-            obj.icon = 'fa-child';
+        switch (page) {
+          case '/realm': return 'Public Nodes'; break;
+          case '/agreement/new': return 'Agreement Request'; break;
+          case '/agreement': return 'Agreements'; break;
+          case '/settings': return 'Settings'; break;
+          case '/linkedentity': return 'Cluster Processes'; break;
+          case '/linkedentity/new': return 'New Process Entity'; break;
+          case '/user': return 'Manage Users'; break;
+          case '/user/show': return 'User Profile'; break;
+          case '/user/new': return 'Sign Up'; break;
+          case '/session/new': return 'Sign In'; break;
+          default:
+            if (page.indexOf('/linkedentity/edit') == 0) return 'Edit Process Entity'; break;
             break;
         }
 
-        if (param || false) {
-          return obj[param];
-        } else {
-          return obj;
+        return 'Dashboard';
+      },
+
+      pageBreadcrumb: function (page) {
+        page = page.replace(/(\/[0-9]*)$/, '');
+
+        switch (page) {
+          case '/realm':
+            return [
+              { title: 'Global Network', url: Settings.get('realm') },
+              { title: 'Public Nodes', url: false }
+            ];
+            break;
+          case '/agreement/new':
+            return [
+              { title: 'Global Network', url: Settings.get('realm') },
+              { title: 'Public Nodes', url: '/realm' },
+              { title: 'Agreement Request', url: false }
+            ];
+            break;
+          case '/agreement':
+            return [
+              { title: 'Local Cluster', url: '/' },
+              { title: 'Agreements', url: false }
+            ];
+            break;
+          case '/settings':
+            return [
+              { title: 'Local Cluster', url: '/' },
+              { title: 'Settings', url: false }
+            ];
+            break;
+          case '/linkedentity':
+            return [
+              { title: 'Local Cluster', url: '/' },
+              { title: 'Cluster Processes', url: false }
+            ];
+            break;
+          case '/linkedentity/new':
+            return [
+              { title: 'Local Cluster', url: '/' },
+              { title: 'Cluster Processes', url: '/linkedentity' },
+              { title: 'New Process Entity', url: false }
+            ];
+            break;
+          case '/user':
+            return [
+              { title: 'Local Cluster', url: '/' },
+              { title: 'Manage Users', url: false }
+            ];
+            break;
+          case '/user/show':
+            return [
+              { title: 'Local Cluster', url: '/' },
+              { title: 'Manage Users', url: '/user' },
+              { title: 'User Profile', url: false }
+            ];
+            break;
+          case '/user/new':
+            return [
+              { title: 'Local Cluster', url: '/' },
+              { title: 'Manage Users', url: '/user' },
+              { title: 'Sign Up', url: false }
+            ];
+            break;
+          case '/session/new':
+            return [
+              { title: 'Local Cluster', url: '/' },
+              { title: 'Manage Users', url: '/user' },
+              { title: 'Sign In', url: false }
+            ];
+            break;
+          default:
+            if (page.indexOf('/linkedentity/edit') == 0) {
+              return [
+                { title: 'Local Cluster', url: '/' },
+                { title: 'Cluster Processes', url: '/linkedentity' },
+                { title: 'Edit Process Entity', url: false }
+              ];
+            }
+            break;
         }
+
+        return [
+          { title: 'Local Cluster', url: '/' },
+          { title: 'Dashboard', url: false }
+        ];
       },
 
       getStatusStyle: function (name) {
