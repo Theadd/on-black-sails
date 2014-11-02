@@ -35,19 +35,18 @@ module.exports.setup = function() {
   self._exclude = -1
 
   self.on('process', function(item) {
-    sails.log.debug("IN: self.on('process', function(item)... POOL SIZE: " + (self._pool.length + 1))
     if (self._stack.length) {
       ++self._stats['force-idle']
       self.queue(item, true, true)
     } else {
-      while (self._stack.length < 20) {
+      while (self._stack.length < 20 && self._active) {
         var another = self.next()
         if (another == null) break
         self._stack.push(another)
       }
     }
 
-    if (self._stack.length && !self._isWorking) {
+    if (self._stack.length && !self._isWorking && self._active) {
       sails.log.debug("We got " + self._stack.length + " items in the stack ready to propagate!")
       self._isWorking = true
       self.propagate(function (err, res) {
@@ -65,15 +64,9 @@ module.exports.setup = function() {
     if (!self._isBusy) {
       self._isBusy = true
       self.updateFilterParams(self._filterOptions)
-      console.log("Running: ServiceQueueModel.runOnce('" + self.config('onempty') + "', " + JSON.stringify(self._filterOptions, null, '  ') + ", ...)")
       ServiceQueueModel.runOnce(self.config('onempty'), self._filterOptions, function (err, count, options) {
-        console.log("\tIn callback of peersAgreementFilter, err: " + err + ", count: " + count)
-        console.log("\t... Options:\n")
-        console.log(options)
-        console.log("\t==================\n")
 
         self._filterOptions = options
-
         self._isBusy = false
       })
     }
@@ -95,8 +88,7 @@ module.exports.start = function () {
 
   Agreement.findOne({id: self.config('agreement')}).exec( function (err, agreement) {
     if (err) {
-      console.error("ERROR IN PropagateService.start > Agreement.findOne: " + self.config('agreement'))
-      return console.error(err)
+      return sails.log.error("ERROR IN PropagateService.start > Agreement.findOne: " + self.config('agreement'))
     }
     if (agreement) {
       self._agreement = agreement
