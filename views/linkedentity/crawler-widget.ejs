@@ -3,10 +3,10 @@
   <div class="widget-header">
     <i class="fa <%= crawlerIcon %>"></i> Crawler: <%= crawlerTitle %>
     <div class="btn-group btn-toggle pull-right" data-toggle="buttons">
-      <label class="btn btn-default <%= (values.active) ? 'active' : '' %>">
+      <label class="btn <%= (values.active) ? 'btn-primary active' : 'btn-default' %>">
         <input name="<%= crawler %>" value="true" <%= (values.active) ? 'checked="checked"' : '' %> type="radio"> ON
       </label>
-      <label class="btn btn-primary <%= (!values.active) ? 'active' : '' %>">
+      <label class="btn <%= (!values.active) ? 'btn-primary active' : 'btn-default' %>">
         <input name="<%= crawler %>" value="false" <%= (!values.active) ? 'checked="checked"' : '' %> type="radio"> OFF
       </label>
     </div>

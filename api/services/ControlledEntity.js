@@ -2,7 +2,7 @@
  * Created by Theadd on 11/10/2014.
  */
 
-var extend = require('util')._extend
+var extend = require('node.extend');
 
 var defaultEntity = {
   name: '',
@@ -78,8 +78,8 @@ function ControlledEntity (entity) {
   var self = this
   if (!(self instanceof ControlledEntity)) return new ControlledEntity(entity)
 
-  self._entity = extend({}, defaultEntity)
-  self._entity = extend(self._entity, entity)
+  self._entity = extend(true, {}, defaultEntity)
+  self._entity = extend(true, self._entity, entity)
   self._ready = false
   self._worker = false
   self._pid = false
@@ -320,7 +320,7 @@ ControlledEntity.prototype.update = function (callback) {
   var self = this
 
   if (self.get('id') != false) {
-    var updateValues = extend({}, self._entity)
+    var updateValues = extend(true, {}, self._entity)
     delete updateValues.id
 
     LinkedEntity.update({ id: self.get('id') }, updateValues, function(err, entity) {
@@ -334,7 +334,7 @@ ControlledEntity.prototype.update = function (callback) {
 }
 
 ControlledEntity.prototype.getClonedValues = function () {
-  var self = this, result = extend({}, self._entity)
+  var self = this, result = extend(true, {}, self._entity)
 
   result.ready = self._ready
   result.pid = self._pid
