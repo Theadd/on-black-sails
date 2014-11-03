@@ -36,7 +36,7 @@ module.exports.setup = function() {
           self._task.role = 'update-metadata'
           self._task.use(Indexer.getDownloadLink(entries[0].uuid, entries[0].cache || '', entries[0].source))
         } else {
-          console.log("Unexpected error in MetadataService.on('process')")
+          sails.log.debug("Unexpected error in MetadataService.on('process')")
           self._task.setStatus('standby')
         }
       })
@@ -84,7 +84,7 @@ module.exports.updateMetadata = function(content) {
   }, function(err, hashes) {
     ++self._stats['items-processed']
     if (err) {
-      console.log(err)
+      sails.log.debug(err)
     } else {
       if (hashes[0].category.indexOf("movies") != -1) {
         MediaService.queue(hashes[0].uuid)
@@ -105,7 +105,7 @@ module.exports.updateMetadata = function(content) {
       data['added'] = dateAdded
       data['size'] = content.files[i].size;
       File.create(data).exec(function (err, fileentry) {
-        if (err) console.error(err)
+        if (err) sails.log.error(err)
       })
     }
   }
@@ -117,11 +117,11 @@ module.exports.errorOnUpdateMetadata = function(error) {
   Hash.update({ uuid: task.hash },{
     cache: ''
   }, function(err, hashes) {
-    console.log("\n# Download error: " + task.url)
-    console.log("\t" + error)
+    sails.log.debug("\n# Download error: " + task.url)
+    sails.log.debug("\t" + error)
     if (err) {
-      console.log("[In errorOnUpdateMetadata()]: ERROR UPDATING METADATA OF " + task.hash)
-      console.log(err)
+      sails.log.debug("[In errorOnUpdateMetadata()]: ERROR UPDATING METADATA OF " + task.hash)
+      sails.log.debug(err)
     }
   })
 }

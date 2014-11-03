@@ -69,7 +69,7 @@ module.exports.updatePeersOf = function(hash) {
           ++self._stats['items-processed']
           --self._stats['working-pool-size']
           if (!err) {
-            //console.log("  >>> " + entries[0].uuid + "\t" + res.complete + "/" + res.incomplete + " (" + res.downloaded + ") - " + res.retries + " #" + res.responses + "/" + res.announces)
+            //sails.log.debug("  >>> " + entries[0].uuid + "\t" + res.complete + "/" + res.incomplete + " (" + res.downloaded + ") - " + res.retries + " #" + res.responses + "/" + res.announces)
             if (res.complete == 0 && res.incomplete == 0 && Settings.get('removedead')) {
               HashHelpers.remove(entries[0].uuid)
               ++self._stats['items-dead-removed']
@@ -85,21 +85,21 @@ module.exports.updatePeersOf = function(hash) {
                   ++self._stats['items-updated']
                 } else {
                   ++self._stats['items-update-error']
-                  console.log("(TRACKER) UPDATE ERROR! " + entries[0].uuid)
-                  console.log(uErr)
+                  sails.log.debug("(TRACKER) UPDATE ERROR! " + entries[0].uuid)
+                  sails.log.debug(uErr)
                 }
               })
             }
           } else {
-            //console.log("\t\tERROR >>> " + entries[0].uuid)
-            //console.log(client.getAnnounce())
+            //sails.log.debug("\t\tERROR >>> " + entries[0].uuid)
+            //sails.log.debug(client.getAnnounce())
             ++self._stats['items-retry-fail']
           }
         })
       } else {
         ++self._stats['items-not-found']
-        console.log("(TRACKER) Item not found! " + hash)
-        console.log(err)
+        sails.log.debug("(TRACKER) Item not found! " + hash)
+        sails.log.debug(err)
       }
     })
 }

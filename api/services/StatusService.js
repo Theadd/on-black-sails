@@ -36,7 +36,7 @@ module.exports.setup = function() {
           self._task.role = 'update-status'
           self._task.use('http://bitsnoop.com/api/fakeskan.php?hash=' + entries[0].uuid)
         } else {
-          console.log("Unexpected error in StatusService.on('process')")
+          sails.log.debug("Unexpected error in StatusService.on('process')")
           self._task.setStatus('standby')
         }
       })

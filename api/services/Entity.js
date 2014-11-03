@@ -48,7 +48,7 @@ module.exports.deploy = function() {
       process.nextTick(function () {
         self.loadControlledEntities(function (err) {
           if (err) {
-            console.error(err)
+            sails.log.error(err)
           } else {
             self.spawnChildProcesses()
           }
@@ -82,13 +82,13 @@ EntityObject.prototype.addLinkedEntity = function (name, config, port, enabled, 
 
     LinkedEntity.create({name: name, config: config, enabled: enabled, respawn: respawn, port: port}).exec(function (err, entry) {
       if (!err) {
-        console.log("\n[addLinkedEntity]\tADDED! " + entry.name + ", enabled: " + entry.enabled + ", port: " + port)
+        sails.log.debug("\n[addLinkedEntity]\tADDED! " + entry.name + ", enabled: " + entry.enabled + ", port: " + port)
       } else {
-        console.log(err)
+        sails.log.debug(err)
       }
     })
   } catch (err) {
-    console.error(err)
+    sails.log.error(err)
   }
 }
 
@@ -119,7 +119,7 @@ EntityObject.prototype.spawnChildProcesses = function () {
       }
       self.spawnNextChildProcess()
     } else {
-      console.error("No linked entities found!")
+      sails.log.error("No linked entities found!")
     }
   })
 }
@@ -134,7 +134,7 @@ EntityObject.prototype.spawnNextChildProcess = function () {
         controlledEntity.error(err)
         controlledEntity.setWorker(null)
       } else {
-        console.log("FORKED " + childProcessKey)// + " on port " + cluster.workers[childProcessKey].config.port)
+        sails.log.debug("FORKED " + childProcessKey)// + " on port " + cluster.workers[childProcessKey].config.port)
         controlledEntity.setWorker(cluster.workers[childProcessKey])
       }
       return self.spawnNextChildProcess()
@@ -169,7 +169,7 @@ EntityObject.prototype._spawnChildProcess = function (controlledEntity) {
   cluster.workers[childProcessKey]._controlledEntity = controlledEntity
 
   cluster.workers[childProcessKey].on('message', function (msg) {
-    console.log("\t---> Handling message of " + (childProcessKey || -1))
+    sails.log.debug("\t---> Handling message of " + (childProcessKey || -1))
     self.handleMessageOnMaster(msg)
   })
 
@@ -222,7 +222,7 @@ EntityObject.prototype.createSpecialControlledEntity = function (agreement, filt
     entity.set('propagate-onempty', filter)
     entity.set('propagate-agreement', agreement)
     entity.set('propagate-port', port + 1)
-console.log("... creating...")
+sails.log.debug("... creating...")
     entity.create(function (err, result) {
       if (err) return callback(err)
       return callback(null, Entity._controlledEntity[result.id])
@@ -239,7 +239,7 @@ EntityObject.prototype.getNextPortAuto = function (callback) {
     if (!(entities && entities.length)) return callback(null, min)
     for (var i in entities) {
       var port = entities[i].port
-      console.log(">>> getNextPortAuto: min: " + min + ", found: " + port)
+      sails.log.debug(">>> getNextPortAuto: min: " + min + ", found: " + port)
       if (port >= min) {
         if (port == min) {
           min = port + 4
@@ -270,7 +270,7 @@ EntityObject.prototype.handleMessageOnMaster = function (msg) {
         cluster.workers[msg.id].send({ cmd: 'run'})
         break
       default:
-        console.error("Unrecognized message on master: " + msg)
+        sails.log.error("Unrecognized message on master: " + msg)
     }
   }
 }
@@ -304,7 +304,7 @@ EntityObject.prototype.handleMessageOnWorker = function (msg) {
         }
         break
       default:
-        console.error("Unrecognized message on worker: " + msg)
+        sails.log.error("Unrecognized message on worker: " + msg)
     }
   }
 }

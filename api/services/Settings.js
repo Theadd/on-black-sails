@@ -176,7 +176,7 @@ Settings.prototype.get = function (prop) {
         break
       default:
         console.trace()
-        console.warn("[Settings] Unrecognized property: " + prop)
+        sails.log.warn("[Settings] Unrecognized property: " + prop)
     }
   } else {
     value = extend({}, self._config)
@@ -230,7 +230,7 @@ Settings.prototype.set = function (prop, value) {
       break
     default:
       console.trace()
-      console.warn("[Settings] Unrecognized property: " + prop)
+      sails.log.warn("[Settings] Unrecognized property: " + prop)
   }
 }
 

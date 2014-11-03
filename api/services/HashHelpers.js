@@ -130,7 +130,7 @@ exports.remove = function (uuid) {
         if (!err && entries.length) {
           if (entries[0].seeders == 0 && entries[0].leechers == 0) {
             //torrent already dead, delete
-            console.log("REMOVING: " + uuid)
+            sails.log.debug("REMOVING: " + uuid)
             Hash.destroy({ uuid: uuid }).exec(function() {})
           } else {
             //torrent was not dead last check
@@ -140,11 +140,11 @@ exports.remove = function (uuid) {
               if (deadTorrentsPool.unshift(uuid) >= 500) {
                 deadTorrentsPool.splice(-50)
               }
-              console.log("RECHECK BEFORE REMOVING: " + uuid)
+              sails.log.debug("RECHECK BEFORE REMOVING: " + uuid)
               TrackerService.queue(uuid, true, true)
             } else {
               //recheck also returns dead, remove from dead pool and database
-              console.log("REMOVING (After recheck): " + uuid)
+              sails.log.debug("REMOVING (After recheck): " + uuid)
               deadTorrentsPool.splice(index, 1)
               Hash.destroy({ uuid: uuid }).exec(function() {})
             }

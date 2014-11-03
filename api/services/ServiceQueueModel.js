@@ -107,7 +107,7 @@ var getTargetService = exports.getTargetService = function (target) {
       targetService = PropagateService
       break
     default:
-      console.log("Unrecognized service: " + target)
+      sails.log.error("Unrecognized service: " + target)
       break
   }
 

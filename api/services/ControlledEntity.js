@@ -124,8 +124,8 @@ ControlledEntity.prototype.getRespawnByForce = function () {
 }
 
 ControlledEntity.prototype.error = function (err) {
-  console.error(err)
-  console.log(err.stack)
+  sails.log.error(err)
+  sails.log.debug(err.stack)
 }
 
 ControlledEntity.prototype.get = function (prop) {
@@ -265,7 +265,7 @@ ControlledEntity.prototype._update = function (prop, value, doNotUpdateModel) {
 
   if (!doNotUpdateModel) {
     LinkedEntity.update({ id: self.get('id') }, updateValues, function(err, entities) {
-      console.log("\tUPDATED " + prop + " TO " + value + " FOR " + self.get('id'))
+      sails.log.debug("\tUPDATED " + prop + " TO " + value + " FOR " + self.get('id'))
       if (err) {
         self.error(err)
       } else {
@@ -280,7 +280,7 @@ ControlledEntity.prototype._update = function (prop, value, doNotUpdateModel) {
       }
     })
   } else {
-    console.log("\tPUBLISH (ONLY) " + prop + " TO " + value + " FOR " + self.get('id'))
+    sails.log.debug("\tPUBLISH (ONLY) " + prop + " TO " + value + " FOR " + self.get('id'))
     LinkedEntity.publishUpdate(self.get('id'), {
       name: self.get('name'),
       property: prop,
@@ -347,5 +347,7 @@ ControlledEntity.prototype.send = function (command, value) {
   value = value || false
   command = String(command)
 
-  self.get('worker').send({ cmd: command, val: value })
+  if (self.get('worker')) {
+    self.get('worker').send({ cmd: command, val: value })
+  }
 }

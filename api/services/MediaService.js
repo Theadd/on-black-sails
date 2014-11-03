@@ -46,7 +46,7 @@ module.exports.setup = function() {
             self._task.use('http://www.omdbapi.com/?i=&t=' + media.name + ((media.year > 0) ? '&y=' + media.year : ''))
           }
         } else {
-          console.log("Unexpected error in MediaService.on('process')")
+          sails.log.debug("Unexpected error in MediaService.on('process')")
           self._task.setStatus('standby')
         }
       })

@@ -59,14 +59,14 @@ exports.matchingIMDBIDFromTMDB = function (title, year, cb, opts) {
     opts = opts || {}
 
     MovieDB.on('error', function(emsg) {
-      console.log("@MOVIEDB: ", emsg)
+      sails.log.debug("@MOVIEDB: ", emsg)
       moviedbBusyState = false
     })
 
     MovieDB.searchMovie({query: title }, function(err, mdbres){
       if (err) {
         moviedbBusyState = false
-        console.log(err)
+        sails.log.debug(err)
         //delete Indexer.workers['update-media'][opts['hash']]
       } else {
         var probable = []

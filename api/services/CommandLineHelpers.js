@@ -126,7 +126,7 @@ exports.process = function () {
       var data = fs.readFileSync(configFile)
       configFileContent = JSON.parse(data)
     } catch(err) {
-      console.warn("Unable to read config from: " + configFile)
+      sails.log.warn("Unable to read config from: " + configFile)
     }
     config = extendObject(config, configFileContent)
   }
@@ -166,7 +166,7 @@ exports.process = function () {
         }
       } catch (err) {
         if (unlistedParameters.indexOf(parametersLeft[j]) == -1) {
-          console.warn("Unrecognized parameter: " + parametersLeft[j])
+          sails.log.debug("Unrecognized parameter: " + parametersLeft[j])
         }
       }
     }
@@ -175,7 +175,7 @@ exports.process = function () {
   if (saveConfigFile) {
     var fs = require('fs');
     fs.writeFile(configFile, JSON.stringify(config, undefined, 2), function(err) {
-      if (err) console.warn(err)
+      if (err) sails.log.warn(err)
     })
   }
 

@@ -56,7 +56,7 @@ exports.run = function() {
   if (CommandLineHelpers.config.autoqueue != false) {
     var queueModels = CommandLineHelpers.config.autoqueue.split(',')
     for (var queueModel in queueModels) {
-      console.log("Running queue model " + queueModels[queueModel])
+      sails.log.debug("Running queue model " + queueModels[queueModel])
       ServiceQueueModel.run(queueModels[queueModel])
     }
   }
@@ -65,7 +65,7 @@ exports.run = function() {
     var targetService = ServiceQueueModel.getTargetService(sails.config.target || 'tracker')
     targetService.client()
     setTimeout(function () {
-      console.log("EXECUTING COMMAND " + sails.config.command + " ON " + (sails.config.target || 'tracker'))
+      sails.log.debug("EXECUTING COMMAND " + sails.config.command + " ON " + (sails.config.target || 'tracker'))
       targetService.exec({name: sails.config.command})
     }, 2000);
   }
@@ -75,7 +75,7 @@ exports.run = function() {
       try {
         global.gc()
       } catch (e) {
-        console.error("Restart this process enabling garbage collection: \"node --expose-gc app.js ...\"")
+        sails.log.error("Restart this process enabling garbage collection: \"node --expose-gc app.js ...\"")
       }
     }, (Number(CommandLineHelpers.config.autogc || Settings.get('autogc')) >= 1000) ? Number(CommandLineHelpers.config.autogc || Settings.get('autogc')) : 90000)
   }
@@ -89,14 +89,14 @@ var createTask = exports.createTask = function(target, interval, dataCb, errorCb
     task.on('error', errorCb);
   } else {
     task.on('error', function (err) {
-      console.log(err)
+      sails.log.debug(err)
       if (typeof task.role !== "undefined") {
         workers[task.role]--
       }
-      console.log(task.url)
+      sails.log.debug(task.url)
       var self = this
       if (typeof self.hash !== "undefined") {
-        console.log("SKIP UPDATING " + self.hash)
+        sails.log.debug("SKIP UPDATING " + self.hash)
         Hash.update({ uuid: self.hash }, { size: 0 }, function(err, hashes) { })
       }
     })
@@ -104,7 +104,7 @@ var createTask = exports.createTask = function(target, interval, dataCb, errorCb
 
   if (logStatus || false) {
     task.on('status', function (msg) {
-      console.log("Status: " + msg)
+      sails.log.debug("Status: " + msg)
     })
   }
 
@@ -153,7 +153,7 @@ var indexSiteAPI = function(content) {
             }
           }
           if (addAttempts >= contentLength) {
-            console.log("[" + task.url + "] Indexed " + added + " out of " + (contentLength + 1) + " in " + ((new Date().getTime() - startTime)) + "ms (" + (task._totalNumLines || 0) + " lines so far)")
+            sails.log.debug("[" + task.url + "] Indexed " + added + " out of " + (contentLength + 1) + " in " + ((new Date().getTime() - startTime)) + "ms (" + (task._totalNumLines || 0) + " lines so far)")
             addAttempts = 0
             added = 0
             task.resume()

@@ -130,8 +130,8 @@ module.exports.propagate = function (callback) {
     uuid : self._stack
   }).exec( function (err, entries) {
     if (err) {
-      console.error("Error in PropagateService.propagate > Hash.find().exec() callback!")
-      console.error(err)
+      sails.log.error("Error in PropagateService.propagate > Hash.find().exec() callback!")
+      sails.log.error(err)
       return callback(err)
     }
     if (entries && entries.length) {
@@ -155,7 +155,7 @@ module.exports.propagate = function (callback) {
       }
 
     } else {
-      console.error("NO ENTRIES FOUND in PropagateService.propagate > Hash.find().exec() callback!")
+      sails.log.error("NO ENTRIES FOUND in PropagateService.propagate > Hash.find().exec() callback!")
       return callback(null, 0)
     }
   })
