@@ -116,7 +116,7 @@ module.exports = {
               })
 
               HashHelpers.mergeAllJob (jobName, _data, function (err, response) {
-                sails.log.debug(response)
+                AgreementHistory.store(agreement, filter, true, response)
               })
 
             })

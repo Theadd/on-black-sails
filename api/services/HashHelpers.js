@@ -29,9 +29,9 @@ var onMergeJobReady = exports.onMergeJobReady = function (jobName, callback) {
 
   if (mergeJob[jobName] && mergeJob[jobName].busy) {
     sails.log.debug("[BUSY] " + jobName)
-    process.nextTick(function () {
+    setTimeout(function () {
       onMergeJobReady(jobName, callback)
-    })
+    }, 100)
   } else {
     sails.log.debug("\t" + jobName + " not busy")
     callback()

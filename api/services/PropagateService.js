@@ -51,9 +51,14 @@ module.exports.setup = function() {
       self._isWorking = true
       self.propagate(function (err, res) {
         if (err) sails.log.error(err)
+        var info = {
+          count: (err) ? 0 : self._stack.length,
+          sent: (err) ? 0 : res || 0,
+          error: (err) ? 1 : 0
+        }
+        AgreementHistory.store(self._agreement.id, self.config('onempty'), false, info)
         if (!err) {
           self._stack = []
-
         }
         self._isWorking = false
       })
@@ -104,8 +109,6 @@ module.exports.start = function () {
         self.run()
       }
     }
-
-
   })
 }
 
@@ -113,9 +116,6 @@ module.exports.updateFilterParams = function (options, callback) {
   var self = this
   callback = callback || function () {}
 
-  console.log("updateFilterParams: ")
-  console.log(options)
-  console.log(" ")
   Agreement.findOne({id: self.config('agreement')}).exec( function (err, agreement) {
     if (err || !agreement) return callback(err || 'Unexpected error.')
     agreement.setParams(self.config('onempty'), options, callback)
@@ -146,14 +146,17 @@ module.exports.propagate = function (callback) {
         }
       }
       if (data.length) {
-        self._send(data, callback)
+        self._send(data, function (err) {
+          if (err) return callback(err)
+          return callback(null, data.length)
+        })
       } else {
-        callback(null, true)
+        callback(null, 0)
       }
 
     } else {
       console.error("NO ENTRIES FOUND in PropagateService.propagate > Hash.find().exec() callback!")
-      return callback(null, true)
+      return callback(null, 0)
     }
   })
 }
