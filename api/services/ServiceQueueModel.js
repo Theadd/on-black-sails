@@ -2,7 +2,7 @@
  * Created by Theadd on 21/09/2014.
  */
 
-var extend = require('util')._extend
+var extend = require('node.extend');
 
 exports.run = function (modelName, opts) {
   opts = opts || {}
@@ -54,7 +54,7 @@ exports.runOnce = function (modelName, opts, cb) {
             }
           }
           if (cb) {
-            cb(null, entries.length, extend({}, options))
+            cb(null, entries.length, extend(true, {}, options))
           }
         } else {
           if (cb) {
@@ -79,9 +79,9 @@ var getModel = exports.getModel = function (modelName, opts) {
   opts = opts || {}
 
   if (parts[1] && model.config[parts[1]]) {
-    options = extend(extend(extend({}, model.config.defaults), model.config[parts[1]]), opts)
+    options = extend(true, extend(true, extend(true, {}, model.config.defaults), model.config[parts[1]]), opts)
   } else {
-    options = extend(extend({}, model.config.defaults), opts)
+    options = extend(true, extend(true, {}, model.config.defaults), opts)
   }
 
   return {model: model, options: options}
@@ -120,14 +120,14 @@ exports.getListOfModels = function () {
   for (var model in ServiceQueueModels) {
     if (['identity', 'globalId'].indexOf(model) != -1) continue
     var config = ServiceQueueModels[model].config
-    var options = extend({}, config.defaults)
+    var options = extend(true, {}, config.defaults)
     options.name = model
-    list[options.name] = extend({}, options)
+    list[options.name] = extend(true, {}, options)
     for (var i in config) {
       if (i == 'defaults') continue
-      var subOptions = extend(extend({}, options), config[i])
+      var subOptions = extend(true, extend(true, {}, options), config[i])
       subOptions.name = subOptions.name + '-' + i
-      list[subOptions.name] = extend({}, subOptions)
+      list[subOptions.name] = extend(true, {}, subOptions)
     }
   }
 
