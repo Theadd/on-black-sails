@@ -1,29 +1,53 @@
 io.socket.on('connect', function() {
-  io.socket.on('user', cometMessageReceivedFromServer);
+  io.socket.on('user', cometUserMessageReceivedFromServer);
   io.socket.get('/user/subscribe');
 
-  io.socket.on('linkedentity', cometMessageReceivedFromServer);
+  io.socket.on('linkedentity', cometEntityMessageReceivedFromServer);
   io.socket.get('/linkedentity/subscribe');
 
-  io.socket.on('agreement', cometMessageReceivedFromServer);
+  io.socket.on('agreement', cometAgreementMessageReceivedFromServer);
   io.socket.get('/agreement/subscribe');
 });
 
-function cometMessageReceivedFromServer(message) {
-  console.log('Here\'s the message: ' + message);
-  console.log(message);
+function cometUserMessageReceivedFromServer(message) {
+  if ((document.location.pathname).replace(/(\/)$/, '') == '/user') {
+    console.debug(message);
 
-  updateEntryInDom(message);
+    updateEntryInDom(message);
 
-  if (message.verb !== 'destroyed') {
-    displayFlashActivity(message);
+    if (message.verb !== 'destroyed') {
+      displayFlashActivity(message);
+    }
+  }
+}
+
+function cometEntityMessageReceivedFromServer(message) {
+  if ((document.location.pathname).replace(/(\/)$/, '') == '/linkedentity') {
+    console.debug(message);
+
+    updateEntryInDom(message);
+
+    if (message.verb !== 'destroyed') {
+      displayFlashActivity(message);
+    }
+  }
+}
+
+
+function cometAgreementMessageReceivedFromServer(message) {
+  if ((document.location.pathname).replace(/(\/)$/, '') == '/agreement') {
+    console.debug(message);
+
+    updateEntryInDom(message);
+
+    if (message.verb !== 'destroyed') {
+      displayFlashActivity(message);
+    }
   }
 }
 
 function displayFlashActivity(message) {
   $('#chatAudio')[0].play();
-  //$('.navbar').after('<div class="alert alert-success">' + message.data.name + message.data.action + "</div>");
-  //$('.alert').fadeOut(5000);
 }
 
 function updateEntryInDom(message) {
