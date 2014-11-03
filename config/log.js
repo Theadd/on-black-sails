@@ -22,9 +22,8 @@ module.exports = {
   // 'verbose': Display calls from `.error()`, `.warn()`, `.debug()`, `.info()` to `.verbose()`
   //
   log: {
-    //level: 'info'
-    //level: 'warn'
-    level: 'debug'
+    level: 'warn'
+    //level: 'debug'
   }
 
 };
