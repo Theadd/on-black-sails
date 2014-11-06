@@ -21,56 +21,49 @@ module.exports.policies = {
   '*': "flash",
 
   user: {
-    'new': "flash",
-    subscribe: ["flash", "authenticated"],
-    create: "flash",
-    show: "userCanSeeProfile",
-    edit: "userCanSeeProfile",
-    update: "userCanSeeProfile",
-    '*': "admin"
+    'new': ["frontend", "flash"],
+    subscribe: ["frontend", "flash", "authenticated"],
+    create: ["frontend", "flash"],
+    show: ["frontend", "userCanSeeProfile"],
+    edit: ["frontend", "userCanSeeProfile"],
+    update: ["frontend", "userCanSeeProfile"],
+    '*': ["frontend", "admin"]
   },
   linkedentity: {
-    'new': ["flash", "servicequeuemodels", "admin"],
-    subscribe: "flash",
-    index: "flash",
-    create: "admin",
-    edit: ["flash", "servicequeuemodels", "signedin"],
-    update: "admin",
-    '*': "admin"
+    'new': ["master", "flash", "servicequeuemodels", "admin"],
+    subscribe: ["master", "public", "flash"],
+    index: ["master", "public", "flash"],
+    create: ["master", "admin"],
+    edit: ["master", "public", "flash", "servicequeuemodels", "signedin"],
+    update: ["master", "admin"],
+    toggle: ["master", "admin"],
+    command: ["master", "admin"],
+    '*': false
   },
   settings: {
-    index: "flash",
-    verify: "flash",
-    '*': "admin"
+    index: ["master", "flash", "admin"],
+    update: ["master", "flash", "admin"],
+    '*': false
   },
   message: {
-    index: "flash", //TODO: admin
-    create: "flash",
-    '*': "admin"
+    create: ["master", "flash"],
+    '*': false
   },
   agreement: {
-    'new': ["flash", "servicequeuemodels"],
-    index: ["flash", "servicequeuemodels"],
-    '*': "flash"
+    index: ["master", "public", "flash", "servicequeuemodels"],
+    'new': ["master", "flash", "admin", "servicequeuemodels"],
+    create: ["master", "flash", "admin"],
+    subscribe: ["master", "public", "flash"],
+    action: ["master", "public", "admin"],
+    propagate: ["master"],
+    '*': false
   },
   realm: {
-    '*': "flash"
+    index: ["frontend", "flash"],
+    verify: ["master", "flash"],
+    edit: ["master", "flash", "admin"],
+    update: ["master", "flash", "admin"],
+    '*': false
   }
 
-	// Here's an example of mapping some policies to run before
-  // a controller and its actions
-	// RabbitController: {
-
-		// Apply the `false` policy as the default for all of RabbitController's actions
-		// (`false` prevents all access, which ensures that nothing bad happens to our rabbits)
-		// '*': false,
-
-		// For the action `nurture`, apply the 'isRabbitMother' policy
-		// (this overrides `false` above)
-		// nurture	: 'isRabbitMother',
-
-		// Apply the `isNiceToAnimals` AND `hasRabbitFood` policies
-		// before letting any users feed our rabbits
-		// feed : ['isNiceToAnimals', 'hasRabbitFood']
-	// }
 };

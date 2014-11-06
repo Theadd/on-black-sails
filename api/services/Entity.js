@@ -11,6 +11,8 @@ function EntityObject () {
   var self = this
   if (!(self instanceof EntityObject)) return new EntityObject()
   self.isMaster = false
+  self.isPublic = true
+  self.isAPI = true
   self.port = sails.config.port
   self._spawnChildProcessQueue = []
   self.id = 0
