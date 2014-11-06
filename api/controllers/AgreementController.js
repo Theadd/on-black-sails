@@ -57,7 +57,9 @@ module.exports = {
           ]
         }
       }
-      return res.redirect('/agreement')
+      Cluster.requestAndBuildAgreements( function () {
+        return res.redirect('/agreement')
+      })
     })
   },
 
