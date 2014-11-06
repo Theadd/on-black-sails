@@ -1,7 +1,7 @@
 module.exports = function(req, res, ok) {
 
   if (req.session.User && req.session.User.admin) {
-    if (Settings.get('ready') || req.url == '/settings/update') {
+    if (Settings.get('ready') || req.url.indexOf('/settings') != -1) {
       return ok()
     } else {
       req.session.flash = {
