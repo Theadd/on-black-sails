@@ -12,11 +12,35 @@ function Settings () {
   var self = this
   if (!(self instanceof Settings)) return new Settings()
 
+  self._category = {
+    general: {
+      key: 'general',
+      title: 'General Settings',
+      icon: 'fa-cogs'
+    },
+    realm: {
+      key: 'realm',
+      title: 'Realm Settings',
+      icon: 'fa-cogs'
+    },
+    cluster: {
+      key: 'cluster',
+      title: 'Local Cluster Settings',
+      icon: 'fa-cogs'
+    },
+    access: {
+      key: 'access',
+      title: 'Access Control Settings',
+      icon: 'fa-cogs'
+    }
+  }
+
   self._config = {
     port: {
       key: 'port',
       value: sails.config.port,
       type: 'integer',
+      category: 'general',
       title: 'Port (master/dashboard)',
       help: 'Integer up to 65536',
       desc: 'The default port used by the master in this cluster. It\'s also the dashboard HTTP port so you \
@@ -26,20 +50,22 @@ function Settings () {
       key: 'environment',
       value: sails.config.environment,
       type: 'string',
+      category: 'general',
       title: 'Environment',
       help: '<span class="inline-pseudobox">development</span> or <span class="inline-pseudobox">production</span>',
       desc: 'The runtime "environment" of your Sails app is either <span class="inline-pseudobox">development</span> \
-        or <span class="inline-pseudobox">production</span>.<br />\
-        In development, your Sails app will go out of its way to help you\
-        (for instance you will receive more descriptive error and debugging output)<br />\
-        In production, Sails configures itself (and its dependencies) to optimize performance.\
+        or <span class="inline-pseudobox">production</span>.<br /><br />\
+        <ul><li>In <strong>development</strong>, your Sails app will go out of its way to help you\
+        (for instance you will receive more descriptive error and debugging output).</li>\
+        <li>In <strong>production</strong>,, Sails configures itself (and its dependencies) to optimize performance.\
         You should always put your app in production mode before you deploy it to a server-\
-        This helps ensure that your Sails app remains stable, performant, and scalable.'
+        This helps ensure that your Sails app remains stable, performant, and scalable.</li></ul>'
     },
     autoportstart: {
       key: 'autoportstart',
       value: sails.config.autoportstart || 1633,
       type: 'integer',
+      category: 'general',
       title: 'Port auto start',
       help: 'Integer up to 65536',
       desc: 'The starting port to use when port is automatically assigned.'
@@ -56,6 +82,7 @@ function Settings () {
       key: 'realm',
       value: sails.config.realm || 'http://realm.onblacksails.com:42000/',
       type: 'string',
+      category: 'realm',
       title: 'Realm',
       help: 'URL',
       desc: 'Please, don\'t edit this field if you are not told to.'
@@ -64,6 +91,7 @@ function Settings () {
       key: 'publicaddress',
       value: sails.config.publicaddress || 'http://localhost:1337/', //TODO: 'http://',
       type: 'string',
+      category: 'realm',
       title: 'Public address',
       help: 'URL',
       desc: 'Public address that points to the root of this dashboard, like <span class="inline-pseudobox">\
@@ -73,6 +101,7 @@ function Settings () {
       key: 'clustername',
       value: sails.config.clustername || 'Default',
       type: 'string',
+      category: 'cluster',
       title: 'Cluster Name',
       help: 'String',
       desc: ''
@@ -90,6 +119,7 @@ function Settings () {
       key: 'datapath',
       value: sails.config.datapath || '.data/',
       type: 'string',
+      category: 'general',
       title: 'Path to data directory',
       help: 'Relative or absolute path',
       desc: ''
@@ -98,25 +128,48 @@ function Settings () {
       key: 'removedead',
       value: sails.config.removedead || false,
       type: 'boolean',
+      category: 'cluster',
       title: 'Remove dead torrents',
       help: 'Boolean',
-      desc: ''
+      desc: 'Remove dead torrents'
     },
     indexfiles: {
       key: 'indexfiles',
       value: sails.config.indexfiles || false,
       type: 'boolean',
+      category: 'cluster',
       title: 'Index torrent filenames',
       help: 'Boolean',
-      desc: ''
+      desc: 'Index torrent filenames'
     },
     autogc: {
       key: 'autogc',
       value: sails.config.autogc || false,
       type: 'boolean',
+      category: 'general',
       title: 'Force garbage collection',
       help: 'Boolean',
-      desc: ''
+      desc: 'When enabled, each proccess in your local cluster will call <span class="inline-pseudobox">global.gc()\
+        </span> every 90 seconds in order to collect/free memory garbage.'
+    },
+    publicaccess: {
+      key: 'publicaccess',
+      value: (typeof sails.config.publicaccess === "boolean") ? sails.config.publicaccess : true,
+      type: 'boolean',
+      category: 'access',
+      title: 'Public access',
+      help: 'Boolean',
+      desc: 'Allow access to sensitive areas of the system for non-localhost users. <strong>Caution</strong>: When \
+        disabled, you won&apos;t be able to access some areas of the dashboard unless yo do it from the same machine.'
+    },
+    apionmaster: {
+      key: 'apionmaster',
+      value: (typeof sails.config.apionmaster === "boolean") ? sails.config.apionmaster : true,
+      type: 'boolean',
+      category: 'access',
+      title: 'API access on Master',
+      help: 'Boolean',
+      desc: 'Allow access to the Restful API on master process.'
     },
     ready: {
       key: 'ready',
@@ -174,6 +227,12 @@ Settings.prototype.get = function (prop) {
       case 'ready':
         value = self._config.ready.value
         break
+      case 'publicaccess':
+        value = self._config.publicaccess.value
+        break
+      case 'apionmaster':
+        value = self._config.apionmaster.value
+        break
       default:
         console.trace()
         sails.log.warn("[Settings] Unrecognized property: " + prop)
@@ -228,6 +287,12 @@ Settings.prototype.set = function (prop, value) {
     case 'ready':
       self._config.ready.value = Boolean(JSON.parse(value))
       break
+    case 'publicaccess':
+      self._config.publicaccess.value = Boolean(JSON.parse(value))
+      break
+    case 'apionmaster':
+      self._config.apionmaster.value = Boolean(JSON.parse(value))
+      break
     default:
       console.trace()
       sails.log.warn("[Settings] Unrecognized property: " + prop)
@@ -258,4 +323,8 @@ Settings.prototype.save = function (callback) {
   var fs = require('fs');
   fs.writeFile("./config/local.js", content, callback)
 
+}
+
+Settings.prototype.getCategories = function () {
+  return extend({}, this._category)
 }

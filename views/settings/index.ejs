@@ -1,28 +1,54 @@
+
+<% if(flash && (flash.err || flash.msg)) { %>
 <div class="row">
+  <div class="col-xs-12">
 
-  <div class="col-lg-12">
-    <div class="widget">
-      <div class="widget-header">
-        <i class="fa fa-cogs"></i> Settings
-        <div class="clearfix"></div>
-      </div>
-      <div class="widget-body narrow">
+    <% if(flash && flash.err) { %>
+    <% Object.keys(flash.err).forEach(function(error) { %>
+    <div class="alert alert-danger" role="alert">
+      <a href="#" class="close" data-dismiss="alert">&times;</a>
+      <%- flash.err[error].message %>
+    </div>
+    <% }) %>
+    <% } %>
 
-        <% if(flash && flash.err) { %>
-        <% Object.keys(flash.err).forEach(function(error) { %>
-        <div class="alert alert-danger" role="alert"><%- flash.err[error].message %></div>
-        <% }) %>
-        <hr />
-        <% } %>
-        <% if(flash && flash.msg) { %>
-        <% Object.keys(flash.msg).forEach(function(msg) { %>
-        <div class="alert alert-success" role="alert"><%- flash.msg[msg].message %></div>
-        <% }) %>
-        <hr />
-        <% } %>
+    <% if(flash && flash.msg) { %>
+    <% Object.keys(flash.msg).forEach(function(msg) { %>
+    <div class="alert alert-success" role="alert">
+      <a href="#" class="close" data-dismiss="alert">&times;</a>
+      <%- flash.msg[msg].message %>
+    </div>
+    <% }) %>
+    <% } %>
 
-        <form action="/settings/update" method="POST" class="form-horizontal form-signin" role="form">
-          <% _.each(settings, function(setting) { %>
+  </div>
+</div>
+<% } %>
+
+<form action="/settings/update" method="POST" class="form-horizontal form-signin" role="form">
+
+  <%
+  var show = true;
+  _.each(categories, function(category) {
+  %>
+
+  <div class="row">
+
+    <div class="col-lg-12">
+      <div class="widget">
+        <div class="widget-header">
+          <i class="fa <%= category.icon %>"></i> <%= category.title %>
+          <div class="clearfix"></div>
+        </div>
+        <div class="widget-body narrow">
+
+          <%
+          _.each(settings, function(setting) {
+            show = (setting.category == category.key)
+            if (show) {
+              if (setting.type != 'boolean') {
+          %>
+
           <div class="form-group">
             <label for="label" class="col-sm-2 control-label"><%= setting.title %></label>
             <div class="col-sm-5">
@@ -31,21 +57,45 @@
             <div class="col-sm-5">
               <div class="input-mask"><%- setting.help %></div>
             </div>
+            <% if (setting.desc.length) { %>
             <div class="row">
               <div class="col-sm-offset-2 col-sm-10">
                 <span class="help-block form-group-inline-message"><%- setting.desc %></span>
               </div>
             </div>
+            <% } %>
           </div>
-          <% }) %>
 
-          <input type="submit" class="btn btn-lg btn-primary btn-block" value="Save Settings"/>
-          <input type="hidden" name="_csrf" value="<%= _csrf %>" />
+          <% } else { %>
 
-        </form>
+          <div class="form-group">
+            <label for="label" class="col-sm-2 control-label"><%= setting.title %></label>
+            <div class="col-sm-10">
 
+              <input type="checkbox" class="" value="true" name="<%= setting.key %>" <%= (setting.value) ? 'checked="checked"' : '' %> /> <%- setting.desc %>
 
+            </div>
+          </div>
+
+          <%
+              }
+            }
+          })
+          %>
+
+        </div>
       </div>
     </div>
+
   </div>
-</div>
+
+  <% }) %>
+
+  <div class="row">
+    <div class="col-lg-12">
+      <input type="submit" class="btn btn-lg btn-primary btn-block" value="Save Settings"/>
+      <input type="hidden" name="_csrf" value="<%= _csrf %>" />
+    </div>
+  </div>
+
+</form>
