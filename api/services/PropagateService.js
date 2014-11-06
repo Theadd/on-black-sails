@@ -3,7 +3,7 @@
  */
 
 var requestify = require('requestify')
-var extend = require('util')._extend
+var extend = require('node.extend')
 
 module.exports = new (require('ipc-service').Service)()
 
@@ -163,22 +163,34 @@ module.exports.propagate = function (callback) {
 
 module.exports._send = function(data, callback) {
   var self = this,
-    url = self._agreement.remotenode.url + "agreement/propagate"
+    url = self._agreement.remotenode.url + "agreement/propagate",
+    encoded = Common.Encode(data, self._agreement.hash)
 
-  requestify.get(url, {
-    params: {
-      agreement: self._agreement.id,
-      filter: self.config('onempty'),
-      data: Common.Encode(data, self._agreement.hash)
-    }
-  }).then(function(response) {
-    response.getBody()
-    try {
-      callback(null, JSON.parse(response.body))
-    } catch (e) {
-      callback(e, response.body)
-    }
-  }, function(error) {
-    callback(error)
-  })
+  if (encoded.length >= 80000) {
+    var half = Math.ceil(data.length / 2),
+      data0 = data.slice(0, half),
+      data1 = data.slice(half)
+
+    self._send(data0, function (err) {
+      if (err) return callback(err)
+      self._send(data1, callback)
+    })
+  } else {
+    requestify.get(url, {
+      params: {
+        agreement: self._agreement.id,
+        filter: self.config('onempty'),
+        data: encoded
+      }
+    }).then(function(response) {
+      response.getBody()
+      try {
+        callback(null, JSON.parse(response.body))
+      } catch (e) {
+        callback(e, response.body)
+      }
+    }, function(error) {
+      callback(error)
+    })
+  }
 }
