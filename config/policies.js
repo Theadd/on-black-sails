@@ -54,7 +54,7 @@ module.exports.policies = {
     'new': ["master", "flash", "admin", "servicequeuemodels"],
     create: ["master", "flash", "admin"],
     subscribe: ["master", "public", "flash"],
-    action: ["master", "public", "admin"],
+    action: ["master", "admin"],
     propagate: ["master"],
     '*': false
   },

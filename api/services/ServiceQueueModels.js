@@ -109,7 +109,7 @@ module.exports = {
       defaults: {
         standalone: false,    //Not allowed as a global task, i.e. ServiceQueueModel.run('peers') is not allowed.
         type: 'agreement',    //Show only in agreement multi select
-        stacksize: 20,        //Number of torrents propagated in each http request
+        stacksize: 15,        //Number of torrents propagated in each http request
         limit: 250,           //Number of torrents to queue each time the service pool is empty
         startAt: new Date(0), //Start propagating torrents with peersUpdatedAt greater than this date.
         interval: 3000,       //Interval between each http request to the remote node
@@ -117,15 +117,15 @@ module.exports = {
         prioritize: false,     //Prioritize items in the queue.
         display: 'Peers',
         desc: 'Add latest torrents with updated peers to PropagateService.',
-        tooltip: 'Sends stacks of 50 torrents every 3 seconds.'
+        tooltip: 'Sends stacks of 15 torrents every 3 seconds.'
       },
       heavy: {
-        stacksize: 50,        //Number of torrents propagated in each http request
+        stacksize: 15,        //Number of torrents propagated in each http request
         limit: 500,           //Number of torrents to queue each time the service pool is empty
-        interval: 1000,       //Interval between each http request to the remote node
+        interval: 500,       //Interval between each http request to the remote node
         display: 'Peers (Heavy)',
         desc: 'Add latest torrents with updated peers to PropagateService.',
-        tooltip: 'Does the same as <strong>peers</strong> but sends stacks of 50 torrents each second instead of 20 every 3 seconds.'
+        tooltip: 'Does the same as <strong>peers</strong> but sends stacks of 15 torrents each 0.5 seconds instead of 15 every 3 seconds.'
       }
     },
     getQuery: function(options) {

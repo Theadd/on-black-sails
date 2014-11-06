@@ -39,7 +39,7 @@ module.exports.setup = function() {
       ++self._stats['force-idle']
       self.queue(item, true, true)
     } else {
-      while (self._stack.length < 20 && self._active) {
+      while (self._stack.length < self._filterOptions.stacksize && self._active) {
         var another = self.next()
         if (another == null) break
         self._stack.push(another)

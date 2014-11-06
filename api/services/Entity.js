@@ -104,7 +104,7 @@ EntityObject.prototype.loadControlledEntities = function (callback) {
       }
       callback(null, self._controlledEntities)
     } else {
-      callback(new Error("No linked entities found."))
+      callback(null)
     }
   })
 }
