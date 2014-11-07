@@ -11,7 +11,8 @@ module.exports = {
 
     Cluster.getRealmClusters(function (err, response) {
       res.view({
-        clusters: response || []
+        clusters: response || [],
+        localcluster: Settings.get('cluster')
       })
     })
   },
@@ -44,6 +45,8 @@ module.exports = {
 
     delete params.id
     delete params._csrf
+    params.private = (typeof params.private == "undefined") ? false : Boolean(JSON.parse(params.private))
+    params.newagreements = (typeof params.newagreements == "undefined") ? false : Boolean(JSON.parse(params.newagreements))
 
     Cluster.updateProfile(params, function (err, response) {
       if (err) {

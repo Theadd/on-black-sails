@@ -201,6 +201,7 @@ Cluster.prototype._cleanCluster = function (data) {
     status: String(data.status || 'INVALID'),
     indexfiles: Boolean(JSON.parse(data.indexfiles || false)),
     removedead: Boolean(JSON.parse(data.removedead || false)),
+    newagreements: Boolean(JSON.parse(data.newagreements || false)),
     total: Number(data.total || 0),
     downloaded: Number(data.downloaded || 0),
     scraped: Number(data.scraped || 0)

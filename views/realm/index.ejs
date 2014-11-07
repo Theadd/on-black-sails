@@ -15,42 +15,74 @@
       </div>
       <div class="widget-body narrow">
 
-        <div class="list-group">
+        <ul class="plastic-list dashboard-realm-node">
           <% _.each(clusters, function(cluster) { %>
-          <a href="#" class="list-group-item list-group-item-toggle-next" data-id="<%= cluster.id %>" data-model="realm">
-            <div class="pull-right">
-              <div class="toolbox-left">
-                <span class="label <%= (cluster.removedead) ? 'label-primary' : 'label-default' %>">
-                  <i class="fa fa-lg fa-recycle"></i>
-                </span>
-                <span class="label <%= (cluster.indexfiles) ? 'label-primary' : 'label-default' %>">
-                  <i class="fa fa-lg fa-database"></i>
-                </span>
-              </div>
-              <div class="toolbox-right">
+          <li class="item" data-id="<%= cluster.id %>">
 
-                <span class="label label-primary" style="width: 160px">
+            <div class="body">
+
+              <div class="cell col-lg-1 col-md-2 col-sm-2 hidden-xs multicell">
+                <div class="cell col-sm-6 box-<%= (cluster.removedead) ? 'primary' : 'default' %>">
+                  <span class="label"
+                        data-toggle="tooltip" data-original-title="Remove dead torrents">
+                    <i class="fa fa-lg fa-recycle"></i>
+                  </span>
+                </div>
+
+                <div class="cell col-sm-6 box-<%= (cluster.indexfiles) ? 'primary' : 'default' %>">
+                  <span class="label"
+                        data-toggle="tooltip" data-original-title='Index torrent files'>
+                    <i class="fa fa-lg fa-database"></i>
+                  </span>
+                </div>
+              </div>
+
+
+
+              <span class="cell col-lg-1 col-md-1 col-sm-2 col-xs-3 box-<%= (cluster.status == 'stable') ? 'success' : 'warning' %>">
+                <span class="plastic-tag uppercase white small center shadow">
+                  <%= cluster.status %>
+                </span>
+              </span>
+              <span class="cell col-lg-6 col-md-4 col-sm-5 col-xs-6 box-lightblue">
+                <span class="plastic-tag title">
+                  <%= cluster.name %> @ <%= cluster.url %>
+                </span>
+              </span>
+
+              <span class="cell col-lg-2 col-md-3 box-default hidden-xs hidden-sm">
+                <span class="plastic-tag center shadow small">
                   <%= Helpers.formatBigNumber(cluster.scraped) %> /
                   <%= Helpers.formatBigNumber(cluster.downloaded) %> /
                   <%= Helpers.formatBigNumber(cluster.total) %>
                 </span>
+              </span>
+
+              <div class="cell col-lg-2 col-md-2 col-sm-3 col-xs-3 no-action box-<%= (cluster.newagreements) ? 'primary' : 'default' %>">
+                <a href="/agreement/new/<%= cluster.id %>"
+                   class="btn btn-sm btn-<%= (cluster.newagreements && localcluster != cluster.id) ? 'primary' : 'default disabled' %>">
+                  <i class="fa fa-share-alt-square"></i> Request Agreement
+                </a>
+              </div>
+
+            </div>
+
+            <% if (cluster.note && cluster.note.length) { %>
+            <div class="expansion">
+              <div class="cell col-sm-12 multiline">
+                <div class="form-group no-padding">
+                  <label for="label" class="col-sm-2 col-md-1 control-label plastic-tag uppercase center shadow">Note</label>
+                  <div class="col-sm-10 col-md-11 cell box-light multiline no-padding">
+                    <div class="markdown-preview" data-markdown="<%= cluster.note %>"></div>
+                  </div>
+                </div>
               </div>
             </div>
-            <p class="list-group-item-heading" style="margin: 0 165px 0 75px;">
-              <%= cluster.name %> @ <%= cluster.url %>
-            </p>
+            <% } %>
 
-          </a>
-
-          <div class="list-group-item list-group-item-collapsed" data-id="<%= cluster.id %>">
-            <div class="pull-right">
-              <a href="/agreement/new/<%= cluster.id %>" class="btn btn-sm btn-info"><i class="fa fa-share-alt-square"></i> Request Agreement</a>
-            </div>
-            <div><strong>Status:</strong> <%= cluster.status %></div>
-            <p><strong>Note:</strong> <%= cluster.note %></p>
-          </div>
+          </li>
           <% }) %>
-        </div>
+        </ul>
 
       </div>
     </div>

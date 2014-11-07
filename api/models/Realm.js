@@ -49,6 +49,11 @@ module.exports = {
       defaultsTo: false
     },
 
+    newagreements: {
+      type: 'boolean',
+      defaultsTo: false
+    },
+
     total: {
       type: 'integer',
       defaultsTo: 0

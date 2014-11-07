@@ -11,7 +11,7 @@
   margin: 0;
   padding: @padding (@padding / 2);
 
-  &:not(.primitive) > * {
+  &:not(.primitive):not(.multicell) > * {
     font-size: inherit;
     font-weight: inherit;
     line-height: inherit;
@@ -36,7 +36,7 @@
     }
   }
 
-  &:not(.multiline) {
+  &:not(.multiline):not(.multicell) {
     height: @item-row-height;
     overflow: hidden;
     > * {
@@ -48,6 +48,16 @@
 
   &.multiline {
     overflow: visible;
+    > * {
+      overflow: visible;
+    }
+  }
+
+  &.multicell {
+    overflow: visible;
+    position: inherit;
+    border-right: 0;
+    padding: 0;
     > * {
       overflow: visible;
     }
