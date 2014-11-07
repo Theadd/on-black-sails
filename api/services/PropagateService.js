@@ -167,6 +167,7 @@ module.exports._send = function(data, callback) {
     encoded = Common.Encode(data, self._agreement.hash)
 
   if (encoded.length >= 80000) {
+    if (data.length == 1) return callback(null) //harmful or corrupted torrent
     var half = Math.ceil(data.length / 2),
       data0 = data.slice(0, half),
       data1 = data.slice(half)
