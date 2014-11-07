@@ -36,7 +36,7 @@ module.exports = {
       type: 'datetime',
       defaultsTo: function() {
         var d = new Date()
-        d.setMinutes(0)
+        d.setMinutes(Math.floor(d.getMinutes() / 10) * 10)
         d.setSeconds(0)
         d.setMilliseconds(0)
         return d
@@ -52,7 +52,7 @@ module.exports = {
 
   store: function (agreement, filter, incoming, info, callback) {
     var d = new Date()
-    d.setMinutes(0)
+    d.setMinutes(Math.floor(d.getMinutes() / 10) * 10)
     d.setSeconds(0)
     d.setMilliseconds(0)
     agreement = parseInt(agreement)
