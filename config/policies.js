@@ -38,6 +38,7 @@ module.exports.policies = {
     update: ["master", "admin"],
     toggle: ["master", "admin"],
     command: ["master", "admin"],
+    detail: ["master", "public", "flash"],
     '*': false
   },
   settings: {
@@ -56,6 +57,7 @@ module.exports.policies = {
     subscribe: ["master", "public", "flash"],
     action: ["master", "admin"],
     propagate: ["master"],
+    history: ["master"],
     '*': false
   },
   realm: {

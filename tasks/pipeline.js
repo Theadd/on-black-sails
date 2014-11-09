@@ -18,7 +18,6 @@ var cssFilesToInject = [
   'styles/**/*.css'
 ];
 
-
 // Client-side javascript files to inject in order
 // (uses Grunt-style wildcard/glob/splat expressions)
 var jsFilesToInject = [
@@ -30,6 +29,7 @@ var jsFilesToInject = [
   'js/dependencies/sails.io.js',
   'js/dependencies/underscore.js',
   'js/dependencies/markdown.js',
+  'js/dependencies/highcharts.js',
   'js/dependencies/**/*.js',
 
   // All of the rest of your client-side js files

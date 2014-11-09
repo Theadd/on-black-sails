@@ -29,6 +29,13 @@ $(function() {
       });
 
       $("[data-toggle='tooltip']").tooltip({container: 'body', delay: 500, html: true});
+
+      var chartContainer = $("#chart-container");
+      if (chartContainer.length) {
+        console.log("displaying chart");
+        loadChart(chartContainer);
+      }
+
     },
 
     /**

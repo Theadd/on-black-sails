@@ -65,15 +65,7 @@ module.exports = {
     AgreementHistory.findOne(query).exec(function (err, entry) {
       if (err) return callback(err)
       if (entry && entry.agreement) {
-        var param
-
-        for (param in info) {
-          if (typeof entry.info[param] !== "number") entry.info[param] = 0
-        }
-
-        for (param in entry.info) {
-          if (info[param]) entry.info[param] += info[param]
-        }
+        entry.info = Common.SumObjectValues(entry.info, info)
         entry.save(callback)
       } else {
         query.info = extend({}, info)
@@ -81,6 +73,65 @@ module.exports = {
           return callback(err, res)
         })
       }
+    })
+  },
+
+  generate: function (agreement, filter, level, size, callback) {
+    var d = new Date()
+    d.setMinutes(Math.floor(d.getMinutes() / 10) * 10)
+    d.setSeconds(0)
+    d.setMilliseconds(0)
+    agreement = parseInt(agreement)
+    callback = callback || function () {}
+
+    if (!(agreement && filter && level && size)) return callback(new Error('Missing required parameters.'))
+
+    var query = {agreement: agreement, filter: filter, date: {'<=': d}},
+      data = []
+
+    AgreementHistory.find(query).sort({date: 'desc'}).limit(size * level).exec(function (err, entries) {
+      if (err) return callback(err)
+
+      var merging = false,
+        item = {}
+
+      for (var i in entries) {
+
+        if (entries[i].date < d) {
+
+          if (merging) {
+            //console.log("\t\t\t%%% FINAL: " + item)
+            merging = false
+            data.push({date: new Date(d), info: extend({}, item)})  //FIXME?
+            d.setTime(d.getTime() - (600000 * level))
+            item = {}
+          }
+          while (entries[i].date < d && data.length < size) {
+            data.push({date: new Date(d), info: {}})
+            d.setTime(d.getTime() - (600000 * level))
+          }
+          if (data.length >= size) break
+        }
+        //console.log("\t%%% ENTRY IN DATE: " + entries[i].date + " >= " + d)
+        if (entries[i].date >= d) {
+          merging = true
+          item = Common.SumObjectValues(item, entries[i].info)
+          //console.log("\t\t%%% MERGE WITH: " + entries[i].info)
+        } else {
+
+        }
+      }
+      if (merging) {
+        //console.log("\t\t\t%%% FINAL: " + item)
+        data.push({date: new Date(d), info: extend({}, item)})
+        d.setTime(d.getTime() - (600000 * level))
+      }
+      while (data.length < size) {
+        data.push({date: new Date(d), info: {}})
+        d.setTime(d.getTime() - (600000 * level))
+      }
+
+      return callback(null, data)
     })
   }
 

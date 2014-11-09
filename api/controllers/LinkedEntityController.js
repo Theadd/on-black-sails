@@ -139,6 +139,28 @@ module.exports = {
     })
   },
 
+  detail: function(req, res, next) {
+    var id = req.param('id')
+
+    LinkedEntity.findOne(id, function foundLinkedEntity(err, entity) {
+      if (err) return next(err)
+      var result = {}
+      try {
+        result = Entity.getControlledEntity(entity.id).getClonedValues()
+      } catch (e) {
+        console.log(e)
+        req.session.flash = {
+          err: [{name: 'Error', message: e.message}]
+        }
+        return res.redirect('/linkedentity')
+      }
+
+      res.view({
+        linkedentity: result
+      })
+    })
+  },
+
   ///////////////////////////// ACTIONS ////////////////////////
 
   'toggle': function(req, res) {

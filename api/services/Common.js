@@ -8,6 +8,7 @@ var crypto = require('crypto')
 module.exports.ValueOfMultiSelect = ValueOfMultiSelect
 module.exports.Encode = Encode
 module.exports.Decode = Decode
+module.exports.SumObjectValues = SumObjectValues
 module.exports.RevertSanitizeRequestParameters = RevertSanitizeRequestParameters
 module.exports.RandomHexString = RandomHexString
 module.exports.ValidURL = ValidURL
@@ -60,6 +61,21 @@ function Decode (input, key){
   } catch (e) {
     return false
   }
+}
+
+function SumObjectValues (first, second) {
+  var param,
+    output = extend({}, first)
+
+  for (param in second) {
+    if (typeof output[param] !== "number") output[param] = 0
+  }
+
+  for (param in output) {
+    if (second[param]) output[param] += second[param]
+  }
+
+  return output
 }
 
 

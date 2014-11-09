@@ -134,6 +134,29 @@ module.exports = {
         error: "Missing required parameters."
       })
     }
+  },
+
+  /** HISTORY **/
+
+  'history': function(req, res) {
+    var agreement = req.param('agreement'),
+      filter = req.param('filter'),
+      level = req.param('level'),
+      size = 120
+
+    if (agreement && filter && level) {
+
+      AgreementHistory.generate(agreement, filter, level, size, function (err, statistics) {
+        res.json({
+          error: err || false,
+          data: statistics
+        })
+      })
+    } else {
+      res.json({
+        error: "Missing required parameters."
+      })
+    }
   }
 
 }
