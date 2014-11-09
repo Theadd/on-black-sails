@@ -40,3 +40,18 @@ $(".dashboard-agreement-list").on("click", "a.dashboard-agreement-action", funct
   }
 });
 
+$(".dashboard-chart-level").on("click", "a", function (ev) {
+  ev.preventDefault();
+
+  var level = $(this).data('level'),
+    list = $(this).closest(".dashboard-chart-level"),
+    widget = $(this).closest(".widget"),
+    container = widget.find("#chart-container");
+
+  list.find(".active").removeClass("active");
+  $(this).parent().addClass("active");
+  container.data('level', '' + level);
+
+  loadChart(container);
+});
+
