@@ -84,6 +84,7 @@ function ControlledEntity (entity) {
   self._worker = false
   self._pid = false
   self._forceRespawn = false
+  self._stats = {}
 }
 
 ControlledEntity.prototype.setWorker = function (worker) {
@@ -147,6 +148,10 @@ ControlledEntity.prototype.get = function (prop) {
     case 'pid':
       value = self._pid
       break
+    case 'stats':
+      value = self._stats
+      self.send('stats', true)
+      break
     case 'enabled':
       value = self._entity.enabled
       break
@@ -188,6 +193,14 @@ ControlledEntity.prototype.set = function (prop, value) {
       break
     case 'pid':
       self._pid = Number(value)
+      break
+    case 'stats':
+      try {
+        self._stats = extend(true, {}, value)
+      } catch (e) {
+        return sails.log.error(e)
+      }
+      self._update(prop, self._stats, true)
       break
     case 'enabled':
       self._entity.enabled = Boolean(JSON.parse(value))

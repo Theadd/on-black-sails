@@ -3,7 +3,8 @@
  */
 
 var cluster = require('cluster')
-var extend = require('util')._extend
+//var extend = require('util')._extend
+var extend = require('node.extend');
 
 module.exports = new EntityObject()
 
@@ -27,7 +28,7 @@ module.exports.deploy = function() {
 
   sails.config['platform'] = os.platform()
   CommandLineHelpers.process()
-  self.config = extend({}, CommandLineHelpers.config)
+  self.config = extend(true, {}, CommandLineHelpers.config)
 
   if (standaloneProcess) {
     if (Boolean(sails.config.master)) {
@@ -271,6 +272,10 @@ EntityObject.prototype.handleMessageOnMaster = function (msg) {
       case 'configured':
         cluster.workers[msg.id].send({ cmd: 'run'})
         break
+      case 'stats':
+        console.log("got stats on master")
+        cluster.workers[msg.id]._controlledEntity.set('stats', msg.val)
+        break
       default:
         sails.log.error("Unrecognized message on master: " + msg)
     }
@@ -283,8 +288,8 @@ EntityObject.prototype.handleMessageOnWorker = function (msg) {
   if (msg.cmd || false) {
     switch (msg.cmd) {
       case 'configure':
-        self.config = extend(self.config, msg.val)
-        CommandLineHelpers.config = extend(CommandLineHelpers.config, self.config)  //TODO: refactoring
+        self.config = extend(true, self.config, msg.val)
+        CommandLineHelpers.config = extend(true, CommandLineHelpers.config, self.config)  //TODO: refactoring
         process.send({ cmd: 'configured', id: self.id })
         break
       case 'run':
@@ -304,6 +309,9 @@ EntityObject.prototype.handleMessageOnWorker = function (msg) {
         if (service) {
           service.active(true)
         }
+        break
+      case 'stats':
+        self.send('stats', self.getStats())
         break
       default:
         sails.log.error("Unrecognized message on worker: " + msg)
@@ -335,4 +343,19 @@ EntityObject.prototype.send = function (command, value) {
   if (!cluster.isMaster) {
     process.send({ cmd: command, val: value, id: self.id })
   }
+}
+
+EntityObject.prototype.getStats = function () {
+  var output = {},
+    util = require('util')
+
+  output['pid'] = process.pid
+  output['memory'] = util.inspect(process.memoryUsage())
+  output['metadata'] = MetadataService.getStats()
+  output['media'] = MediaService.getStats()
+  output['status'] = StatusService.getStats()
+  output['tracker'] = TrackerService.getStats()
+  output['propagate'] = PropagateService.getStats()
+
+  return extend(true, {}, output)
 }

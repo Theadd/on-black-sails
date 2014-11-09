@@ -14,6 +14,12 @@ io.socket.on('connect', function() {
       io.socket.on('agreement', handleServerMessage);
       io.socket.get('/agreement/subscribe');
       break;
+    default:
+      if (page.indexOf('/linkedentity/detail/') != -1) {
+        io.socket.on('linkedentity', handleServerMessage);
+        io.socket.get('/linkedentity/subscribe');
+      }
+      break;
   }
 
 });
@@ -63,6 +69,13 @@ function updateEntryInDom(message) {
       }
       if (message.verb === 'created') {
         AgreementIndexPage.addAgreement(message);
+      }
+      break;
+    default:
+      if (page.indexOf('/linkedentity/detail/') != -1) {
+        if (message.data.property == 'stats') {
+          LinkedEntityIndexPage.updateLinkedEntity(id, message);
+        }
       }
       break;
   }

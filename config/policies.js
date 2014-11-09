@@ -39,6 +39,7 @@ module.exports.policies = {
     toggle: ["master", "admin"],
     command: ["master", "admin"],
     detail: ["master", "public", "flash"],
+    stats: ["master", "public"],
     '*': false
   },
   settings: {

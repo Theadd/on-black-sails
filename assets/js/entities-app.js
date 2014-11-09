@@ -8,6 +8,8 @@ var LinkedEntityIndexPage = {
     var prop = message.data.property;
     if (prop == 'ready') {
       LinkedEntityIndexPage.updateLinkedEntityState(id, message)
+    } else if (prop == 'stats') {
+      LinkedEntityIndexPage.updateLinkedEntityDetail(id, message)
     } else {
       LinkedEntityIndexPage.updateLinkedEntityLabel(id, message)
     }
@@ -59,6 +61,15 @@ var LinkedEntityIndexPage = {
 
   addLinkedEntity: function(id, message) {
     location.reload();
+  },
+
+  updateLinkedEntityDetail: function(id, message) {
+    var value = message.data.value,
+      container = $("#linkedentity-detail-stats");
+
+    if (container.length && container.data('id') == id) {
+      container.html("<pre>" + JSON.stringify(value, null, '  ') + "</pre>");
+    }
   }
 
 };

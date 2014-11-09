@@ -32,8 +32,15 @@ $(function() {
 
       var chartContainer = $("#chart-container");
       if (chartContainer.length) {
-        console.log("displaying chart");
         loadChart(chartContainer);
+      }
+
+      var linkedEntityStatsContainer = $("#linkedentity-detail-stats");
+      if (linkedEntityStatsContainer.length) {
+        setTimeout(function () {
+          linkedEntityRequestStats(linkedEntityStatsContainer);
+        }, 2000)
+
       }
 
     },

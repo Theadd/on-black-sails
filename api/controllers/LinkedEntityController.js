@@ -144,9 +144,10 @@ module.exports = {
 
     LinkedEntity.findOne(id, function foundLinkedEntity(err, entity) {
       if (err) return next(err)
-      var result = {}
+      var result = {}, controlled
       try {
-        result = Entity.getControlledEntity(entity.id).getClonedValues()
+        controlled = Entity.getControlledEntity(entity.id)
+        result = controlled.getClonedValues()
       } catch (e) {
         console.log(e)
         req.session.flash = {
@@ -157,6 +158,26 @@ module.exports = {
 
       res.view({
         linkedentity: result
+      })
+    })
+  },
+
+  stats: function(req, res, next) {
+    var id = req.param('id')
+
+    LinkedEntity.findOne(id, function foundLinkedEntity(err, entity) {
+      if (err) return next(err)
+
+      try {
+        Entity.getControlledEntity(entity.id).get('stats')
+      } catch (e) {
+        res.json({
+          error: e
+        })
+      }
+
+      res.json({
+        error: false
       })
     })
   },

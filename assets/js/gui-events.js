@@ -55,3 +55,12 @@ $(".dashboard-chart-level").on("click", "a", function (ev) {
   loadChart(container);
 });
 
+function linkedEntityRequestStats(container) {
+  var id = container.data('id'),
+    url = "/linkedentity/stats/";
+
+  $.getJSON(url, {
+    id: id
+  }).done(function (data) {});
+
+}
