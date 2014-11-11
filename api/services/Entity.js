@@ -35,14 +35,13 @@ module.exports.deploy = function() {
       //Standalone process able to fork linked entities (MASTER)
       self.isMaster = true
       self._controlledEntity = {}
-      Cluster.updateClusterStats(300000)
+      Cluster.updateClusterStats(1800000, true) //30min
       Cluster.requestAndBuildAgreements()
       cluster.on('exit', function(worker, code, signal) {
         worker._controlledEntity.set('ready', false)
         sails.log.error("Worker " + worker._controlledEntity.get('name') + " <" + worker._controlledEntity.get('pid') + "> died (" + (signal || code) + ")")
         if (worker._controlledEntity.get('enabled') && worker._controlledEntity.get('respawn')) {
           sails.log.debug("Restarting worker " + worker._controlledEntity.get('name') + " <" + worker._controlledEntity.get('pid') + ">")
-          //self.spawnChildProcessByName(worker._controlledEntity.get('name'), true)
           worker._controlledEntity.setRespawnByForce(true)
           self._spawnChildProcessQueue.push(worker._controlledEntity.get('id'))
           self.spawnNextChildProcess()

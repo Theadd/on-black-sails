@@ -13,17 +13,18 @@ function Cluster () {
   var self = this
   if (!(self instanceof Cluster)) return new Cluster()
 
-  //self._agreement = {}
 }
 
-Cluster.prototype.updateClusterStats = function (interval) {
+Cluster.prototype.updateClusterStats = function (interval, skip) {
+  skip = skip || false
   var self = this, total = 0, downloaded = 0, scraped = 0
-  if (Settings.get('ready')) {
+
+  if (Settings.get('ready') && !skip) {
     Hash.count({}, function (err, num) {
       total = num || 0
       Hash.count({downloaded: true}, function (err, num) {
         downloaded = num || 0
-        Hash.count({updatedBy: {'>': 0}}, function (err, num) {
+        Hash.count({peersUpdatedAt: {'<=': new Date()}}, function (err, num) {
           scraped = num || 0
           self.setStats(total, downloaded, scraped)
         })
