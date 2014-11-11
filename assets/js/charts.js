@@ -1,21 +1,5 @@
 
-/*$(function () {
-  $(document).ready(function () {
-    var chartContainer = $("#chart-container");
-    if (chartContainer.length) {
-      console.log("displaying chart");
-      loadChart(chartContainer);
-    }
-  });
-});*/
-
 var loadChart = function ($container) {
-  /*Highcharts.setOptions({
-    global: {
-      useUTC: false
-    }
-  });*/
-
   var agreement = parseInt($container.data('agreement')),
     filter = $container.data('filter'),
     incoming = Boolean(JSON.parse($container.data('incoming') || false)),
@@ -28,19 +12,9 @@ var loadChart = function ($container) {
     incoming: incoming,
     level: level
   }).done(function (data) {
-    console.log("in callback of getJSON: ");
     var series;
 
     if (incoming) {
-      /*"info" : {
-        "count" : 3077,
-          "deadmarked" : 0,
-          "error" : 0,
-          "updated" : 0,
-          "uptodate" : 3075,
-          "created" : 0,
-          "deadnotcreated" : 2
-      }*/
       series = generateSeries(data.data, [{
         type: 'areaspline',
         name: 'COUNT',
@@ -51,12 +25,24 @@ var loadChart = function ($container) {
         key: 'updated'
       },{
         type: 'areaspline',
-        name: 'UPTODATE',
+        name: 'ERROR',
+        key: 'error'
+      },{
+        type: 'areaspline',
+        name: 'UP TO DATE',
         key: 'uptodate'
       },{
         type: 'areaspline',
-        name: 'DEADNOTCREATED',
+        name: 'CREATED',
+        key: 'created'
+      },{
+        type: 'areaspline',
+        name: 'DEAD, NOT CREATED',
         key: 'deadnotcreated'
+      },{
+        type: 'areaspline',
+        name: 'MARKED AS DEAD',
+        key: 'deadmarked'
       }]);
     } else {
       series = generateSeries(data.data, [{
@@ -75,10 +61,7 @@ var loadChart = function ($container) {
     }
 
     renderChart($container, series);
-
   });
-
-
 
 }
 
@@ -88,10 +71,6 @@ function generateSeries(data, series) {
   for (i in series) {
     _series.push($.extend({}, {type: 'areaspline', name: 'Default', key: 'default', data: []}, series[i]));
   }
-
-
-
-
 
   for (i in data) {
     var d = new Date(data[i].date);
@@ -162,22 +141,16 @@ function renderChart(container, series) {
 }
 
 function loadVisibleCharts() {
-  console.log("loading visible charts...");
   var chartContainers = $(".chart-container");
+
   if (chartContainers.length) {
     chartContainers.each( function () {
       if (!($(this).data('loaded') || false)) {
         if ($(this).is(':visible')) {
-          console.log("LOADING (NOT LOADED) VISIBLE CHART!!");
           $(this).data('loaded', true);
           loadChart($(this));
-        } else {
-          console.log("NOT LOADING (NOT LOADED) INVISIBLE CHART!!");
         }
-      } else {
-        console.log("NOT LOADING ALREADY LOADED CHART!!");
       }
-
     });
   }
 }
