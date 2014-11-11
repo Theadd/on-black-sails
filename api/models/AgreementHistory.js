@@ -82,7 +82,7 @@ module.exports = {
     d.setSeconds(0)
     d.setMilliseconds(0)
     agreement = parseInt(agreement)
-    incoming = Boolean(incoming)
+    incoming = Boolean(JSON.parse(incoming))
     callback = callback || function () {}
 
     if (!(agreement && filter && level && size)) return callback(new Error('Missing required parameters.'))
