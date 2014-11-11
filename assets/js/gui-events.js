@@ -45,8 +45,8 @@ $(".dashboard-chart-level").on("click", "a", function (ev) {
 
   var level = $(this).data('level'),
     list = $(this).closest(".dashboard-chart-level"),
-    widget = $(this).closest(".widget"),
-    container = widget.find("#chart-container");
+    widget = $(this).closest(".chart-wrapper"),
+    container = widget.find(".chart-container");
 
   list.find(".active").removeClass("active");
   $(this).parent().addClass("active");

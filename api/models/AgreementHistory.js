@@ -76,17 +76,18 @@ module.exports = {
     })
   },
 
-  generate: function (agreement, filter, level, size, callback) {
+  generate: function (agreement, filter, incoming, level, size, callback) {
     var d = new Date()
     d.setMinutes(Math.floor(d.getMinutes() / 10) * 10)
     d.setSeconds(0)
     d.setMilliseconds(0)
     agreement = parseInt(agreement)
+    incoming = Boolean(incoming)
     callback = callback || function () {}
 
     if (!(agreement && filter && level && size)) return callback(new Error('Missing required parameters.'))
 
-    var query = {agreement: agreement, filter: filter, date: {'<=': d}},
+    var query = {agreement: agreement, filter: filter, incoming: incoming, date: {'<=': d}},
       data = []
 
     AgreementHistory.find(query).sort({date: 'desc'}).limit(size * level).exec(function (err, entries) {

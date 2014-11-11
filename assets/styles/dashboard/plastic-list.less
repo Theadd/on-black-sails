@@ -6,10 +6,47 @@
 @item-row-height: 46px;
 
 .cell() {
-  display: inline-block;
+
   float: left;
   margin: 0;
-  padding: @padding (@padding / 2);
+
+  .nav-tabs {
+    border-bottom: none;
+
+    > li.active > a {
+      background-color: rgba(255, 255, 255, 1);
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      border-bottom-color: transparent;
+      z-index: 1;
+    }
+
+    > li:not(.active) > a {
+      background-color: rgba(100, 100, 100, 0.04);
+      border-bottom-color: transparent;
+    }
+
+    > li > a {
+      line-height: 0.8em;
+    }
+  }
+
+  &:not(.tab-pane) {
+    display: inline-block;
+    padding: @padding (@padding / 2);
+  }
+
+  &.tab-pane.active {
+    display: inline-block;
+    width: 100%;
+    background-color: rgba(255, 255, 255, 1);
+
+    > * {
+      border-radius: 0 @border-radius @border-radius @border-radius;
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      min-height: @item-row-height;
+      margin: 0;
+    }
+  }
 
   &:not(.primitive):not(.multicell) > * {
     font-size: inherit;
@@ -177,7 +214,12 @@ ul.plastic-list {
     }
 
     &:last-child {
-      border-radius: 0 0 @border-radius @border-radius;
+      &:not(first-child) {
+        border-radius: 0 0 @border-radius @border-radius;
+      }
+      &:first-child {
+        border-radius: @border-radius @border-radius @border-radius @border-radius;
+      }
     }
 
     &:not(:last-child) {

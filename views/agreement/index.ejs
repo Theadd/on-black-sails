@@ -183,13 +183,68 @@
                 </div>
               </div>
 
-              <div class="cell col-sm-12 multiline">
-                <div class="form-group no-padding">
-                  <label for="label" class="col-sm-2 col-md-1 control-label plastic-tag uppercase center shadow">Note</label>
-                  <div class="col-sm-10 col-md-11 cell box-light multiline no-padding">
+              <div class="cell col-sm-12 multiline primitive">
+
+                <ul role="tablist" class="nav nav-tabs">
+
+                  <li class="active"><a aria-expanded="true"
+                                  aria-controls="note<%= agreement.id %>"
+                                  data-toggle="tab"
+                                  role="tab"
+                                  id="note-tab<%= agreement.id %>"
+                                  href="#note<%= agreement.id %>"
+                                  class="plastic-tag title">Note</a></li>
+
+                  <li class=""><a aria-expanded="false"
+                                  aria-controls="graphs-in-<%= agreement.id %>"
+                                  data-toggle="tab"
+                                  role="tab"
+                                  id="graphs-in-tab<%= agreement.id %>"
+                                  href="#graphs-in-<%= agreement.id %>"
+                                  class="plastic-tag title">Incoming (<%= agreement.remotenode.filters.length %>)</a></li>
+
+                  <li class=""><a aria-expanded="false"
+                                  aria-controls="graphs-out-<%= agreement.id %>"
+                                  data-toggle="tab"
+                                  role="tab"
+                                  id="graphs-out-tab<%= agreement.id %>"
+                                  href="#graphs-out-<%= agreement.id %>"
+                                  class="plastic-tag title">Outgoing (<%= agreement.localnode.filters.length %>)</a></li>
+
+                </ul>
+                <div class="tab-content" id="myTabContent">
+
+                  <div aria-labelledby="note-tab<%= agreement.id %>"
+                       id="note<%= agreement.id %>"
+                       class="tab-pane fade active in cell multiline"
+                       role="tabpanel">
                     <div class="markdown-preview" data-markdown="<%= agreement.note %>"></div>
                   </div>
+
+                  <div aria-labelledby="graphs-in-tab<%= agreement.id %>"
+                       id="graphs-in-<%= agreement.id %>"
+                       class="tab-pane fade cell multiline"
+                       role="tabpanel">
+
+                    <% var filters = agreement.remotenode.filters, incoming = true; %>
+                    <% include tab-pane-charts-container.ejs %>
+
+
+                  </div>
+
+                  <div aria-labelledby="graphs-out-tab<%= agreement.id %>"
+                       id="graphs-out-<%= agreement.id %>"
+                       class="tab-pane fade cell multiline"
+                       role="tabpanel">
+
+                    <% var filters = agreement.localnode.filters, incoming = false; %>
+                    <% include tab-pane-charts-container.ejs %>
+
+
+                  </div>
+
                 </div>
+
               </div>
             </div>
 

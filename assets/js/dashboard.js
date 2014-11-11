@@ -30,10 +30,7 @@ $(function() {
 
       $("[data-toggle='tooltip']").tooltip({container: 'body', delay: 500, html: true});
 
-      var chartContainer = $("#chart-container");
-      if (chartContainer.length) {
-        loadChart(chartContainer);
-      }
+      loadVisibleCharts();
 
       var linkedEntityStatsContainer = $("#linkedentity-detail-stats");
       if (linkedEntityStatsContainer.length) {
@@ -41,6 +38,20 @@ $(function() {
           linkedEntityRequestStats(linkedEntityStatsContainer);
         }, 2000)
       }
+
+      $('.nav-tabs').on('click', 'a', function (e) {
+        e.preventDefault();
+        console.log("click tab");
+        $(this).tab('show');
+
+      });
+
+      $('.nav-tabs a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+        //e.target // newly activated tab
+        //e.relatedTarget // previous active tab
+        console.log("tab shown");
+        loadVisibleCharts();
+      })
 
     },
 
