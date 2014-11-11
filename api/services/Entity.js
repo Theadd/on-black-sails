@@ -350,7 +350,7 @@ EntityObject.prototype.getStats = function () {
     util = require('util')
 
   output['pid'] = process.pid
-  output['memory'] = util.inspect(process.memoryUsage())
+  output['memory'] = process.memoryUsage()
   output['metadata'] = MetadataService.getStats()
   output['media'] = MediaService.getStats()
   output['status'] = StatusService.getStats()

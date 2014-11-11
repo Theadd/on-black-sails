@@ -74,7 +74,7 @@ function updateEntryInDom(message) {
     default:
       if (page.indexOf('/linkedentity/detail/') != -1) {
         if (message.data.property == 'stats') {
-          LinkedEntityIndexPage.updateLinkedEntity(id, message);
+          LinkedEntityDetailPage.updateLinkedEntity(id, message);
         }
       }
       break;

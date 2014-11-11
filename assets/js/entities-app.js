@@ -61,15 +61,112 @@ var LinkedEntityIndexPage = {
 
   addLinkedEntity: function(id, message) {
     location.reload();
+  }
+
+};
+
+var LinkedEntityDetailPage = {
+
+  updateLinkedEntity: function (id, message) {
+    var prop = message.data.property;
+    if (prop == 'stats') {
+      LinkedEntityDetailPage.updateLinkedEntityDetail(id, message)
+    }
   },
 
-  updateLinkedEntityDetail: function(id, message) {
+  updateLinkedEntityDetail: function (id, message) {
     var value = message.data.value,
       container = $("#linkedentity-detail-stats");
 
     if (container.length && container.data('id') == id) {
-      container.html("<pre>" + JSON.stringify(value, null, '  ') + "</pre>");
+      var parsed = LinkedEntityDetailPage.parseDetailValue(value);
+      container.html(LinkedEntityDetailPage.getContent(parsed));
     }
+  },
+
+  parseDetailValue: function (value) {
+    var output = {};
+
+    for (var i in value) {
+      if (typeof value[i] === "object") {
+        if (typeof value[i]['role'] !== "undefined") {
+          if (value[i]['role'] != 'none') {
+            output[i] = $.extend({}, value[i]);
+          }
+        } else {
+          output[i] = $.extend({}, value[i]);
+        }
+      } else {
+        output[i] = value[i];
+      }
+    }
+
+    return output;
+  },
+
+  prettify: function (key, value) {
+    var output = {display: '', value: ''};
+
+    if (typeof prettyStats[key] !== "undefined") {
+      if (typeof prettyStats[key].display !== "undefined") {
+        output.display = prettyStats[key].display;
+      }
+      if (typeof prettyStats[key].value === "function") {
+        output.value = prettyStats[key].value(value);
+      } else {
+        output.value = value;
+      }
+    } else {
+      output.display = key;
+      output.value = value;
+    }
+
+    return $.extend({}, output);
+  },
+
+  getContent: function (input) {
+    var content = "<ul>\n", pretty;
+
+    for (var i in input) {
+      pretty = LinkedEntityDetailPage.prettify(i, input[i]);
+      content += '<li><strong>' + pretty.display + '</strong>: ';
+      if (typeof pretty.value === "object") {
+        content += LinkedEntityDetailPage.getContent(pretty.value);
+      } else {
+        content += pretty.value;
+      }
+      content += "</li>\n";
+    }
+
+    content += "</ul>\n";
+    return content;
   }
 
+};
+
+var prettyStats = {
+  pid: {
+    display: 'Process ID (PID)'
+  },
+  rss: {
+    display: 'Resident Set Size',
+    tooltip: "RSS is the Resident Set Size and is used to show how much memory is allocated to that process and is in \
+      RAM. It does not include memory that is swapped out. It does include memory from shared libraries as long as the\
+      pages from those libraries are actually in memory. It does include all stack and heap memory.",
+    value: function (val) {
+      return Helpers.formatBigNumber(val) + 'bytes';
+    }
+  },
+  heapTotal: {
+    display: 'Heap (Total)',
+    value: function (val) {
+      return Helpers.formatBigNumber(val) + 'bytes';
+    }
+  },
+  heapUsed: {
+    display: 'Heap (Used)',
+    value: function (val) {
+      return Helpers.formatBigNumber(val) + 'bytes';
+    }
+  }
 };

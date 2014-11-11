@@ -40,7 +40,6 @@ $(function() {
         setTimeout(function () {
           linkedEntityRequestStats(linkedEntityStatsContainer);
         }, 2000)
-
       }
 
     },
