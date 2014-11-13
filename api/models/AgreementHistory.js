@@ -102,6 +102,8 @@ module.exports = {
       var merging = false,
         item = {}
 
+      d.setTime(d.getTime() - (600000 * level))
+
       for (var i in entries) {
 
         if (entries[i].date < d) {
