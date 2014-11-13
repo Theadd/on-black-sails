@@ -1,5 +1,5 @@
 <li class="item" data-id="<%= agreement.id %>">
-  <div class="body">
+<div class="body">
               <span class="cell col-md-1 col-sm-2 col-xs-2 box-<%= Helpers.getStatusStyle(agreement.status) %>">
                 <span class="plastic-tag uppercase white small center shadow"><%= agreement.status %></span>
               </span>
@@ -13,140 +13,297 @@
               <span class="cell col-md-8 col-sm-8 col-xs-7 box-lightblue">
                 <span class="plastic-tag title">[<%= agreement.remotenode.name %>] <%= agreement.title %></span>
               </span>
-    <div class="btn-group cell col-md-1 col-sm-2 col-xs-3 multiline no-action box-align-right pull-right">
-      <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
-        Action <span class="caret"></span>
-      </button>
-      <ul class="dropdown-menu no-display" role="menu">
-        <% _.each(agreement.actions, function(action) { %>
-        <li>
-          <a class="btn dashboard-agreement-action pull-right<%= (action.enabled) ? '' : ' disabled' %>"
-             data-action="<%= action.key %>" data-id="<%= agreement.id %>" href="#"
-             title="<%= action.help %>"><%- action.display %></a>
-        </li>
-        <% }) %>
-      </ul>
-    </div>
+  <div class="btn-group cell col-md-1 col-sm-2 col-xs-3 multiline no-action box-align-right pull-right">
+    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+      Action <span class="caret"></span>
+    </button>
+    <ul class="dropdown-menu no-display" role="menu">
+      <% _.each(agreement.actions, function(action) { %>
+      <li>
+        <a class="btn dashboard-agreement-action pull-right<%= (action.enabled) ? '' : ' disabled' %>"
+           data-action="<%= action.key %>" data-id="<%= agreement.id %>" href="#"
+           title="<%= action.help %>"><%- action.display %></a>
+      </li>
+      <% }) %>
+    </ul>
   </div>
-  <div class="expansion">
+</div>
+<div class="expansion">
 
-    <div class="cell col-sm-6 multiline box-lightblue">
-      <div>
-        <div class="cell col-sm-1">
-                    <span class="label <%= (agreement.localnode.removedead) ? 'label-primary' : 'label-default' %>">
+  <div class="cell col-sm-6 multiline box-lightblue">
+    <div>
+      <div class="cell col-sm-1">
+                    <span class="label <%= (agreement.localnode.removedead) ? 'label-primary' : 'label-default' %>"
+                          data-toggle="tooltip" data-original-title="Remove dead torrents">
                       <i class="fa fa-lg fa-recycle"></i>
                     </span>
-        </div>
-        <div class="cell col-sm-1">
-                    <span class="label <%= (agreement.localnode.indexfiles) ? 'label-primary' : 'label-default' %>">
+      </div>
+      <div class="cell col-sm-1">
+                    <span class="label <%= (agreement.localnode.indexfiles) ? 'label-primary' : 'label-default' %>"
+                          data-toggle="tooltip" data-original-title='Index torrent files'>
                       <i class="fa fa-lg fa-database"></i>
                     </span>
-        </div>
-        <div class="cell col-sm-1">
-                    <span class="label <%= (agreement.localnode.allsources) ? 'label-primary' : 'label-default' %>">
+      </div>
+      <div class="cell col-sm-1">
+                    <span class="label <%= (agreement.localnode.allsources) ? 'label-primary' : 'label-default' %>"
+                          data-toggle="tooltip" data-original-title='Propagate torrents updated from all sources'>
                       <i class="fa fa-lg fa-cubes"></i>
                     </span>
-        </div>
-        <div class="cell col-sm-9 box-default">
+      </div>
+      <div class="cell col-sm-9 box-default">
                     <span class="plastic-tag title">
                       [<%= agreement.localnode.name %>] <%= agreement.localnode.url %>
                     </span>
-        </div>
-
-        <div class="cell col-sm-12 multiline box-default">
-          <div class="form-group">
-            <label for="label" class="col-sm-3 col-md-2 control-label plastic-tag uppercase white shadow">Provides</label>
-            <div class="col-sm-9 col-md-10 cell multiline no-padding">
-
-
-              <ul class="media-list">
-                <% _.each(agreement.localnode.filters, function(filter) {
-                  var sqm = servicequeuemodels[filter];
-                %>
-                <li class="media" data-toggle="tooltip" data-original-title="<%- sqm.tooltip %>">
-                  <a class="pull-left" href="#">
-                    <i class="fa fa-lg fa-fw fa-check-square-o"></i>
-                  </a>
-                  <div class="media-body">
-                    <h4 class="media-heading"><%- sqm.display %></h4>
-                    <%- sqm.desc %>
-                  </div>
-                </li>
-                <% }) %>
-              </ul>
-
-
-            </div>
-            <div class="clearfix"></div>
-          </div>
-
-        </div>
-        <div class="clearfix"></div>
       </div>
-    </div>
 
-    <div class="cell col-sm-6 multiline box-lightblue">
-      <div>
-        <div class="cell col-sm-1">
-                    <span class="label <%= (agreement.remotenode.removedead) ? 'label-primary' : 'label-default' %>">
+      <div class="cell col-sm-12 multiline box-default">
+        <div class="form-group">
+          <label for="label" class="col-sm-3 col-md-2 control-label plastic-tag uppercase white shadow">Provides</label>
+          <div class="col-sm-9 col-md-10 cell multiline no-padding">
+
+
+            <ul class="media-list">
+              <% _.each(agreement.localnode.filters, function(filter) {
+                var sqm = servicequeuemodels[filter];
+              %>
+              <li class="media" data-toggle="tooltip" data-original-title="<%- sqm.tooltip %>">
+                <a class="pull-left" href="#">
+                  <i class="fa fa-lg fa-fw fa-check-square-o"></i>
+                </a>
+                <div class="media-body">
+                  <h4 class="media-heading"><%- sqm.display %></h4>
+                  <%- sqm.desc %>
+                </div>
+              </li>
+              <% }) %>
+            </ul>
+
+          </div>
+          <div class="clearfix"></div>
+        </div>
+
+      </div>
+      <div class="clearfix"></div>
+    </div>
+  </div>
+
+  <div class="cell col-sm-6 multiline box-lightblue">
+    <div>
+      <div class="cell col-sm-1">
+                    <span class="label <%= (agreement.remotenode.removedead) ? 'label-primary' : 'label-default' %>"
+                          data-toggle="tooltip" data-original-title="Remove dead torrents">
                       <i class="fa fa-lg fa-recycle"></i>
                     </span>
-        </div>
-        <div class="cell col-sm-1">
-                    <span class="label <%= (agreement.remotenode.indexfiles) ? 'label-primary' : 'label-default' %>">
+      </div>
+      <div class="cell col-sm-1">
+                    <span class="label <%= (agreement.remotenode.indexfiles) ? 'label-primary' : 'label-default' %>"
+                          data-toggle="tooltip" data-original-title='Index torrent files'>
                       <i class="fa fa-lg fa-database"></i>
                     </span>
-        </div>
-        <div class="cell col-sm-1">
-                    <span class="label <%= (agreement.remotenode.allsources) ? 'label-primary' : 'label-default' %>">
+      </div>
+      <div class="cell col-sm-1">
+                    <span class="label <%= (agreement.remotenode.allsources) ? 'label-primary' : 'label-default' %>"
+                          data-toggle="tooltip" data-original-title='Propagate torrents updated from all sources'>
                       <i class="fa fa-lg fa-cubes"></i>
                     </span>
-        </div>
-        <div class="cell col-sm-9 box-default">
+      </div>
+      <div class="cell col-sm-9 box-default">
                     <span class="plastic-tag title">
                       [<%= agreement.remotenode.name %>] <%= agreement.remotenode.url %>
                     </span>
-        </div>
+      </div>
 
-        <div class="cell col-sm-12 multiline box-default">
-          <div class="form-group">
-            <label for="label" class="col-sm-3 col-md-2 control-label plastic-tag uppercase white shadow">Provides</label>
-            <div class="col-sm-9 col-md-10 cell multiline no-padding">
+      <div class="cell col-sm-12 multiline box-default">
+        <div class="form-group">
+          <label for="label" class="col-sm-3 col-md-2 control-label plastic-tag uppercase white shadow">Provides</label>
+          <div class="col-sm-9 col-md-10 cell multiline no-padding">
 
+            <ul class="media-list">
+              <% _.each(agreement.remotenode.filters, function(filter) {
+                var sqm = servicequeuemodels[filter];
+              %>
+              <li class="media" data-toggle="tooltip" data-original-title="<%- sqm.tooltip %>">
+                <a class="pull-left" href="#">
+                  <i class="fa fa-lg fa-fw fa-check-square-o"></i>
+                </a>
+                <div class="media-body">
+                  <h4 class="media-heading"><%- sqm.display %></h4>
+                  <%- sqm.desc %>
+                </div>
+              </li>
+              <% }) %>
+            </ul>
 
-              <ul class="media-list">
-                <% _.each(agreement.remotenode.filters, function(filter) {
-                  var sqm = servicequeuemodels[filter];
-                %>
-                <li class="media" data-toggle="tooltip" data-original-title="<%- sqm.tooltip %>">
-                  <a class="pull-left" href="#">
-                    <i class="fa fa-lg fa-fw fa-check-square-o"></i>
-                  </a>
-                  <div class="media-body">
-                    <h4 class="media-heading"><%- sqm.display %></h4>
-                    <%- sqm.desc %>
-                  </div>
-                </li>
-                <% }) %>
-              </ul>
-
-            </div>
-            <div class="clearfix"></div>
           </div>
-
+          <div class="clearfix"></div>
         </div>
-        <div class="clearfix"></div>
-      </div>
-    </div>
 
-    <div class="cell col-sm-12 multiline">
-      <div class="form-group no-padding">
-        <label for="label" class="col-sm-2 col-md-1 control-label plastic-tag uppercase center shadow">Note</label>
-        <div class="col-sm-10 col-md-11 cell box-light multiline no-padding">
-          <div class="markdown-preview" data-markdown="<%= agreement.note %>"></div>
-        </div>
       </div>
+      <div class="clearfix"></div>
     </div>
   </div>
+
+  <div class="cell col-sm-12 multiline primitive">
+
+    <ul role="tablist" class="nav nav-tabs">
+
+      <li class="active"><a aria-expanded="true"
+                            aria-controls="note<%= agreement.id %>"
+                            data-toggle="tab"
+                            role="tab"
+                            id="note-tab<%= agreement.id %>"
+                            href="#note<%= agreement.id %>"
+                            class="plastic-tag title">Note</a></li>
+
+      <li class=""><a aria-expanded="false"
+                      aria-controls="graphs-in-<%= agreement.id %>"
+                      data-toggle="tab"
+                      role="tab"
+                      id="graphs-in-tab<%= agreement.id %>"
+                      href="#graphs-in-<%= agreement.id %>"
+                      class="plastic-tag title">Incoming (<%= agreement.remotenode.filters.length %>)</a></li>
+
+      <li class=""><a aria-expanded="false"
+                      aria-controls="graphs-out-<%= agreement.id %>"
+                      data-toggle="tab"
+                      role="tab"
+                      id="graphs-out-tab<%= agreement.id %>"
+                      href="#graphs-out-<%= agreement.id %>"
+                      class="plastic-tag title">Outgoing (<%= agreement.localnode.filters.length %>)</a></li>
+
+    </ul>
+    <div class="tab-content" id="myTabContent">
+
+      <div aria-labelledby="note-tab<%= agreement.id %>"
+           id="note<%= agreement.id %>"
+           class="tab-pane fade active in cell multiline"
+           role="tabpanel">
+        <div class="markdown-preview" data-markdown="<%= agreement.note %>"></div>
+      </div>
+
+      <div aria-labelledby="graphs-in-tab<%= agreement.id %>"
+           id="graphs-in-<%= agreement.id %>"
+           class="tab-pane fade cell multiline"
+           role="tabpanel">
+
+        <% var filters = agreement.remotenode.filters, incoming = true; %>
+
+        <div class="tab-pane-charts-container cell no-padding multiline">
+
+          <% if (filters.length) { %>
+
+          <% filters.forEach(function(filter) { %>
+
+
+          <div class="cell primitive multiline chart-wrapper">
+            <div class="col-lg-12">
+              <div class="col-sm-4 plastic-tag title" style="font-size: 1.4em; padding: 10px;">
+                <i class="fa fa-area-chart"></i> <%- servicequeuemodels[filter].display %>
+              </div>
+              <div class="col-sm-8 cell primitive multiline" style="text-align: right;">
+                <label for="label" class="control-label" style="margin-right: 15px; margin-top: 5px;">Data Interval: </label>
+                <nav class="pull-right cell multiline primitive" style="height: 15px; padding: 0;">
+                  <ul class="pagination pagination-sm dashboard-chart-level cell multiline primitive"
+                      style="padding: 0;">
+                    <li class="active"><a href="#" data-level="1">10 min</a></li>
+                    <li class=""><a href="#" data-level="3">30 min</a></li>
+                    <li class=""><a href="#" data-level="6">1 hour</a></li>
+                    <li class=""><a href="#" data-level="144">1 day</a></li>
+                  </ul>
+                </nav>
+
+
+              </div>
+              <div class="clearfix"></div>
+            </div>
+            <div class="col-lg-12">
+
+              <div class="chart-container"
+                   data-agreement="<%= agreement.id %>"
+                   data-filter="<%= filter %>"
+                   data-incoming="<%= (incoming) ? 'true' : 'false' %>"
+                   data-level="1"
+                   style="min-width: 310px; height: 400px; margin: 0 auto">
+                <br /><br /><br /><h4 class="loading-content"><i class="fa fa-spinner fa-spin"></i> Loading...</h4>
+              </div>
+
+            </div>
+          </div>
+
+
+          <% }) %>
+
+          <% } %>
+
+        </div> <!-- END tab-pane-charts-container -->
+
+
+
+      </div>
+
+      <div aria-labelledby="graphs-out-tab<%= agreement.id %>"
+           id="graphs-out-<%= agreement.id %>"
+           class="tab-pane fade cell multiline"
+           role="tabpanel">
+
+        <% var filters = agreement.localnode.filters, incoming = false; %>
+
+        <div class="tab-pane-charts-container cell no-padding multiline">
+
+          <% if (filters.length) { %>
+
+          <% filters.forEach(function(filter) { %>
+
+
+          <div class="cell primitive multiline chart-wrapper">
+            <div class="col-lg-12">
+              <div class="col-sm-4 plastic-tag title" style="font-size: 1.4em; padding: 10px;">
+                <i class="fa fa-area-chart"></i> <%- servicequeuemodels[filter].display %>
+              </div>
+              <div class="col-sm-8 cell primitive multiline" style="text-align: right;">
+                <label for="label" class="control-label" style="margin-right: 15px; margin-top: 5px;">Data Interval: </label>
+                <nav class="pull-right cell multiline primitive" style="height: 15px; padding: 0;">
+                  <ul class="pagination pagination-sm dashboard-chart-level cell multiline primitive"
+                      style="padding: 0;">
+                    <li class="active"><a href="#" data-level="1">10 min</a></li>
+                    <li class=""><a href="#" data-level="3">30 min</a></li>
+                    <li class=""><a href="#" data-level="6">1 hour</a></li>
+                    <li class=""><a href="#" data-level="144">1 day</a></li>
+                  </ul>
+                </nav>
+
+
+              </div>
+              <div class="clearfix"></div>
+            </div>
+            <div class="col-lg-12">
+
+              <div class="chart-container"
+                   data-agreement="<%= agreement.id %>"
+                   data-filter="<%= filter %>"
+                   data-incoming="<%= (incoming) ? 'true' : 'false' %>"
+                   data-level="1"
+                   style="min-width: 310px; height: 400px; margin: 0 auto">
+                <br /><br /><br /><h4 class="loading-content"><i class="fa fa-spinner fa-spin"></i> Loading...</h4>
+              </div>
+
+            </div>
+          </div>
+
+
+          <% }) %>
+
+          <% } %>
+
+        </div> <!-- END tab-pane-charts-container -->
+
+
+
+      </div>
+
+    </div>
+
+  </div>
+</div>
 
 </li>

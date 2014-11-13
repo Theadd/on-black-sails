@@ -22,11 +22,7 @@ $(function() {
       this.handleSwitches();
       $('.selectpicker').selectpicker({showContent: false});
       $(".markdown-editor").markdown({iconlibrary: 'fa'});
-      $('.markdown-preview').each(function( index ) {
-        var data = $( this ).data('markdown');
-        console.log("CONVERTING '"+data+"' TO HTML!");
-        $( this).html(markdown.toHTML(data));
-      });
+      this.renderMarkdownPreview();
 
       $("[data-toggle='tooltip']").tooltip({container: 'body', delay: 500, html: true});
 
@@ -39,19 +35,8 @@ $(function() {
         }, 2000)
       }
 
-      $('.nav-tabs').on('click', 'a', function (e) {
-        e.preventDefault();
-        console.log("click tab");
-        $(this).tab('show');
-
-      });
-
-      $('.nav-tabs a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
-        //e.target // newly activated tab
-        //e.relatedTarget // previous active tab
-        console.log("tab shown");
-        loadVisibleCharts();
-      })
+      this.bindTabEvents();
+      this.bindGUIEvents();
 
     },
 
@@ -137,11 +122,35 @@ $(function() {
 
         $(this).find('.btn').toggleClass('btn-default');
       });
+    },
+
+    renderMarkdownPreview: function () {
+      $('.markdown-preview').each(function () {
+        var data = $( this ).data('markdown');
+        $( this).html(markdown.toHTML(data));
+      });
+    },
+
+    bindTabEvents: function () {
+
+      $('.nav-tabs').on('click', 'a', function (e) {
+        e.preventDefault();
+        $(this).tab('show');
+      });
+
+      $('.nav-tabs a[data-toggle="tab"]').on('shown.bs.tab', function () {
+        loadVisibleCharts();
+      });
+    },
+
+    bindGUIEvents: function () {
+      bindGUIEvents();
     }
 
   };
 
   App.init();
+  $.App = App;
 
 });
 

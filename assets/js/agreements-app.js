@@ -17,6 +17,10 @@ var AgreementIndexPage = {
         JST['assets/templates/addAgreement.ejs'](obj)
       );
 
+      $.App.renderMarkdownPreview();
+      $.App.bindTabEvents();
+      $.App.bindGUIEvents();
+
     });
   },
 
@@ -32,6 +36,10 @@ var AgreementIndexPage = {
       $('.dashboard-agreement-list').prepend(
         JST['assets/templates/addAgreement.ejs'](obj)
       );
+
+      $.App.renderMarkdownPreview();
+      $.App.bindTabEvents();
+      $.App.bindGUIEvents();
 
     });
 
