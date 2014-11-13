@@ -77,10 +77,16 @@ module.exports = {
   },
 
   generate: function (agreement, filter, incoming, level, size, callback) {
-    var d = new Date()
-    d.setMinutes(Math.floor(d.getMinutes() / 10) * 10)
+    var d = new Date(),
+      _level = Math.min(level, 6),
+      a = Math.floor(d.getMinutes() / 10),
+      b = a % _level,
+      minutes = (a + (level - b)) * 10
+
+    d.setMinutes(minutes)
     d.setSeconds(0)
     d.setMilliseconds(0)
+
     agreement = parseInt(agreement)
     incoming = Boolean(JSON.parse(incoming))
     callback = callback || function () {}

@@ -85,7 +85,7 @@ function generateSeries(data, series) {
 
 function renderChart(container, series) {
 
-  container.highcharts({
+  var temp = container.highcharts({
     chart: {
       zoomType: 'x'
     },
@@ -106,6 +106,9 @@ function renderChart(container, series) {
         text: null
       },
       min: 0
+    },
+    tooltip: {
+      shared: true
     },
     legend: {
       floating: true,
@@ -137,7 +140,9 @@ function renderChart(container, series) {
     },
 
     series: series
-  });
+  }).highcharts();
+
+  console.log(temp);
 }
 
 function loadVisibleCharts() {
