@@ -91,9 +91,11 @@
 
   <% }) %>
 
-  <div class="row">
+  <div class="clearfix"></div>
+
+  <div class="row form-buttons">
     <div class="col-lg-12">
-      <input type="submit" class="btn btn-lg btn-primary btn-block" value="Save Settings"/>
+      <button type="submit" class="btn btn-md btn-primary"><i class="fa fa-cogs"></i> Save Settings</button>
       <input type="hidden" name="_csrf" value="<%= _csrf %>" />
     </div>
   </div>

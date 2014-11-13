@@ -116,9 +116,15 @@
 
 
 
-          <input type="submit" class="btn btn-lg btn-primary btn-block" value="Send"/>
-          <input type="hidden" name="receiver" value="<%= receiver %>" />
-          <input type="hidden" name="_csrf" value="<%= _csrf %>" />
+          <div class="clearfix"></div>
+
+          <div class="row form-buttons">
+            <div class="col-lg-12">
+              <button type="submit" class="btn btn-md btn-primary"><i class="fa fa-send"></i> Send</button>
+              <input type="hidden" name="receiver" value="<%= receiver %>" />
+              <input type="hidden" name="_csrf" value="<%= _csrf %>" />
+            </div>
+          </div>
 
         </form>
 
