@@ -24,7 +24,10 @@ module.exports = {
         agreements.unshift(agreement)
       }
 
-      res.view({ agreements: agreements})
+      res.view({
+        agreements: agreements,
+        deleted: (typeof req.param('deleted') !== "undefined")
+      })
     })
 
   },

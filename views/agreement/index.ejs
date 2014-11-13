@@ -31,13 +31,18 @@
     <div class="widget">
       <div class="widget-header">
         <i class="fa fa-share-alt-square"></i> Agreements
+        <% if (deleted) { %>
+        <a href="/agreement" class="btn btn-sm btn-primary pull-right"><i class="fa fa-lg fa-eye"></i> Show All</a>
+        <% } else { %>
+        <a href="/agreement?deleted" class="btn btn-sm btn-default pull-right"><i class="fa fa-lg fa-eye-slash"></i> Show All</a>
+        <% } %>
         <div class="clearfix"></div>
       </div>
       <div class="widget-body narrow">
 
         <ul class="plastic-list dashboard-agreement-list">
           <% _.each(agreements, function(agreement) { %>
-
+          <% if (agreement.status == 'deleted' && !deleted) return; %>
           <li class="item" data-id="<%= agreement.id %>">
             <div class="body">
               <span class="cell col-md-1 col-sm-2 col-xs-2 box-<%= Helpers.getStatusStyle(agreement.status) %>">
