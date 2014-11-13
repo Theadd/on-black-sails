@@ -364,3 +364,18 @@ ControlledEntity.prototype.send = function (command, value) {
     self.get('worker').send({ cmd: command, val: value })
   }
 }
+
+ControlledEntity.prototype.destroy = function (callback) {
+  var self = this
+
+  if (self.get('ready')) {
+    return callback(new Error("This entity cannot be deleted while it's still running."))
+  } else {
+    var id = self.get('id')
+    LinkedEntity.destroy({ id: self.get('id') }, function(err) {
+      if (err) return callback(err)
+      delete Entity._controlledEntity[id]
+      return callback(null)
+    })
+  }
+}

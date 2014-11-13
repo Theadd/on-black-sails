@@ -88,33 +88,59 @@ module.exports = {
 
   update: function(req, res, next) {
     //if (req.session.User && req.session.User.admin) {
-    var entity = Entity.getControlledEntity(req.param('id'))
+    var entity = Entity.getControlledEntity(req.param('id')),
+      button = req.param('button')
 
     if (entity) {
-      //set default value for multi selects
-      req.body.autoqueue = req.body.autoqueue || false
-      req.body['metadata-onempty'] = req.body['metadata-onempty'] || false
-      req.body['tracker-onempty'] = req.body['tracker-onempty'] || false
-      req.body['status-onempty'] = req.body['status-onempty'] || false
-      req.body['media-onempty'] = req.body['media-onempty'] || false
 
-      for (var i in req.body) {
-        if (i == '_csrf' || i == 'id') continue
-        entity.set(i, req.body[i])
-      }
-      entity.update(function (err, result) {
-        if (err) {
-          req.session.flash = {
-            err: [{name: 'updateError', message: err.message}]
-          }
-          return res.redirect('/linkedentity/edit/' + req.param('id'));
-        } else {
-          req.session.flash = {
-            msg: [{name: 'restartNeeded', message: 'Restart <span class="inline-pseudobox">' + result.name + '</span> to apply changes.'}]
-          }
-          return res.redirect('/linkedentity')
+      if (button == 'update') {
+        //set default value for multi selects
+        req.body.autoqueue = req.body.autoqueue || false
+        req.body['metadata-onempty'] = req.body['metadata-onempty'] || false
+        req.body['tracker-onempty'] = req.body['tracker-onempty'] || false
+        req.body['status-onempty'] = req.body['status-onempty'] || false
+        req.body['media-onempty'] = req.body['media-onempty'] || false
+
+        for (var i in req.body) {
+          if (i == '_csrf' || i == 'id' || i == 'button') continue
+          entity.set(i, req.body[i])
         }
-      })
+        entity.update(function (err, result) {
+          if (err) {
+            req.session.flash = {
+              err: [
+                {name: 'updateError', message: err.message}
+              ]
+            }
+            return res.redirect('/linkedentity/edit/' + req.param('id'));
+          } else {
+            req.session.flash = {
+              msg: [
+                {name: 'restartNeeded', message: 'Restart <span class="inline-pseudobox">' + entity.get('name') + '</span> to apply changes.'}
+              ]
+            }
+            return res.redirect('/linkedentity')
+          }
+        })
+      } else if (button == 'delete') {
+        entity.destroy(function (err) {
+          if (err) {
+            req.session.flash = {
+              err: [
+                {name: 'destroyError', message: err.message}
+              ]
+            }
+            return res.redirect('/linkedentity/edit/' + req.param('id'));
+          } else {
+            req.session.flash = {
+              msg: [
+                {name: 'destroySuccess', message: 'Entity successfully deleted.'}
+              ]
+            }
+            return res.redirect('/linkedentity')
+          }
+        })
+      }
     } else {
       req.session.flash = {
         err: [{name: 'entityNotFound', message: 'Entity not found!'}]

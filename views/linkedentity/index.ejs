@@ -1,3 +1,30 @@
+
+<% if(flash && (flash.err || flash.msg)) { %>
+<div class="row">
+  <div class="col-xs-12">
+
+    <% if(flash && flash.err) { %>
+    <% Object.keys(flash.err).forEach(function(error) { %>
+    <div class="alert alert-danger" role="alert">
+      <a href="#" class="close" data-dismiss="alert">&times;</a>
+      <%- flash.err[error].message %>
+    </div>
+    <% }) %>
+    <% } %>
+
+    <% if(flash && flash.msg) { %>
+    <% Object.keys(flash.msg).forEach(function(msg) { %>
+    <div class="alert alert-success" role="alert">
+      <a href="#" class="close" data-dismiss="alert">&times;</a>
+      <%- flash.msg[msg].message %>
+    </div>
+    <% }) %>
+    <% } %>
+
+  </div>
+</div>
+<% } %>
+
 <% var display = false; %>
 
 <div class="row">
