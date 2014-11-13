@@ -62,6 +62,9 @@ function updateEntryInDom(message) {
       if (message.verb === 'created') {
         LinkedEntityIndexPage.addLinkedEntity(id, message);
       }
+      if (message.verb === 'destroyed') {
+        LinkedEntityIndexPage.addLinkedEntity(id, message);
+      }
       break;
     case '/agreement':
       if (message.verb === 'updated') {

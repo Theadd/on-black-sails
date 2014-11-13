@@ -375,6 +375,7 @@ ControlledEntity.prototype.destroy = function (callback) {
     LinkedEntity.destroy({ id: self.get('id') }, function(err) {
       if (err) return callback(err)
       delete Entity._controlledEntity[id]
+      LinkedEntity.publishDestroy(id)
       return callback(null)
     })
   }
