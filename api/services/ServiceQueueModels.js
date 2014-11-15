@@ -125,7 +125,15 @@ module.exports = {
         interval: 500,       //Interval between each http request to the remote node
         display: 'Peers (Heavy)',
         desc: 'Add latest torrents with updated peers to PropagateService.',
-        tooltip: 'Does the same as <strong>peers</strong> but sends stacks of 15 torrents each 0.5 seconds instead of 15 every 3 seconds.'
+        tooltip: 'Does the same as <strong>Peers</strong> but sends stacks of 15 torrents each 0.5 seconds instead of 15 every 3 seconds.'
+      },
+      heavier: {
+        stacksize: 30,
+        limit: 500,
+        interval: 250,
+        display: 'Peers (Heavier)',
+        desc: 'Add latest torrents with updated peers to PropagateService.',
+        tooltip: 'Does the same as <strong>Peers</strong> but sends stacks of 30 torrents each 0.25 seconds instead of 15 every 3 seconds.'
       }
     },
     getQuery: function(options) {
