@@ -36,6 +36,10 @@ module.exports = {
       type: 'string',
       enum: ['public', 'private', 'agreement'], //ON EDIT: Check ControlledEntity.set('type') also.
       defaultsTo: 'public'
+    },
+
+    localcluster: {
+      model: 'LocalCluster'
     }
 
   }

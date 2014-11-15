@@ -12,7 +12,9 @@ function EntityObject () {
   var self = this
   if (!(self instanceof EntityObject)) return new EntityObject()
   self.isMaster = false
+  self.isSlave = false
   self.isPublic = true
+  self.localCluster = false
   self.isAPI = true
   self.port = sails.config.port
   self._spawnChildProcessQueue = []
@@ -31,31 +33,56 @@ module.exports.deploy = function() {
   self.config = extend(true, {}, CommandLineHelpers.config)
 
   if (standaloneProcess) {
-    if (Boolean(sails.config.master)) {
-      //Standalone process able to fork linked entities (MASTER)
-      self.isMaster = true
-      self._controlledEntity = {}
-      Cluster.updateClusterStats(1800000, true) //30min
-      Cluster.requestAndBuildAgreements()
-      cluster.on('exit', function(worker, code, signal) {
-        worker._controlledEntity.set('ready', false)
-        sails.log.error("Worker " + worker._controlledEntity.get('name') + " <" + worker._controlledEntity.get('pid') + "> died (" + (signal || code) + ")")
-        if (worker._controlledEntity.get('enabled') && worker._controlledEntity.get('respawn')) {
-          sails.log.debug("Restarting worker " + worker._controlledEntity.get('name') + " <" + worker._controlledEntity.get('pid') + ">")
-          worker._controlledEntity.setRespawnByForce(true)
-          self._spawnChildProcessQueue.push(worker._controlledEntity.get('id'))
-          self.spawnNextChildProcess()
+    self.isSlave = Boolean(sails.config.slave)
+    self.isMaster = Boolean(sails.config.master) || self.isSlave
+    if (self.isMaster) {
+      //Standalone process able to fork linked entities (MASTER/SLAVE)
+
+
+      LocalCluster.notify(!self.isSlave, true, function (err, localcluster) {
+        if (err) {
+          sails.log.error(err)
+          self.terminate(true)
+        } else {
+
+          console.log("    LocalCluster.notify() CALLBACK: " + err)
+          console.log(localcluster)
+          self.localCluster = localcluster.id
+
+          self._controlledEntity = {}
+
+          if (!self.isSlave) {
+            Cluster.updateClusterStats(1800000, true) //30min
+          }
+
+          Cluster.requestAndBuildAgreements()
+
+          cluster.on('exit', function(worker, code, signal) {
+            worker._controlledEntity.set('ready', false)
+            sails.log.error("Worker " + worker._controlledEntity.get('name') + " <" + worker._controlledEntity.get('pid') + "> died (" + (signal || code) + ")")
+            if (worker._controlledEntity.get('enabled') && worker._controlledEntity.get('respawn')) {
+              sails.log.debug("Restarting worker " + worker._controlledEntity.get('name') + " <" + worker._controlledEntity.get('pid') + ">")
+              worker._controlledEntity.setRespawnByForce(true)
+              self._spawnChildProcessQueue.push(worker._controlledEntity.get('id'))
+              self.spawnNextChildProcess()
+            }
+          })
+          process.nextTick(function () {
+            self.loadControlledEntities(function (err) {
+              if (err) {
+                sails.log.error(err)
+              } else {
+                self.spawnChildProcesses()
+              }
+            })
+          })
+
+
         }
       })
-      process.nextTick(function () {
-        self.loadControlledEntities(function (err) {
-          if (err) {
-            sails.log.error(err)
-          } else {
-            self.spawnChildProcesses()
-          }
-        })
-      })
+
+
+
 
     } else {
       Indexer.run()
@@ -136,8 +163,13 @@ EntityObject.prototype.spawnNextChildProcess = function () {
         controlledEntity.error(err)
         controlledEntity.setWorker(null)
       } else {
-        sails.log.debug("FORKED " + childProcessKey)// + " on port " + cluster.workers[childProcessKey].config.port)
-        controlledEntity.setWorker(cluster.workers[childProcessKey])
+        if  (childProcessKey != 0) {
+          sails.log.debug("FORKED " + childProcessKey)
+          controlledEntity.setWorker(cluster.workers[childProcessKey])
+        } else {
+          sails.log.debug("Entity controlled in another instance of LocalCluster")
+        }
+
       }
       return self.spawnNextChildProcess()
     })
@@ -145,8 +177,13 @@ EntityObject.prototype.spawnNextChildProcess = function () {
 }
 
 EntityObject.prototype.spawnChildProcess = function (controlledEntity, callback) {
-  var self = this,
-    ports = controlledEntity.getRequiredPorts()
+  var self = this
+
+  if (controlledEntity.get('localcluster') != self.localCluster) {
+    return callback(null, 0)  //Entity controlled in another instance of LocalCluster
+  }
+
+  var ports = controlledEntity.getRequiredPorts()
 
   new Common.TestPorts(ports, function (err, res) {
     if (res.taken.length && !controlledEntity.getRespawnByForce()) {

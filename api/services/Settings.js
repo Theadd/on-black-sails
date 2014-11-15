@@ -171,6 +171,15 @@ function Settings () {
       help: 'Boolean',
       desc: 'Allow access to the Restful API on master process.'
     },
+    localcluster: {
+      key: 'localcluster',
+      value: sails.config.localcluster || bcrypt.hashSync(crypto.randomBytes(Math.ceil(15 / 2)).toString('hex').slice(0, 15), 10),
+      type: 'string',
+      category: 'cluster',
+      title: 'Local Cluster UUID',
+      help: '',
+      desc: ''
+    },
     ready: {
       key: 'ready',
       value: sails.config.ready || false,
@@ -233,6 +242,9 @@ Settings.prototype.get = function (prop) {
       case 'apionmaster':
         value = self._config.apionmaster.value
         break
+      case 'localcluster':
+        value = self._config.localcluster.value
+        break
       default:
         console.trace()
         sails.log.warn("[Settings] Unrecognized property: " + prop)
@@ -241,6 +253,7 @@ Settings.prototype.get = function (prop) {
     value = extend({}, self._config)
     delete value.identitykey
     delete value.cluster
+    delete value.localcluster
     delete value.ready
   }
 
@@ -292,6 +305,9 @@ Settings.prototype.set = function (prop, value) {
       break
     case 'apionmaster':
       self._config.apionmaster.value = Boolean(JSON.parse(value))
+      break
+    case 'localcluster':
+      self._config.localcluster.value = Boolean(JSON.parse(value))
       break
     default:
       console.trace()

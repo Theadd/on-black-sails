@@ -21,7 +21,33 @@ module.exports.bootstrap = function(cb) {
       },
       function userUpdated(err, users) {
         if (err) console.error(err)
-        cb()
+
+        /*Hash.update({}, {
+          updatedBy: Settings.get('cluster')
+        }, function (uErr, hashes) {
+          if (uErr) {
+            sails.log.error(uErr)
+          }
+          cb()
+        })*/
+
+        LocalCluster.getMaster(function (err, master) {
+          if (!err && !!master) {
+            LinkedEntity.update({localcluster: null}, {
+              localcluster: master.id
+            }, function (err, entries) {
+              if (err) {
+                sails.log.error(err)
+              }
+              console.log(entries)
+              cb()
+            })
+          } else cb()
+        })
+
+
+
+        //cb()
       }
     )
   } else {

@@ -10,6 +10,7 @@ var defaultEntity = {
   enabled: false,
   respawn: false,
   type: 'public',
+  localcluster: false,
   config: {
     'index': {
       'kickass': {
@@ -167,6 +168,9 @@ ControlledEntity.prototype.get = function (prop) {
     case 'type':
       value = self._entity.type || 'public'
       break
+    case 'localcluster':
+      value = self._entity.localcluster || false
+      break
     case 'propagate-onempty':
       value = self._entity.config.propagate.onempty || false
       break
@@ -223,6 +227,10 @@ ControlledEntity.prototype.set = function (prop, value) {
         self._entity.type = String(value)
         self._update(prop, self._entity.type)
       }
+      break
+    case 'localcluster':
+      self._entity.localcluster = value
+      self._update(prop, self._entity.localcluster, true)
       break
     //CONFIG PROPERTIES, THEY DON'T GET UPDATED UNTIL SAVE()
     case 'live': self._entity.config.live = Boolean(JSON.parse(value)); break
