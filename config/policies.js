@@ -67,6 +67,12 @@ module.exports.policies = {
     edit: ["master", "flash", "admin"],
     update: ["master", "flash", "admin"],
     '*': false
+  },
+  localcluster: {
+    index: ["master", "flash", "admin"],
+    edit: ["master", "flash", "admin"],
+    update: ["master", "flash", "admin"],
+    '*': "flash"
   }
 
 };

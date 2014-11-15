@@ -5,8 +5,6 @@
  * @docs        :: http://sailsjs.org/#!documentation/models
  */
 
-var extend = require('node.extend');
-
 module.exports = {
 
   autoPK: true,
@@ -25,7 +23,7 @@ module.exports = {
 
     name: {
       type: 'string',
-      defaultsTo: ''
+      required: true
     },
 
     master: {
@@ -46,6 +44,12 @@ module.exports = {
     setRunning: function (running, callback) {
       this.running = running
       this.save(callback)
+    },
+
+    toJSON: function() {
+      var obj = this.toObject()
+      delete obj.hash
+      return obj
     }
 
   },
@@ -65,7 +69,6 @@ module.exports = {
   },
 
   register: function (hash, asMaster, callback) {
-    console.log("register local cluster: " + hash + ", asMaster: " + asMaster)
 
     LocalCluster.getMaster(function (err, master) {
       if (err) return callback(err)
@@ -81,7 +84,9 @@ module.exports = {
 
         if (!!exists) return callback(new Error('Hash already exists.'))
 
-        LocalCluster.create({hash: hash, master: asMaster}).exec(function (err, created) {
+        var name = (asMaster) ? "Master" : "Slave"
+
+        LocalCluster.create({hash: hash, master: asMaster, name: name}).exec(function (err, created) {
           if (err) return callback(err)
 
           Settings.save(function () {
@@ -91,6 +96,19 @@ module.exports = {
 
       })
 
+    })
+  },
+
+  modify: function (id, name, url, callback) {
+    LocalCluster.findOne(id, function (err, localcluster) {
+      if (err) return callback(err)
+      if (localcluster && localcluster.id) {
+        localcluster.name = name
+        localcluster.url = url
+        localcluster.save(callback)
+      } else {
+        return callback(new Error('Provided LocalCluster ID does not exist.'))
+      }
     })
   },
 
