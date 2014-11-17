@@ -285,6 +285,13 @@ Settings.prototype.set = function (prop, value) {
     case 'clustername':
       self._config.clustername.value = String(value)
       break
+    case 'identitykey':
+      if (Entity.isSlave) {
+        self._config.identitykey.value = String(value)
+      } else {
+        sails.log.error("Unable to set settings value of 'identitykey' in master.")
+      }
+      break
     case 'datapath':
       self._config.datapath.value = String(value)
       break

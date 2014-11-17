@@ -58,6 +58,38 @@ module.exports = {
       }
       return (id) ? res.redirect('/localcluster/edit/' + id) : res.redirect('/localcluster/')
     }
+  },
+
+  'request': function(req, res) {
+    var data = req.param('data')
+
+    if (data) {
+      ClusterInstance.get(Entity.localCluster, function (err, instance) {
+        if (err) {
+          res.json({
+            error: err || "Unexpected error."
+          })
+        } else {
+          instance.handleRequest(data, function (err, encoded) {
+            console.log("--- (LocalClusterController.request, in callback of instance.handleRequest()")
+            if (err) {
+              res.json({
+                error: err
+              })
+            } else {
+              res.json({
+                error: false,
+                data: encoded
+              })
+            }
+          })
+        }
+      })
+    } else {
+      res.json({
+        error: "Missing required parameters."
+      })
+    }
   }
 
 }

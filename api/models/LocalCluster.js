@@ -36,6 +36,12 @@ module.exports = {
       defaultsTo: ''
     },
 
+    status: {
+      type: 'string',
+      enum: ['undefined', 'pending', 'ready'],
+      defaultsTo: 'undefined'
+    },
+
     running: {
       type: 'boolean',
       defaultsTo: true
@@ -105,6 +111,7 @@ module.exports = {
       if (localcluster && localcluster.id) {
         localcluster.name = name
         localcluster.url = url
+        localcluster.status = (localcluster.master) ? 'ready' : 'pending'
         localcluster.save(callback)
       } else {
         return callback(new Error('Provided LocalCluster ID does not exist.'))
@@ -139,7 +146,7 @@ module.exports = {
   _notifySlave: function (running, callback) {
     var hash = Settings.get('localcluster')
 
-    LocalCluster.get(function (err, localcluster) {
+    LocalCluster.get(hash, function (err, localcluster) {
       if (err) return callback(err)
 
       if (!!localcluster) {

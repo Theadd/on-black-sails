@@ -166,7 +166,7 @@ exports.process = function () {
         }
       } catch (err) {
         if (unlistedParameters.indexOf(parametersLeft[j]) == -1) {
-          sails.log.debug("Unrecognized parameter: " + parametersLeft[j])
+          sails.log.info("Unrecognized parameter: " + parametersLeft[j])
         }
       }
     }
