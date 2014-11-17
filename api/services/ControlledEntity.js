@@ -224,13 +224,15 @@ ControlledEntity.prototype.get = function (prop) {
   return value
 }
 
-ControlledEntity.prototype.set = function (prop, value) {
+ControlledEntity.prototype.set = function (prop, value, doNotUpdateModel) {
   var self = this
+
+  doNotUpdateModel = doNotUpdateModel || false
 
   switch (prop) {
     case 'ready':
       self._ready = Boolean(JSON.parse(value))
-      if (self._ready) {
+      if (self._ready && self.get('localcluster') == Entity.localCluster) {
         self.set('pid', self.get('worker').process.pid)
       }
       self._update(prop, self._ready, true)
@@ -248,24 +250,24 @@ ControlledEntity.prototype.set = function (prop, value) {
       break
     case 'enabled':
       self._entity.enabled = Boolean(JSON.parse(value))
-      self._update(prop, self._entity.enabled)
+      self._update(prop, self._entity.enabled, doNotUpdateModel)
       break
     case 'name':
       self._entity.name = String(value)
-      self._update(prop, self._entity.name)
+      self._update(prop, self._entity.name, doNotUpdateModel)
       break
     case 'port':
       self._entity.port = Number(value)
-      self._update(prop, self._entity.port)
+      self._update(prop, self._entity.port, doNotUpdateModel)
       break
     case 'respawn':
       self._entity.respawn = Boolean(JSON.parse(value))
-      self._update(prop, self._entity.respawn)
+      self._update(prop, self._entity.respawn, doNotUpdateModel)
       break
     case 'type':
       if (['public', 'private', 'agreement'].indexOf(String(value)) != -1) {
         self._entity.type = String(value)
-        self._update(prop, self._entity.type)
+        self._update(prop, self._entity.type, doNotUpdateModel)
       }
       break
     case 'localcluster':
@@ -313,7 +315,7 @@ ControlledEntity.prototype.set = function (prop, value) {
     case 'propagate-agreement': self._entity.config.propagate.agreement = Number(value); break
 
     default:
-      console.warn("[ControlledEntity] Unrecognized property: " + prop)
+      sails.log.warn("[ControlledEntity] Unrecognized property: " + prop)
   }
 }
 
@@ -349,6 +351,25 @@ ControlledEntity.prototype._update = function (prop, value, doNotUpdateModel) {
       action: 'updated'
     })
   }
+
+  LocalCluster.getMaster(function (err, master) {
+    if (!err && !!master) {
+      if (Entity.localCluster != master.id) {
+
+        ClusterInstance.get(master.id, function (err, masterInstance) {
+
+          masterInstance.request({
+            type: 'update',
+            linkedentity: self.get('id'),
+            prop: prop,
+            value: value
+          })
+
+        })
+
+      }
+    }
+  })
 
 }
 

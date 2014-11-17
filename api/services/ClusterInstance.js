@@ -69,6 +69,8 @@ Instance.prototype.request = function (params, callback) {
     encoded = Common.Encode(data, self.values.hash),
     parsed, decoded
 
+  callback = callback || function () {}
+
   requestify.get(url, {
     params: {
       data: encoded
@@ -96,18 +98,7 @@ Instance.prototype.handleRequest = function (data, callback) {
     ClusterInstance.get(params.instance, function (err, instance) {
       if (err) return callback(err)
 
-      console.log("\n\n----------------------------------")
-      console.log("SOURCE INSTANCE: ")
-      console.log(instance.values)
-      console.log("\nPARAMS: ")
-      console.log(params)
-      console.log("----------------------------------\n\n")
       self._handleRequest(params, function (err, response) {
-        console.log(">>> In callback of _handleRequest(params), err: " + err)
-        console.log(">>> \tinstance.hash: " + instance.values.hash)
-        console.log(">>> \tresponse: ")
-        console.log(response)
-        console.log("\n")
         var encoded = Common.Encode(response, instance.values.hash)
         return callback(null, encoded)
       })
@@ -118,7 +109,7 @@ Instance.prototype.handleRequest = function (data, callback) {
 };
 
 Instance.prototype._handleRequest = function (params, callback) {
-  var self = this, response = {}, i
+  var self = this, response = {}, i, controlled
 
   switch (params.type) {
     case 'settings':
@@ -129,7 +120,7 @@ Instance.prototype._handleRequest = function (params, callback) {
       return callback(null, response)
       break
     case 'respawn':
-      var controlled = Entity.getControlledEntity(params.linkedentity)
+      controlled = Entity.getControlledEntity(params.linkedentity)
       if (controlled.get('localcluster') == Entity.localCluster) {
         controlled.respawn(params.forcerespawn)
       } else {
@@ -138,7 +129,7 @@ Instance.prototype._handleRequest = function (params, callback) {
       break
     case 'reload':
       Entity.loadControlledEntities(function () {
-        var controlled = Entity.getControlledEntity(params.linkedentity)
+        controlled = Entity.getControlledEntity(params.linkedentity)
         if (controlled) {
           LinkedEntity.findOne(params.linkedentity, function (err, entity) {
             if (err) return callback(err)
@@ -148,6 +139,14 @@ Instance.prototype._handleRequest = function (params, callback) {
           return callback(new Error("ControlledEntity not found."))
         }
       })
+      break
+    case 'update':
+      controlled = Entity.getControlledEntity(params.linkedentity)
+      if (controlled) {
+        controlled.set(params.prop, params.value, true)
+      } else {
+        return callback(new Error("ControlledEntity not found."))
+      }
       break
     default:
       return callback(new Error("Unrecognized request type."))
