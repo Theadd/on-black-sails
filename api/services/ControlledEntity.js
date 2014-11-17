@@ -166,7 +166,7 @@ ControlledEntity.prototype.reset = function (entity, callback) {
 
 ControlledEntity.prototype.error = function (err) {
   sails.log.error(err)
-  sails.log.debug(err.stack)
+  //sails.log.debug(err.stack)
   this._errors.push(err)
 }
 
@@ -249,8 +249,10 @@ ControlledEntity.prototype.set = function (prop, value, doNotUpdateModel) {
       self._update(prop, self._stats, true)
       break
     case 'enabled':
+      console.log("ControlledEntity.set(enabled)")
       self._entity.enabled = Boolean(JSON.parse(value))
       self._update(prop, self._entity.enabled, doNotUpdateModel)
+
       break
     case 'name':
       self._entity.name = String(value)
@@ -263,6 +265,7 @@ ControlledEntity.prototype.set = function (prop, value, doNotUpdateModel) {
     case 'respawn':
       self._entity.respawn = Boolean(JSON.parse(value))
       self._update(prop, self._entity.respawn, doNotUpdateModel)
+
       break
     case 'type':
       if (['public', 'private', 'agreement'].indexOf(String(value)) != -1) {
@@ -352,6 +355,13 @@ ControlledEntity.prototype._update = function (prop, value, doNotUpdateModel) {
     })
   }
 
+  self.updateToMaster(prop)
+
+}
+
+ControlledEntity.prototype.updateToMaster = function (prop) {
+  var self = this
+
   LocalCluster.getMaster(function (err, master) {
     if (!err && !!master) {
       if (Entity.localCluster != master.id) {
@@ -362,7 +372,7 @@ ControlledEntity.prototype._update = function (prop, value, doNotUpdateModel) {
             type: 'update',
             linkedentity: self.get('id'),
             prop: prop,
-            value: value
+            value: self.get(prop)
           })
 
         })
@@ -370,6 +380,24 @@ ControlledEntity.prototype._update = function (prop, value, doNotUpdateModel) {
       }
     }
   })
+}
+
+ControlledEntity.prototype.updateToSlave = function (prop) {
+  var self = this
+
+  if (self.get('localcluster') != Entity.localCluster && !Entity.isSlave) {
+    console.log("ControlledEntity.updateToSlave("+prop+")")
+    ClusterInstance.get(self.get('localcluster'), function (err, instance) {
+
+      instance.request({
+        type: 'update',
+        linkedentity: self.get('id'),
+        prop: prop,
+        value: self.get(prop)
+      })
+
+    })
+  }
 
 }
 
@@ -451,6 +479,24 @@ ControlledEntity.prototype.send = function (command, value) {
 
   if (self.get('worker')) {
     self.get('worker').send({ cmd: command, val: value })
+  } else {
+
+    if (self.get('localcluster') != Entity.localCluster) {
+      console.log("ControlledEntity.send("+command+", "+value+") TO SLAVE IN LOCAL CLUSTER")
+      ClusterInstance.get(self.get('localcluster'), function (err, instance) {
+        if (err) {
+          self.error(err)
+        } else {
+          instance.request({
+            type: 'send',
+            linkedentity: self.get('id'),
+            cmd: command,
+            val: value
+          })
+        }
+      })
+
+    }
   }
 }
 

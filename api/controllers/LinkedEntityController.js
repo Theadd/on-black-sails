@@ -219,6 +219,7 @@ module.exports = {
 
       if (entity) {
         entity.set(prop, !entity.get(prop))
+        entity.updateToSlave(prop)
       }
     }
     res.json({

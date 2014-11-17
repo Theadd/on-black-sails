@@ -148,6 +148,14 @@ Instance.prototype._handleRequest = function (params, callback) {
         return callback(new Error("ControlledEntity not found."))
       }
       break
+    case 'send':
+      controlled = Entity.getControlledEntity(params.linkedentity)
+      if (controlled) {
+        controlled.send(params.cmd, params.val)
+      } else {
+        return callback(new Error("ControlledEntity not found."))
+      }
+      break
     default:
       return callback(new Error("Unrecognized request type."))
   }
