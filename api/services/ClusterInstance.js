@@ -128,6 +128,27 @@ Instance.prototype._handleRequest = function (params, callback) {
       }
       return callback(null, response)
       break
+    case 'respawn':
+      var controlled = Entity.getControlledEntity(params.linkedentity)
+      if (controlled.get('localcluster') == Entity.localCluster) {
+        controlled.respawn(params.forcerespawn)
+      } else {
+        return callback(new Error("Specified LinkedEntity does not belong to this local cluster: " + Entity.localCluster))
+      }
+      break
+    case 'reload':
+      Entity.loadControlledEntities(function () {
+        var controlled = Entity.getControlledEntity(params.linkedentity)
+        if (controlled) {
+          LinkedEntity.findOne(params.linkedentity, function (err, entity) {
+            if (err) return callback(err)
+            controlled.reset(entity, callback)
+          })
+        } else {
+          return callback(new Error("ControlledEntity not found."))
+        }
+      })
+      break
     default:
       return callback(new Error("Unrecognized request type."))
   }
@@ -145,5 +166,14 @@ Instance.prototype.requestSettings = function (callback) {
     }
 
     Settings.save(callback)
+  })
+}
+
+Instance.prototype.requestRespawn = function (id, forceRespawn, callback) {
+  var self = this,
+    requestParams = {type: 'respawn', linkedentity: id, forcerespawn: forceRespawn}
+
+  self.request(requestParams, function (err, params) {
+    return callback(err, params)
   })
 }

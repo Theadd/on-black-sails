@@ -60,12 +60,11 @@ module.exports.deploy = function() {
 
             cluster.on('exit', function (worker, code, signal) {
               worker._controlledEntity.set('ready', false)
-              sails.log.error("Worker " + worker._controlledEntity.get('name') + " <" + worker._controlledEntity.get('pid') + "> died (" + (signal || code) + ")")
+              var error = new Error("Worker " + worker._controlledEntity.get('name') + " <" + worker._controlledEntity.get('pid') + "> died (" + (signal || code) + ")")
+              worker._controlledEntity.error(error)
               if (worker._controlledEntity.get('enabled') && worker._controlledEntity.get('respawn')) {
-                sails.log.debug("Restarting worker " + worker._controlledEntity.get('name') + " <" + worker._controlledEntity.get('pid') + ">")
-                worker._controlledEntity.setRespawnByForce(true)
-                self._spawnChildProcessQueue.push(worker._controlledEntity.get('id'))
-                self.spawnNextChildProcess()
+                worker._controlledEntity.error(new Error("Restarting worker " + worker._controlledEntity.get('name') + " <" + worker._controlledEntity.get('pid') + ">"))
+                worker._controlledEntity.respawn(true)
               }
             })
             process.nextTick(function () {
@@ -130,7 +129,9 @@ EntityObject.prototype.loadControlledEntities = function (callback) {
   LinkedEntity.find({}).exec(function(err, entries) {
     if (!err && entries.length) {
       for (var i in entries) {
-        self._controlledEntity[entries[i].id] = new ControlledEntity(entries[i])
+        if (typeof self._controlledEntity[entries[i].id] === "undefined") {
+          self._controlledEntity[entries[i].id] = new ControlledEntity(entries[i])
+        }
       }
       callback(null, self._controlledEntities)
     } else {

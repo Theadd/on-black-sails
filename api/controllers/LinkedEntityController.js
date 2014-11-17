@@ -95,6 +95,7 @@ module.exports = {
 
       if (button == 'update') {
         //set default value for multi selects
+        console.log("IN entity update, localcluster: " + req.body['localcluster'])
         req.body.autoqueue = req.body.autoqueue || false
         req.body['metadata-onempty'] = req.body['metadata-onempty'] || false
         req.body['tracker-onempty'] = req.body['tracker-onempty'] || false
@@ -234,9 +235,7 @@ module.exports = {
       if (entity) {
         switch (prop) {
           case 'run':
-            entity.setRespawnByForce(true)
-            Entity._spawnChildProcessQueue.push(req.param('id'))
-            Entity.spawnNextChildProcess()
+            entity.respawn(true)
             break
           case 'kill':
             entity.send('kill')

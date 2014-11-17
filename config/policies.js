@@ -34,7 +34,7 @@ module.exports.policies = {
     subscribe: ["master", "public", "flash"],
     index: ["master", "public", "flash"],
     create: ["master", "admin"],
-    edit: ["master", "public", "flash", "servicequeuemodels", "signedin"],
+    edit: ["master", "public", "flash", "servicequeuemodels", "localclusters", "signedin"],
     update: ["master", "admin"],
     toggle: ["master", "admin"],
     command: ["master", "admin"],

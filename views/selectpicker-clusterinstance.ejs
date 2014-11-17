@@ -1,0 +1,13 @@
+
+<% if (localclusters) { %>
+<optgroup label="Cluster Instances">
+  <% Object.keys(localclusters).forEach(function(lci) {
+    var localcluster = localclusters[lci];
+  %>
+  <option data-content='<p class=""><%- localcluster.name %><br /><small><%- localcluster.url %></small></p>'
+    <%= (selected.indexOf(localcluster.id) != -1) ? 'selected' : '' %>><%- localcluster.id %></option>
+
+  <% }) %>
+</optgroup>
+<% } %>
+

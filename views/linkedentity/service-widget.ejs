@@ -15,28 +15,28 @@
 
     <div class="form-group">
       <label for="label" class="col-sm-2 control-label">Host (IPC)</label>
-      <div class="col-sm-5">
+      <div class="col-sm-6">
         <input type="text" class="form-control" name="<%= target %>-host" value="<%= values.host %>" />
       </div>
-      <div class="col-sm-5">
+      <div class="col-sm-4">
         <div class="input-mask">localhost / FQDN / IP Address</div>
       </div>
     </div>
     <div class="form-group">
       <label for="label" class="col-sm-2 control-label">Port (IPC)</label>
-      <div class="col-sm-5">
+      <div class="col-sm-6">
         <input type="text" class="form-control" name="<%= target %>-port" value="<%= values.port %>" />
       </div>
-      <div class="col-sm-5">
+      <div class="col-sm-4">
         <div class="input-mask">Integer</div>
       </div>
     </div>
     <div class="form-group">
       <label for="label" class="col-sm-2 control-label">Interval</label>
-      <div class="col-sm-5">
+      <div class="col-sm-6">
         <input type="text" class="form-control" name="<%= target %>-interval" value="<%= values.interval %>" />
       </div>
-      <div class="col-sm-5">
+      <div class="col-sm-4">
         <div class="input-mask">Integer (in milliseconds)</div>
       </div>
     </div>
@@ -45,18 +45,13 @@
 
     <div class="form-group">
       <label for="label" class="col-sm-2 control-label">Autoqueue Model</label>
-      <div class="col-sm-5">
-        <select class="selectpicker"
-                name="<%= target %>-onempty"
-                multiple>
+      <select class="selectpicker col-sm-6"
+              name="<%= target %>-onempty"
+              multiple>
 
-          <% selectfilters = { type: target, selected: selectedQueueModels } %>
-          <% include ../selectpicker-queuemodels.ejs %>
-        </select>
-      </div>
-      <div class="col-sm-5">
-        <div class="input-mask"></div>
-      </div>
+        <% selectfilters = { type: target, selected: selectedQueueModels } %>
+        <% include ../selectpicker-queuemodels.ejs %>
+      </select>
     </div>
 
   </div>

@@ -86,6 +86,7 @@ function ControlledEntity (entity) {
   self._pid = false
   self._forceRespawn = false
   self._stats = {}
+  self._errors = []
 }
 
 ControlledEntity.prototype.setWorker = function (worker) {
@@ -125,9 +126,48 @@ ControlledEntity.prototype.getRespawnByForce = function () {
   return this._forceRespawn
 }
 
+ControlledEntity.prototype.respawn = function (forceRespawn, callback) {
+  var self = this
+  forceRespawn = forceRespawn || false
+  callback = callback || function () {}
+  self.setRespawnByForce(forceRespawn)
+
+  if (self.get('localcluster') == Entity.localCluster) {
+    Entity._spawnChildProcessQueue.push(self.get('id'))
+    Entity.spawnNextChildProcess()
+    return callback(null, true)
+  } else {
+    self.setWorker(null)
+    ClusterInstance.get(self.get('localcluster'), function (err, instance) {
+      if (err) {
+        self.error(err)
+        return callback(err)
+      } else {
+        instance.requestRespawn(self.get('id'), forceRespawn, function (err, params) {
+          if (err) {
+            self.error(err)
+            return callback(err)
+          }
+          return callback(null, "success")
+        })
+      }
+    })
+  }
+
+}
+
+ControlledEntity.prototype.reset = function (entity, callback) {
+  var self = this
+  callback = callback || function () {}
+
+  self._entity = extend(true, self._entity, entity)
+  return callback(null, true)
+}
+
 ControlledEntity.prototype.error = function (err) {
   sails.log.error(err)
   sails.log.debug(err.stack)
+  this._errors.push(err)
 }
 
 ControlledEntity.prototype.get = function (prop) {
@@ -346,7 +386,27 @@ ControlledEntity.prototype.update = function (callback) {
 
     LinkedEntity.update({ id: self.get('id') }, updateValues, function(err, entity) {
       if (err) return callback(err)
-      callback(null, entity)
+
+      if (self.get('localcluster') != Entity.localCluster) {
+
+        ClusterInstance.get(self.get('localcluster'), function (err, instance) {
+          if (err) {
+            self.error(err)
+            return callback(err)
+          } else {
+            instance.request({type: 'reload', linkedentity: self.get('id')}, function (err, params) {
+              if (err) {
+                self.error(err)
+                return callback(err)
+              }
+              return callback(null, "success")
+            })
+          }
+        })
+
+      } else {
+        callback(null, entity)
+      }
     })
 
   } else {
