@@ -30,7 +30,7 @@ module.exports.policies = {
     '*': ["frontend", "admin"]
   },
   linkedentity: {
-    'new': ["master", "flash", "servicequeuemodels", "admin"],
+    'new': ["master", "flash", "servicequeuemodels", "localclusters", "admin"],
     subscribe: ["master", "public", "flash"],
     index: ["master", "public", "flash"],
     create: ["master", "admin"],

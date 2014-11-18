@@ -80,6 +80,7 @@ function ControlledEntity (entity) {
   if (!(self instanceof ControlledEntity)) return new ControlledEntity(entity)
 
   self._entity = extend(true, {}, defaultEntity)
+  self._entity.localcluster = Entity.localCluster
   self._entity = extend(true, self._entity, entity)
   self._ready = false
   self._worker = false
