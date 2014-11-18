@@ -62,6 +62,7 @@ module.exports.deploy = function() {
               worker._controlledEntity.set('ready', false)
               var error = new Error("Worker " + worker._controlledEntity.get('name') + " <" + worker._controlledEntity.get('pid') + "> died (" + (signal || code) + ")")
               worker._controlledEntity.error(error)
+              console.log("DEAD ENTITY, enabled: " + worker._controlledEntity.get('enabled') + ", respawn: " + worker._controlledEntity.get('respawn'))
               if (worker._controlledEntity.get('enabled') && worker._controlledEntity.get('respawn')) {
                 worker._controlledEntity.error(new Error("Restarting worker " + worker._controlledEntity.get('name') + " <" + worker._controlledEntity.get('pid') + ">"))
                 worker._controlledEntity.respawn(true)
@@ -371,7 +372,9 @@ EntityObject.prototype.terminate = function (killProcess) {
     if (cluster.isWorker)
       cluster.worker.disconnect()
 
-    process.exit(0)
+    sails.lower(function () {
+        process.exit(0)
+    })
   }
 }
 
