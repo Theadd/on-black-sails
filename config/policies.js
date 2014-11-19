@@ -72,6 +72,7 @@ module.exports.policies = {
     index: ["master", "flash", "admin"],
     edit: ["master", "flash", "admin"],
     update: ["master", "flash", "admin"],
+    request: ["standalone"],
     '*': "flash"
   }
 
