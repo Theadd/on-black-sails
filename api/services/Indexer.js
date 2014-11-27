@@ -19,9 +19,9 @@ exports.run = function() {
 
   if (CommandLineHelpers.config.index.kickass.active) {
     if (CommandLineHelpers.config.index.kickass.full) {
-      createTask('http://kickass.to/dailydump.txt.gz', 0, indexSiteAPI)
+      createTask('http://kickass.so/dailydump.txt.gz', 0, indexSiteAPI)
     } else {
-      createTask('http://kickass.to/hourlydump.txt.gz', 1800000, indexSiteAPI) //30min = 1800000
+      createTask('http://kickass.so/hourlydump.txt.gz', 1800000, indexSiteAPI) //30min = 1800000
     }
   }
 
