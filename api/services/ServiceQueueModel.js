@@ -39,7 +39,7 @@ exports.runOnce = function (modelName, opts, cb) {
   if (targetName) {
     var targetService = getTargetService(targetName)
     if (targetService) {
-      model.getQuery(options).exec(function(err, entries) {
+      model.query(options, function queryCallback(err, entries) {
         if (!err && entries.length) {
           var i, skipRecentPool = options.skipRecentPool || false
           if (typeof model.filter === "function") {

@@ -22,7 +22,7 @@ module.exports = {
           newly created ones since it is when they are more active.'
       }
     },
-    getQuery: function() {
+    query: function(options, callback) {
       var fromDate = new Date(),
         toDate = new Date(),
         addedDate = new Date()
@@ -31,10 +31,10 @@ module.exports = {
       toDate.setMinutes(toDate.getMinutes() - 15)
       addedDate.setHours(addedDate.getHours() - 24)
 
-      return Hash.find({
+      Hash.find({
         peersUpdatedAt: {'>': fromDate, '<': toDate},
         added: {'>': addedDate}
-      })
+      }).exec(callback)
     }
   },
   /** Add items to MetadataService queue which aren't downloaded yet. */
@@ -43,6 +43,7 @@ module.exports = {
       defaults: {
         standalone: true,
         type: 'metadata',
+        limit: 60,
         interval: 120000,
         target: 'metadata',
         display: 'Default metadata queuing model',
@@ -50,12 +51,12 @@ module.exports = {
         tooltip: 'When set as a general autoqueue model for the entire process, queues 60 torrents each 120 seconds.'
       }
     },
-    getQuery: function() {
-      return Hash.find({
+    query: function(options, callback) {
+      Hash.find({
         where: { downloaded: false },
         sort: 'updatedAt ASC',
-        limit: 60
-      })
+        limit: options.limit
+      }).exec(callback)
     }
   },
   /** Add items to StatusService which are already downloaded. */
@@ -64,6 +65,8 @@ module.exports = {
       defaults: {
         standalone: true,
         type: 'status',
+        limit: 60,
+        queue2tracker: true,  //Automatically add matching torrents to TrackerService Queue
         interval: 120000,
         target: 'status',
         display: 'Default status queuing model',
@@ -71,15 +74,18 @@ module.exports = {
         tooltip: 'When set as a general autoqueue model for the entire process, queues 60 torrents each 120 seconds.'
       }
     },
-    getQuery: function() {
-      return Hash.find()
+    query: function(options, callback) {
+      Hash.find()
         .where({ downloaded: true })
         .sort('updatedAt ASC')
         .where({category: { not: ["movies", "video movies"] } })
-        .limit(60)
+        .limit(options.limit)
+        .exec(callback)
     },
-    filter: function(entry) {
-      TrackerService.queue(entry.uuid)
+    filter: function(entry, options) {
+      if (options.queue2tracker || false) {
+        TrackerService.queue(entry.uuid)
+      }
       return true
     }
   },
@@ -89,6 +95,7 @@ module.exports = {
       defaults: {
         standalone: true,    //Allowed as a global task, i.e. ServiceQueueModel.run('peers') is allowed.
         type: 'media',
+        limit: 120,
         interval: 120000,
         target: 'media',
         display: 'Default media queuing model',
@@ -96,11 +103,12 @@ module.exports = {
         tooltip: 'When set as a general autoqueue model for the entire process, queues 120 torrents each 120 seconds.'
       }
     },
-    getQuery: function() {
-      return Hash.find()
+    query: function(options, callback) {
+      Hash.find()
         .where({downloaded: true, category: ["movies", "video movies"] })
         .sort('updatedAt ASC')
-        .limit(120)
+        .limit(options.limit)
+        .exec(callback)
     }
   },
   /** Add latest torrents with updated peers to PropagateService. */
@@ -136,12 +144,18 @@ module.exports = {
         tooltip: 'Does the same as <strong>Peers</strong> but sends stacks of 30 torrents each 0.25 seconds instead of 15 every 3 seconds.'
       }
     },
-    getQuery: function(options) {
-
-      return Hash.find()
-        .where({ peersUpdatedAt: { '>=': options.startAt } })
-        .sort('peersUpdatedAt ASC')
-        .limit(options.limit)
+    query: function(options, callback) {
+      Hash.native(function (err, collection) {
+        collection.find(
+          { peersUpdatedAt: { $gte: options.startAt } },
+          { uuid: 1, peersUpdatedAt: 1, _id: 0 },
+          { sort: { peersUpdatedAt: 1 }, limit: options.limit },
+          function (err, results) {
+            if (err) return callback(err, results)
+            results.toArray(callback)
+          }
+        )
+      })
     },
     filter: function(entry, options) {
       options.startAt = (options.startAt ||
