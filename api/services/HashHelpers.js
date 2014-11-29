@@ -45,7 +45,7 @@ var isMostUpdated = exports.isMostUpdated = function (existing, received) {
   return mostUpdated
 }
 
-exports.onMergeJobReady = function (jobName, callback) {
+var onMergeJobReady = exports.onMergeJobReady = function (jobName, callback) {
 
   if (mergeJob[jobName] && mergeJob[jobName].busy) {
     sails.log.debug("[BUSY] " + jobName)
