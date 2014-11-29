@@ -234,9 +234,11 @@ module.exports = {
       //sender is remotenode, outgoing (remote offer)
       agreement.remotenode.allsources = raw.outgoingallsources
       agreement.remotenode.filters = raw.outgoingfilters
+      agreement.remotenode.allfields = raw.outgoingallfields
       //receiver is localnode, incoming (our offer)
       agreement.localnode.allsources = raw.incomingallsources
       agreement.localnode.filters = raw.incomingfilters
+      agreement.localnode.allfields = raw.incomingallfields
     } else {
       //agreement.issender = true;
       agreement.localnode = extend({}, raw.sender)
@@ -244,9 +246,11 @@ module.exports = {
       //sender is localnode, outgoing (our offer)
       agreement.localnode.allsources = raw.outgoingallsources
       agreement.localnode.filters = raw.outgoingfilters
+      agreement.localnode.allfields = raw.outgoingallfields
       //receiver is remotenode, incoming (remote offer)
       agreement.remotenode.allsources = raw.incomingallsources
       agreement.remotenode.filters = raw.incomingfilters
+      agreement.remotenode.allfields = raw.incomingallfields
     }
     agreement.title = raw.title
     agreement.status = raw.status

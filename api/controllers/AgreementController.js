@@ -48,6 +48,8 @@ module.exports = {
     if (typeof params.incomingfilters === "string") params.incomingfilters = [params.incomingfilters]
     params.outgoingallsources = Boolean(JSON.parse(params.outgoingallsources || false))
     params.incomingallsources = Boolean(JSON.parse(params.incomingallsources || false))
+    params.outgoingallfields = Boolean(JSON.parse(params.outgoingallfields || false))
+    params.incomingallfields = Boolean(JSON.parse(params.incomingallfields || false))
     params.sender = Settings.get('cluster')
     delete params._csrf
     delete params.id
