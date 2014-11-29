@@ -76,6 +76,7 @@ module.exports.updateMetadata = function(content) {
 
   //Update Hash model
   Hash.update({ uuid: task.hash },{
+    title: String(content.name),
     size: Number(content.length),
     trackers: content.announce,
     files: content.files.length,

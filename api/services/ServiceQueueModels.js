@@ -120,6 +120,7 @@ module.exports = {
         stacksize: 15,        //Number of torrents propagated in each http request
         limit: 250,           //Number of torrents to queue each time the service pool is empty
         startAt: new Date(0), //Start propagating torrents with peersUpdatedAt greater than this date.
+        propagate: { peersUpdatedAt: 1, seeders: 1, leechers: 1 },
         interval: 3000,       //Interval between each http request to the remote node
         target: 'propagate',  //Add items to PropagateService queue.
         prioritize: false,     //Prioritize items in the queue.

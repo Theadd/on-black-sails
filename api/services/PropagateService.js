@@ -32,7 +32,9 @@ module.exports.setup = function() {
   self._filterOptions = {}
   self._agreement = false
   self._allsources = false
+  self._allfields = false
   self._exclude = -1
+  self._propagateFields = {}
 
   self.on('process', function(item) {
     if (self._stack.length) {
@@ -50,7 +52,7 @@ module.exports.setup = function() {
       sails.log.debug("We got " + self._stack.length + " items in the stack ready to propagate!")
       self._isWorking = true
       self.propagate(function (err, res) {
-        if (err) sails.log.error(err)
+        if (err) sails.log.error(err) //TODO: Too many errors being logged when remote is down!
         var info = {
           count: (err) ? 0 : self._stack.length,
           sent: (err) ? 0 : res || 0,
@@ -72,6 +74,13 @@ module.exports.setup = function() {
       ServiceQueueModel.runOnce(self.config('onempty'), self._filterOptions, function (err, count, options) {
 
         self._filterOptions = options
+        self._propagateFields = extend(true, extend(true, {}, self._filterOptions.propagate || {}), {
+          _id: 0,
+          uuid: 1,
+          category: 1,
+          cache: 1,
+          updatedBy: 1
+        })
         self._isBusy = false
       })
     }
@@ -98,7 +107,8 @@ module.exports.start = function () {
     if (agreement) {
       self._agreement = agreement
       self._filterOptions = agreement.getParam(self.config('onempty')) || {}
-      self._allsources = agreement.localnode.allsources
+      self._allsources = agreement.localnode.allsources || false
+      self._allfields = agreement.localnode.allfields || false
       self._exclude = agreement.remotenode.id
 
       if (agreement.status == 'accepted') {
@@ -126,11 +136,9 @@ module.exports.propagate = function (callback) {
   var self = this,
     localnode = Settings.get('cluster')
 
-  Hash.find({
-    uuid : self._stack
-  }).exec( function (err, entries) {
+  self.query( function (err, entries) {
     if (err) {
-      sails.log.error("Error in PropagateService.propagate > Hash.find().exec() callback!")
+      sails.log.error("Error in PropagateService.propagate > self.query callback!")
       sails.log.error(err)
       return callback(err)
     }
@@ -159,6 +167,27 @@ module.exports.propagate = function (callback) {
       return callback(null, 0)
     }
   })
+}
+
+module.exports.query = function (callback) {
+  var self = this
+
+  if (!self._allfields && Settings.get('database') == 'mongodb') {
+    Hash.native(function (err, collection) {
+      collection.find(
+        { uuid: { $in: self._stack } },
+        self._propagateFields,
+        function (err, results) {
+          if (err) return callback(err, results)
+          results.toArray(callback)
+        }
+      )
+    })
+  } else {
+    Hash.find({
+      uuid : self._stack
+    }).exec(callback)
+  }
 }
 
 module.exports._send = function(data, callback) {
