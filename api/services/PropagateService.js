@@ -110,6 +110,9 @@ module.exports.start = function () {
       self._allsources = agreement.localnode.allsources || false
       self._allfields = agreement.localnode.allfields || false
       self._exclude = agreement.remotenode.id
+      if (typeof self._filterOptions.exclude === "undefined") {
+        self._filterOptions.exclude = [self._exclude]
+      }
 
       if (agreement.status == 'accepted') {
         self.run()

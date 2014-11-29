@@ -121,6 +121,7 @@ module.exports = {
         limit: 250,           //Number of torrents to queue each time the service pool is empty
         startAt: new Date(0), //Start propagating torrents with peersUpdatedAt greater than this date.
         propagate: { peersUpdatedAt: 1, seeders: 1, leechers: 1 },
+        exclude: [],
         interval: 3000,       //Interval between each http request to the remote node
         target: 'propagate',  //Add items to PropagateService queue.
         prioritize: false,     //Prioritize items in the queue.
@@ -149,7 +150,7 @@ module.exports = {
       if (Settings.get('database') == 'mongodb') {
         Hash.native(function (err, collection) {
           collection.find(
-            { peersUpdatedAt: { $gte: options.startAt } },
+            { peersUpdatedAt: { $gte: options.startAt }, updatedBy: { $nin: options.exclude } },
             { uuid: 1, peersUpdatedAt: 1, _id: 0 },
             { sort: { peersUpdatedAt: 1 }, limit: options.limit },
             function (err, results) {
@@ -160,7 +161,7 @@ module.exports = {
         })
       } else {
         Hash.find()
-          .where({ peersUpdatedAt: { '>=': options.startAt } })
+          .where({ peersUpdatedAt: { '>=': options.startAt }, updatedBy: { '!' : options.exclude } })
           .sort('peersUpdatedAt ASC')
           .limit(options.limit)
           .exec(callback)
