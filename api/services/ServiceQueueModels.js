@@ -145,17 +145,25 @@ module.exports = {
       }
     },
     query: function(options, callback) {
-      Hash.native(function (err, collection) {
-        collection.find(
-          { peersUpdatedAt: { $gte: options.startAt } },
-          { uuid: 1, peersUpdatedAt: 1, _id: 0 },
-          { sort: { peersUpdatedAt: 1 }, limit: options.limit },
-          function (err, results) {
-            if (err) return callback(err, results)
-            results.toArray(callback)
-          }
-        )
-      })
+      if (Settings.get('database') == 'mongodb') {
+        Hash.native(function (err, collection) {
+          collection.find(
+            { peersUpdatedAt: { $gte: options.startAt } },
+            { uuid: 1, peersUpdatedAt: 1, _id: 0 },
+            { sort: { peersUpdatedAt: 1 }, limit: options.limit },
+            function (err, results) {
+              if (err) return callback(err, results)
+              results.toArray(callback)
+            }
+          )
+        })
+      } else {
+        Hash.find()
+          .where({ peersUpdatedAt: { '>=': options.startAt } })
+          .sort('peersUpdatedAt ASC')
+          .limit(options.limit)
+          .exec(callback)
+      }
     },
     filter: function(entry, options) {
       options.startAt = (options.startAt ||

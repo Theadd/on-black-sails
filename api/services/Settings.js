@@ -180,6 +180,16 @@ function Settings () {
       help: '',
       desc: ''
     },
+    database: {
+      key: 'database',
+      value: sails.config.database || 'mongodb',
+      type: 'string',
+      category: 'general',
+      title: 'Database Type',
+      help: '<span class="inline-pseudobox">mongodb</span>',
+      desc: 'Any database supported by <strong>Waterline</strong> is allowed but at the moment, \
+      native calls (which are faster) are available using <span class="inline-pseudobox">mongodb</span>.'
+    },
     ready: {
       key: 'ready',
       value: sails.config.ready || false,
@@ -244,6 +254,9 @@ Settings.prototype.get = function (prop) {
         break
       case 'localcluster':
         value = self._config.localcluster.value
+        break
+      case 'database':
+        value = self._config.database.value
         break
       default:
         console.trace()
@@ -315,6 +328,9 @@ Settings.prototype.set = function (prop, value) {
       break
     case 'localcluster':
       self._config.localcluster.value = Boolean(JSON.parse(value))
+      break
+    case 'database':
+      self._config.database.value = String(value)
       break
     default:
       console.trace()
