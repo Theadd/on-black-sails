@@ -22,13 +22,11 @@ module.exports = {
     },
 
     title: {
-      type: 'string',
-      required: true
+      type: 'string'
     },
 
     category: {
-      type: 'string',
-      required: true
+      type: 'string'
     },
 
     added: {
