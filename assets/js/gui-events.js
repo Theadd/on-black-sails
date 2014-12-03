@@ -12,9 +12,16 @@ function bindGUIEvents() {
       prop = $(this).data("prop"),
       url = '/'+target+'/' + action + '/'+id;
 
-    $.getJSON(url, {
-      prop: prop
-    }).done(function (data) {});
+    if (!$(this).hasClass('disabled')) {
+      if (action == 'detail') {
+        document.location.href = url;
+      } else {
+        $.getJSON(url, {
+          prop: prop
+        }).done(function (data) {
+        });
+      }
+    }
   });
 
   $(".list-group-item-toggle-next").on("click", function (ev) {

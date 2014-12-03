@@ -16,6 +16,14 @@
             class="label label-danger<%= (entity.ready) ? '' : ' disabled' %>">
         <i class="fa fa-lg fa-stop"></i>
       </span>
+
+      <span data-target="linkedentity"
+            data-id="<%= entity.id %>"
+            data-action="detail"
+            data-prop="detail"
+            class="label label-info<%= (entity.ready) ? '' : ' disabled' %>">
+        <i class="fa fa-lg fa-info-circle"></i>
+      </span>
     </div>
     <div class="toolbox-right">
 
