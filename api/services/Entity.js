@@ -399,6 +399,7 @@ EntityObject.prototype.getStats = function () {
   output['status'] = StatusService.getStats()
   output['tracker'] = TrackerService.getStats()
   output['propagate'] = PropagateService.getStats()
+  output['indexer'] = Indexer.indexerStats
 
   return extend(true, {}, output)
 }

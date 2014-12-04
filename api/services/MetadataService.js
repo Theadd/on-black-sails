@@ -22,6 +22,12 @@ module.exports.setup = function() {
   })
 
   self._isEmptyBusy = false
+  self._stats['empty-busy'] = 0
+  self._stats['empty-queue-model'] = 0
+  self._stats['empty-queue-model-callback'] = 0
+  self._stats['empty-queue-model-error'] = 0
+  self._stats['empty-queue-model-success'] = 0
+  self._stats['empty-queue-model-no-results'] = 0
 
   self.on('process', function(item) {
     self._task.setStatus('targeting')
@@ -46,10 +52,24 @@ module.exports.setup = function() {
     if (!self._isEmptyBusy) {
       if (self.config('onempty') != false) {
         self._isEmptyBusy = true
-        ServiceQueueModel.runOnce(self.config('onempty'), function () {
+        ++self._stats['empty-queue-model']
+        ServiceQueueModel.runOnce(self.config('onempty'), function (err, count) {
           self._isEmptyBusy = false
+          ++self._stats['empty-queue-model-callback']
+          if (err) {
+            ++self._stats['empty-queue-model-error']
+          } else {
+            if (count && count > 0) {
+              ++self._stats['empty-queue-model-success']
+            } else {
+              ++self._stats['empty-queue-model-no-results']
+            }
+          }
+
         })
       }
+    } else {
+      ++self._stats['empty-busy']
     }
   })
 }

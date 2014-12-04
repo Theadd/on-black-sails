@@ -3,8 +3,18 @@
  */
 
 var Task = require('tasker').Task
+var extend = require('node.extend')
+
+var entryDefaultStats = {
+  responses: 0,
+  torrents: 0,
+  indexed: 0
+}
+
+exports.indexerStats = {}
 
 exports.run = function() {
+  var url = ''
 
   TrackerService.setup()
   MetadataService.setup()
@@ -19,17 +29,25 @@ exports.run = function() {
 
   if (CommandLineHelpers.config.index.kickass.active) {
     if (CommandLineHelpers.config.index.kickass.full) {
-      createTask('http://kickass.so/dailydump.txt.gz', 0, indexSiteAPI)
+      url = 'http://kickass.so/dailydump.txt.gz'
+      Indexer.indexerStats[url] = extend(true, {}, entryDefaultStats)
+      createTask(url, 0, indexSiteAPI)
     } else {
-      createTask('http://kickass.so/hourlydump.txt.gz', 1800000, indexSiteAPI) //30min = 1800000
+      url = 'http://kickass.so/hourlydump.txt.gz'
+      Indexer.indexerStats[url] = extend(true, {}, entryDefaultStats)
+      createTask(url, 1800000, indexSiteAPI) //30min = 1800000
     }
   }
 
   if (CommandLineHelpers.config.index.bitsnoop.active) {
     if (CommandLineHelpers.config.index.bitsnoop.full) {
-      createTask('http://ext.bitsnoop.com/export/b3_all.txt.gz', 0, indexSiteAPI)
+      url = 'http://ext.bitsnoop.com/export/b3_all.txt.gz'
+      Indexer.indexerStats[url] = extend(true, {}, entryDefaultStats)
+      createTask(url, 0, indexSiteAPI)
     } else {
-      createTask('http://bitsnoop.com/api/latest_tz.php?t=all', 600000, indexSiteAPI) //10min = 600000
+      url = 'http://bitsnoop.com/api/latest_tz.php?t=all'
+      Indexer.indexerStats[url] = extend(true, {}, entryDefaultStats)
+      createTask(url, 600000, indexSiteAPI) //10min = 600000
     }
   }
 
@@ -122,6 +140,9 @@ var indexSiteAPI = function(content) {
     contentLength = lines.length - 1,
     startTime = new Date().getTime()
 
+  ++Indexer.indexerStats[task.url].responses
+  Indexer.indexerStats[task.url].torrents += contentLength
+
   for (var i in lines) {
     if (lines.hasOwnProperty(i)) {
       var line = lines[i].split("|"),
@@ -153,6 +174,7 @@ var indexSiteAPI = function(content) {
             }
           }
           if (addAttempts >= contentLength) {
+            Indexer.indexerStats[task.url].indexed += added
             sails.log.debug("[" + task.url + "] Indexed " + added + " out of " + (contentLength + 1) + " in " + ((new Date().getTime() - startTime)) + "ms (" + (task._totalNumLines || 0) + " lines so far)")
             addAttempts = 0
             added = 0
