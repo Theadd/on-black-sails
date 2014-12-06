@@ -23,6 +23,8 @@ module.exports.setup = function() {
   })
 
   self._isEmptyBusy = false
+  self._stats['host'] = CommandLineHelpers.config.status.host
+  self._stats['port'] = CommandLineHelpers.config.status.port
 
   self.on('process', function(item) {
     self._task.setStatus('targeting')
@@ -63,6 +65,8 @@ module.exports.start = function () {
     , CommandLineHelpers.config.status.interval,
     function () { return self.updateStatus.apply(self, arguments) }
   )
+
+  self._stats['interval'] = CommandLineHelpers.config.status.interval
 }
 
 module.exports.updateStatus = function(content) {

@@ -22,6 +22,8 @@ module.exports.setup = function() {
   })
 
   self._isEmptyBusy = false
+  self._stats['host'] = CommandLineHelpers.config.media.host
+  self._stats['port'] = CommandLineHelpers.config.media.port
 
   self.on('process', function(item) {
     self._task.setStatus('targeting')
@@ -73,6 +75,7 @@ module.exports.start = function () {
     function () { return self.updateMovie.apply(self, arguments) }
   )
 
+  self._stats['interval'] = CommandLineHelpers.config.media.interval
   self._task.setCache(7200, 1200) //2h, 20m
 }
 

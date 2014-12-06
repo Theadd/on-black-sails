@@ -15,6 +15,17 @@ var Helpers = {
     return num;
   },
 
+  msToTime: function (s) {
+    var ms = s % 1000;
+    s = (s - ms) / 1000;
+    var secs = s % 60;
+    s = (s - secs) / 60;
+    var mins = s % 60;
+    var hrs = (s - mins) / 60;
+
+    return ((hrs) ? hrs + 'h ' : '') + ((mins) ? mins + 'min ' : '') + ((secs) ? secs + 's ' : '') + ((ms) ? ms + 'ms' : '');
+  },
+
   getAgreementFilterObject: function (name, param) {
     var obj = {
       display: 'Error',

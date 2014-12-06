@@ -28,6 +28,8 @@ module.exports.setup = function() {
   self._stats['empty-queue-model-error'] = 0
   self._stats['empty-queue-model-success'] = 0
   self._stats['empty-queue-model-no-results'] = 0
+  self._stats['host'] = CommandLineHelpers.config.metadata.host
+  self._stats['port'] = CommandLineHelpers.config.metadata.port
 
   self.on('process', function(item) {
     self._task.setStatus('targeting')
@@ -83,6 +85,8 @@ module.exports.start = function () {
     function () { return self.updateMetadata.apply(self, arguments) },
     function () { return self.errorOnUpdateMetadata.apply(self, arguments) }
   )
+
+  self._stats['interval'] = CommandLineHelpers.config.metadata.interval
 }
 
 module.exports.updateMetadata = function(content) {

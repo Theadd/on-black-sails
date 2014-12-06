@@ -16,4 +16,19 @@ jQuery(document).ready(function () {
     }
   });
 
+  jQuery(".plastic-panel").on("click", ".item .toggle-expansion", function (ev) {
+    ev.preventDefault();
+
+    var item = $(this).closest('.item');
+    var expansion = item.find('.expansion');
+
+    if (item.hasClass('open')) {
+      expansion.slideToggle("slow");
+      item.removeClass('open');
+    } else {
+      expansion.slideToggle("slow").css('display', 'inline-block');
+      item.addClass('open');
+    }
+  });
+
 });

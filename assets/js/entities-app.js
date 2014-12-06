@@ -76,11 +76,34 @@ var LinkedEntityDetailPage = {
 
   updateLinkedEntityDetail: function (id, message) {
     var value = message.data.value,
-      container = $("#linkedentity-detail-stats");
+      container = $(".linkedentity-detail-panel");
 
     if (container.length && container.data('id') == id) {
       var parsed = LinkedEntityDetailPage.parseDetailValue(value);
-      container.html(LinkedEntityDetailPage.getContent(parsed));
+
+      for (var i in parsed) {
+        if (typeof parsed[i] === "object" && parsed[i].role) {
+          parsed[i].listHTML = LinkedEntityDetailPage.getContent(parsed[i]);
+        }
+      }
+
+      var obj = {
+        stats: parsed,
+        logs: {},
+        elogs: {}
+      };
+
+      console.log(JSON.stringify(parsed, null, '  '));
+
+      $('.linkedentity-detail-panel').html(
+        JST['assets/templates/entityDetailPanel.ejs'](obj)
+      );
+
+      $.App.renderMarkdownPreview();
+      $.App.bindTabEvents();
+      $.App.bindGUIEvents();
+      $.App.bindTooltips();
+
     }
   },
 
@@ -89,12 +112,14 @@ var LinkedEntityDetailPage = {
 
     for (var i in value) {
       if (typeof value[i] === "object") {
-        if (typeof value[i]['role'] !== "undefined") {
-          if (value[i]['role'] != 'none') {
+        if (Object.keys(value[i]).length) {
+          if (typeof value[i]['role'] !== "undefined") {
+            if (value[i]['role'] != 'none') {
+              output[i] = $.extend({}, value[i]);
+            }
+          } else {
             output[i] = $.extend({}, value[i]);
           }
-        } else {
-          output[i] = $.extend({}, value[i]);
         }
       } else {
         output[i] = value[i];
@@ -125,7 +150,7 @@ var LinkedEntityDetailPage = {
   },
 
   getContent: function (input) {
-    var content = "<ul>\n", pretty;
+    var content = "<ul class=\"monospace\">\n", pretty;
 
     for (var i in input) {
       pretty = LinkedEntityDetailPage.prettify(i, input[i]);

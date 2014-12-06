@@ -67,7 +67,7 @@ function bindGUIEvents() {
   $("#linkedentity-detail-stats-refresh").on("click", function (ev) {
     ev.preventDefault();
 
-    var linkedEntityStatsContainer = $("#linkedentity-detail-stats");
+    var linkedEntityStatsContainer = $(".linkedentity-detail-panel");
     if (linkedEntityStatsContainer.length) {
       linkedEntityStatsContainer.html('<h4 class="loading-content"><i class="fa fa-spinner fa-spin"></i> Requesting information...</h4>');
       linkedEntityRequestStats(linkedEntityStatsContainer);

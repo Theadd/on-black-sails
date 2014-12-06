@@ -8,7 +8,8 @@ var extend = require('node.extend')
 var entryDefaultStats = {
   responses: 0,
   torrents: 0,
-  indexed: 0
+  indexed: 0,
+  interval: 0
 }
 
 exports.indexerStats = {}
@@ -142,6 +143,7 @@ var indexSiteAPI = function(content) {
 
   ++Indexer.indexerStats[task.url].responses
   Indexer.indexerStats[task.url].torrents += contentLength
+  Indexer.indexerStats[task.url].interval = task.getInterval()
 
   for (var i in lines) {
     if (lines.hasOwnProperty(i)) {

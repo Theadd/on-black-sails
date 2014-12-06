@@ -1,0 +1,324 @@
+<div class="cell col-sm-12 multiline box-bluesky">
+  <div class="row">
+    <div class="cell col-xs-3 col-sm-2 col-md-1 col-lg-1 box-primary">
+                <span class="label label-primary"
+                      data-toggle="tooltip" data-original-title="Process ID (PID)">
+                  <%= stats.pid %>
+                </span>
+    </div>
+    <div class="cell col-xs-9 col-sm-10 col-md-11 col-lg-11 box-default">
+
+      <%
+        var rss = stats.memory.rss,
+          memory = {
+            bar0: {},
+            bar1: {},
+            bar2: {
+              value: stats.memory.heapTotal,
+              title: 'Heap (Total)'
+            }
+          };
+
+        if (stats.memory.rss < stats.memory.heapUsed) {
+          memory.bar0.value = stats.memory.rss;
+          memory.bar0.title = 'Resident Set Size';
+          memory.bar1.value = stats.memory.heapUsed;
+          memory.bar1.title = 'Heap (Used)';
+        } else {
+          memory.bar1.value = stats.memory.rss;
+          memory.bar1.title = 'Resident Set Size';
+          memory.bar0.value = stats.memory.heapUsed;
+          memory.bar0.title = 'Heap (Used)';
+        }
+
+        memory.bar0.percentage = Math.min(Math.floor(memory.bar0.value * 100 / memory.bar2.value), 100);
+        memory.bar1.percentage = Math.ceil(Math.min((memory.bar1.value * 100 / memory.bar2.value), 100) - memory.bar0.percentage);
+        memory.bar2.percentage = Math.max(100 - memory.bar1.percentage - memory.bar0.percentage, 0);
+
+      %>
+
+      <div class="progress progress-striped" data-toggle="tooltip"
+        data-original-title="<strong><%= memory.bar0.title %>:</strong> <%= Helpers.formatBigNumber(memory.bar0.value) %>B<br /><strong><%= memory.bar1.title %>:</strong> <%= Helpers.formatBigNumber(memory.bar1.value) %>B<br /><strong><%= memory.bar2.title %>:</strong> <%= Helpers.formatBigNumber(memory.bar2.value) %>B">
+        <div class="progress-bar progress-bar-success" style="width: <%= memory.bar0.percentage %>%">
+        </div>
+        <div class="progress-bar progress-bar-warning" style="width: <%= memory.bar1.percentage %>%">
+        </div>
+        <div class="progress-bar progress-bar-primary" style="width: <%= memory.bar2.percentage %>%">
+        </div>
+        <span><%= Helpers.formatBigNumber(rss) %>B</span>
+      </div>
+
+
+    </div>
+  </div>
+</div>
+
+<div class="cell col-sm-12 multiline primitive">
+<div class="row">
+
+
+<ul role="tablist" class="nav nav-tabs">
+
+  <li class="active"><a aria-expanded="true"
+                        aria-controls="activity"
+                        data-toggle="tab"
+                        role="tab"
+                        id="activity-tab"
+                        href="#activity"
+                        class="plastic-tag title">Process activity</a></li>
+
+  <li class=""><a aria-expanded="false"
+                  aria-controls="logs"
+                  data-toggle="tab"
+                  role="tab"
+                  id="logs-tab"
+                  href="#logs"
+                  class="plastic-tag title">Logs</a></li>
+
+  <li class=""><a aria-expanded="false"
+                  aria-controls="execlogs"
+                  data-toggle="tab"
+                  role="tab"
+                  id="execlogs-tab"
+                  href="#execlogs"
+                  class="plastic-tag title">Execution logs</a></li>
+
+</ul>
+<div class="tab-content" id="myTabContent">
+
+<div aria-labelledby="activity-tab"
+     id="activity"
+     class="tab-pane fade active in cell multiline"
+     role="tabpanel">
+<div>
+<% if (stats.indexer) { %>
+<div class="row">
+
+  <h4 class="plastic-tag section-header">CRAWLERS</h4>
+
+  <% Object.keys(stats.indexer).forEach(function(url) {
+    var crawler = stats.indexer[url],
+      value = Math.min(Math.round(crawler.indexed * 100 / crawler.torrents), 100);
+  %>
+  <div class="cell col-sm-12 primitive multiline box-lightblue">
+    <div class="row">
+      <div class="cell hidden-xs col-sm-3 col-md-2 col-lg-2 box-warning">
+        <span class="plastic-tag small center shadow"><%= Helpers.msToTime(crawler.interval) || '---' %></span>
+      </div>
+      <div class="cell col-xs-7 col-sm-5 col-md-5 col-lg-5 box-default">
+        <span class="plastic-tag shadow"><%- url %></span>
+      </div>
+      <div class="cell col-xs-5 col-sm-4 col-md-4 col-lg-4 box-default">
+
+
+        <div class="cell col-sm-3 progress progress-striped" data-toggle="tooltip"
+             data-original-title="<strong>Indexed:</strong> 7.2k<br /><strong>Torrents:</strong> 29k">
+          <div class="progress-bar progress-bar-success" style="width: <%= value %>%">
+          </div>
+          <div class="progress-bar progress-bar-primary" style="width: <%= (100 - value) %>%">
+          </div>
+          <span><%= Helpers.formatBigNumber(crawler.indexed) %> / <%= Helpers.formatBigNumber(crawler.torrents) %> (<%= value %>%)</span>
+        </div>
+
+
+      </div>
+      <div class="cell hidden-xs hidden-sm col-md-1 col-lg-1 box-default">
+        <span class="plastic-tag small center shadow"><%= crawler.responses %></span>
+      </div>
+    </div>
+  </div>
+  <% }) %>
+
+</div>
+<% } %>
+
+<div class="row">
+
+<div class="cell col-sm-6 multiline primitive no-padding">
+  <div>
+
+    <h4 class="plastic-tag section-header">ACTIVE SERVICES (IPC SERVERS)</h4>
+
+    <% Object.keys(stats).forEach(function(index) {
+      var service = stats[index],
+        display = (typeof service === "object" && service.role && service.role == 'server');
+
+      if (display) {
+    %>
+    <div class="cell col-sm-12 multiline box-lightblue item">
+      <div>
+
+        <div class="cell col-xs-5 col-sm-3 col-md-4 col-lg-3 box-lightyellow">
+          <span class="plastic-tag uppercase subtitle small center"><%= index %></span>
+        </div>
+
+        <div class="cell col-xs-7 col-sm-6 col-md-5 col-lg-7 box-default">
+          <span class="plastic-tag shadow"><%- service.host %>:<%- service.port %></span>
+        </div>
+
+        <div class="cell hidden-xs col-sm-3 col-md-3 col-lg-2 box-warning">
+          <span class="plastic-tag small center shadow"><%= Helpers.msToTime(service.interval) || '---' %></span>
+        </div>
+
+        <div class="cell col-sm-5 box-default">
+          <span class="plastic-tag small center shadow"><%= Helpers.formatBigNumber(service['items-processed']) %> / <%= Helpers.formatBigNumber(service['items-served']) %> (<%= Helpers.formatBigNumber(service['idle']) %>)</span>
+        </div>
+
+        <div class="cell col-sm-2 box-default">
+          <span class="plastic-tag small center shadow"><%= Helpers.formatBigNumber(service['pool-size']) %></span>
+        </div>
+
+        <div class="cell col-sm-2 box-default">
+          <span class="plastic-tag small center shadow"><%= Helpers.formatBigNumber(service['recent-pool-size']) %></span>
+        </div>
+
+        <div class="btn-group cell col-sm-3 multiline no-action box-align-right pull-right">
+          <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+            More <span class="caret"></span>
+          </button>
+          <ul class="dropdown-menu no-display" role="menu">
+            <li>
+              <a class="btn toggle-expansion pull-right" href="#">Toggle raw view</a>
+            </li>
+            <li class="divider"></li>
+            <li>
+              <a class="btn dashboard-service-action pull-right"
+                 data-action="pause" data-id="1" href="#">Pause</a>
+            </li>
+            <li>
+              <a class="btn dashboard-service-action pull-right disabled"
+                 data-action="resume" data-id="1" href="#">Resume</a>
+            </li>
+            <li class="divider"></li>
+            <li>
+              <a class="btn dashboard-service-action pull-right disabled"
+                 data-action="start" data-id="1" href="#">Start</a>
+            </li>
+            <li>
+              <a class="btn dashboard-service-action pull-right"
+                 data-action="stop" data-id="1" href="#">Stop</a>
+            </li>
+          </ul>
+        </div>
+
+
+        <div class="expansion cell col-sm-12 box-light multiline">
+          <div>
+            <%= service.listHTML %>
+
+            <div class="clearfix"></div>
+
+          </div>
+
+
+        </div>
+
+        <div class="clearfix"></div>
+
+      </div>
+    </div>
+    <% }}); %>
+
+  </div>
+</div>
+
+
+<div class="cell col-sm-6 multiline primitive no-padding">
+  <div>
+
+    <h4 class="plastic-tag section-header">EXTERNAL SERVICES (IPC CLIENTS)</h4>
+
+    <% Object.keys(stats).forEach(function(index) {
+      var service = stats[index],
+        display = (typeof service === "object" && service.role && service.role == 'client');
+
+      if (display) {
+    %>
+    <div class="cell col-sm-12 multiline box-lightblue item">
+      <div>
+
+        <div class="cell col-xs-5 col-sm-3 col-md-4 col-lg-3 box-lightyellow">
+          <span class="plastic-tag uppercase subtitle small center"><%= index %></span>
+        </div>
+
+        <div class="cell col-xs-7 col-sm-6 col-md-5 col-lg-7 box-default">
+          <span class="plastic-tag shadow"><%- service.host %>:<%- service.port %></span>
+        </div>
+
+        <div class="cell hidden-xs col-sm-3 col-md-3 col-lg-2 box-<%= (service.connected) ? 'success' : 'danger' %>">
+          <span class="plastic-tag uppercase white small center shadow"><%= (service.connected) ? 'on' : 'off' %></span>
+        </div>
+
+        <div class="cell col-sm-5 box-default">
+          <span class="plastic-tag small center shadow"><%= Helpers.formatBigNumber(service['retry-queuing']) %> / <%= Helpers.formatBigNumber(service['local-pool-size']) %></span>
+        </div>
+
+        <div class="cell col-sm-4 box-<%= (service.connected) ? 'success' : 'warning' %>">
+          <span class="plastic-tag uppercase white small center shadow"><%= (service.connected) ? 'Working' : 'Not connected' %></span>
+        </div>
+
+        <div class="btn-group cell col-sm-3 multiline no-action box-align-right pull-right">
+          <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+            More <span class="caret"></span>
+          </button>
+          <ul class="dropdown-menu no-display" role="menu">
+            <li>
+              <a class="btn toggle-expansion pull-right" href="#">Toggle raw view</a>
+            </li>
+          </ul>
+        </div>
+
+        <div class="expansion cell col-sm-12 box-light multiline">
+          <div>
+            <%= service.listHTML %>
+
+            <div class="clearfix"></div>
+
+          </div>
+
+
+        </div>
+
+        <div class="clearfix"></div>
+
+      </div>
+    </div>
+    <% }}); %>
+
+
+  </div>
+</div>
+
+
+</div>
+<!-- row (services) -->
+
+</div>
+
+</div>
+
+<div aria-labelledby="logs-tab"
+     id="logs"
+     class="tab-pane fade cell multiline"
+     role="tabpanel">
+
+  <p>TODO</p>
+
+
+</div>
+
+<div aria-labelledby="execlogs-tab"
+     id="execlogs"
+     class="tab-pane fade cell multiline"
+     role="tabpanel">
+
+  <p>TODO</p>
+
+
+</div>
+
+</div>
+
+
+</div>
+</div>

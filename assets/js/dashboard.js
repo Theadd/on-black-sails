@@ -24,11 +24,11 @@ $(function() {
       $(".markdown-editor").markdown({iconlibrary: 'fa'});
       this.renderMarkdownPreview();
 
-      $("[data-toggle='tooltip']").tooltip({container: 'body', delay: 500, html: true});
+      this.bindTooltips();
 
       loadVisibleCharts();
 
-      var linkedEntityStatsContainer = $("#linkedentity-detail-stats");
+      var linkedEntityStatsContainer = $(".linkedentity-detail-panel");
       if (linkedEntityStatsContainer.length) {
         setTimeout(function () {
           linkedEntityRequestStats(linkedEntityStatsContainer);
@@ -145,6 +145,10 @@ $(function() {
 
     bindGUIEvents: function () {
       bindGUIEvents();
+    },
+
+    bindTooltips: function () {
+      $("[data-toggle='tooltip']").tooltip({container: 'body', delay: 500, html: true});
     }
 
   };
