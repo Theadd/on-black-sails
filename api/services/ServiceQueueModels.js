@@ -173,5 +173,28 @@ module.exports = {
 
       return true
     }
+  },
+
+  keepTrackerServiceBusy: {
+    config: {
+      defaults: {
+        standalone: true,
+        type: 'tracker',
+        interval: 300000,     //5min
+        target: 'tracker',    //add items to TrackerService queue (REQUIRED).
+        limit: 120,
+        prioritize: false,     //prioritize items in the queue (OPTIONAL).
+        skipRecentPool: false, //do not check service recent pool if items already exist (OPTIONAL).
+        display: 'Keep TrackerService Busy',
+        desc: 'Add items to TrackerService queue.',
+        tooltip: 'Adds items to TrackerService queue.'
+      }
+    },
+    query: function(options, callback) {
+      Hash.find({})
+        .sort('peersUpdatedAt ASC')
+        .limit(options.limit)
+        .exec(callback)
+    }
   }
 }
