@@ -2,7 +2,7 @@
  * Created by Theadd on 11/09/2014.
  */
 
-var extend = require('util')._extend
+var extend = require('node.extend')
 
 var mergeJob = {}
 
@@ -80,7 +80,7 @@ exports.mergeAllJob = function (jobName, data, callback) {
       }
 
       if (--mergeJob[jobName].remaining == 0) {
-        var obj = extend({}, mergeJob[jobName].result)
+        var obj = extend(true, {}, mergeJob[jobName].result)
         mergeJob[jobName].busy = false
         return callback(null, obj)
       }
