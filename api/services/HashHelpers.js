@@ -4,7 +4,6 @@
 
 var extend = require('util')._extend
 
-var deadTorrentsPool = []
 var mergeJob = {}
 
 
@@ -99,18 +98,22 @@ exports.merge = function (item, callback) {
   Hash.find()
     .where({ uuid: item.uuid })
     .exec(function (err, entries) {
+      var deadParams = {}
+
       if (!err && entries.length) {
         if (isMostUpdated(entries[0], item)) {
-          if (typeof item.seeders !== "undefined" && Settings.get('removedead') && item.seeders == 0 && item.leechers == 0) {
-            //Remove dead torrent
-            HashHelpers.remove(entries[0].uuid) //TODO: HashHelpers.getDeadParameters()
-            return callback(null, 'deadmarked')
-          } else {
-            var uuid = item.uuid
+          var uuid = item.uuid
 
+          deadParams = HashHelpers.getDeadParameters(entries[0], item)
+
+          if (HashHelpers.shouldBeRemoved(deadParams)) {
+            HashHelpers.remove(uuid)
+            return callback(null, 'removed')
+          } else {
+            item = extend(true, item, deadParams)
             delete item.uuid
 
-            Hash.update({ uuid: uuid }, item, function (err, hashes) {
+            Hash.update({uuid: uuid}, item, function (err) {
               if (err) return callback(null, 'error')
               return callback(null, 'updated')
             })
@@ -119,17 +122,21 @@ exports.merge = function (item, callback) {
           return callback(null, 'uptodate')
         }
       } else {
-        if (!(typeof item.seeders !== "undefined" && Settings.get('removedead') && item.seeders == 0 && item.leechers == 0)) {
-          Hash.create(item).exec(function (createErr, entry) {
-            if (createErr) {
-              sails.log.error(createErr)
+        deadParams = HashHelpers.getDeadParameters({}, item)
+
+        if (HashHelpers.shouldBeRemoved(deadParams)) {
+          return callback(null, 'deadnotcreated')
+        } else {
+          item = extend(true, item, deadParams)
+
+          Hash.create(item).exec(function (err) {
+            if (err) {
+              sails.log.error(err)
               return callback(null, 'error')
             } else {
               return callback(null, 'created')
             }
           })
-        } else {
-          return callback(null, 'deadnotcreated')
         }
       }
     })
@@ -137,35 +144,9 @@ exports.merge = function (item, callback) {
 
 exports.remove = function (uuid) {
   process.nextTick(function () {
-    Hash.find()
-      .where({ uuid: uuid })
-      .exec(function (err, entries) {
-        if (!err && entries.length) {
-          if (entries[0].seeders == 0 && entries[0].leechers == 0) {
-            //torrent already dead, delete
-            sails.log.debug("REMOVING: " + uuid)
-            Hash.destroy({ uuid: uuid }).exec(function() {})
-          } else {
-            //torrent was not dead last check
-            var index = deadTorrentsPool.indexOf(uuid)
-            if (index == -1) {
-              //seems dead for first time, recheck before remove
-              if (deadTorrentsPool.unshift(uuid) >= 500) {
-                deadTorrentsPool.splice(-50)
-              }
-              sails.log.debug("RECHECK BEFORE REMOVING: " + uuid)
-              TrackerService.queue(uuid, true, true)
-            } else {
-              //recheck also returns dead, remove from dead pool and database
-              sails.log.debug("REMOVING (After recheck): " + uuid)
-              deadTorrentsPool.splice(index, 1)
-              Hash.destroy({ uuid: uuid }).exec(function() {})
-            }
-          }
-        } else {
-          //torrent not found, no remove needed
-        }
-      })
+    Hash.destroy({ uuid: uuid }).exec(function() {
+      sails.log.warn(uuid + " removed.")
+    })
   })
 }
 
@@ -174,7 +155,7 @@ exports.getDeadParameters = function (current, updated, foundDead) {
 
   current = current || {}
   updated = updated || {}
-  foundDead = foundDead || null
+  foundDead = (typeof foundDead === "boolean") ? foundDead : null
 
   if (current.deaths || 0) {
     // current DEAD
@@ -255,6 +236,22 @@ exports.getDeadParameters = function (current, updated, foundDead) {
   }
 
   return params
+}
+
+exports.shouldBeRemoved = function (deadParameters) {
+  var remove = false
+
+  if (Settings.get('removedead')) {
+    if (deadParameters.deaths || 0) {
+      if (deadParameters.deadSince || false) {
+        if ((new Date().getTime()) - (new Date(deadParameters.deadSince).getTime()) >= Settings.get('timekeepingdead')) {
+          remove = true
+        }
+      }
+    }
+  }
+
+  return remove
 }
 
 

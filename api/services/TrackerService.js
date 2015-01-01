@@ -29,6 +29,7 @@ module.exports.setup = function() {
   self._stats['items-dead-found'] = 0
   self._stats['items-already-dead-found'] = 0
   self._stats['items-dead-revived'] = 0
+  self._stats['items-dead-removed'] = 0
   self._stats['items-not-found'] = 0
   self._stats['items-retry-fail'] = 0
   self._stats['working-pool-size'] = 0
@@ -75,39 +76,45 @@ module.exports.updatePeersOf = function(hash) {
           ++self._stats['items-processed']
           --self._stats['working-pool-size']
           if (!err) {
-            //sails.log.debug("  >>> " + entries[0].uuid + "\t" + res.complete + "/" + res.incomplete + " (" + res.downloaded + ") - " + res.retries + " #" + res.responses + "/" + res.announces)
             var foundDead = (res.complete == 0 && res.incomplete == 0),
               deadParams = HashHelpers.getDeadParameters(entries[0], {}, foundDead)
 
-            if (entries[0].deaths || 0) {
-              if (foundDead) {
-                ++self._stats['items-already-dead-found']
-              } else {
-                ++self._stats['items-dead-revived']
-              }
+            if (HashHelpers.shouldBeRemoved(deadParams)) {
+              ++self._stats['items-dead-removed']
+              HashHelpers.remove(entries[0].uuid)
             } else {
-              if (foundDead) {
-                ++self._stats['items-dead-found']
+              if (entries[0].deaths || 0) {
+                if (foundDead) {
+                  ++self._stats['items-already-dead-found']
+                } else {
+                  ++self._stats['items-dead-revived']
+                }
+              } else {
+                if (foundDead) {
+                  ++self._stats['items-dead-found']
+                }
               }
+
+              var updateParams = extend(true, deadParams, {
+                seeders: res.complete,
+                leechers: res.incomplete,
+                updatedAt: entries[0].updatedAt,
+                peersUpdatedAt: new Date(),
+                updatedBy: Settings.get('cluster')
+              })
+
+              Hash.update({ uuid: entries[0].uuid }, updateParams, function (uErr) {
+                if (!uErr) {
+                  ++self._stats['items-updated']
+                } else {
+                  ++self._stats['items-update-error']
+                  sails.log.debug("(TRACKER) UPDATE ERROR! " + entries[0].uuid)
+                  sails.log.debug(uErr)
+                }
+              })
             }
 
-            var updateParams = extend(true, deadParams, {
-              seeders: res.complete,
-              leechers: res.incomplete,
-              updatedAt: entries[0].updatedAt,
-              peersUpdatedAt: new Date(),
-              updatedBy: Settings.get('cluster')
-            })
 
-            Hash.update({ uuid: entries[0].uuid }, updateParams, function (uErr) {
-              if (!uErr) {
-                ++self._stats['items-updated']
-              } else {
-                ++self._stats['items-update-error']
-                sails.log.debug("(TRACKER) UPDATE ERROR! " + entries[0].uuid)
-                sails.log.debug(uErr)
-              }
-            })
 
           } else {
             //sails.log.debug("\t\tERROR >>> " + entries[0].uuid)

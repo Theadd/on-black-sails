@@ -133,6 +133,16 @@ function Settings () {
       help: 'Boolean',
       desc: 'Remove dead torrents'
     },
+    timekeepingdead: {
+      key: 'timekeepingdead',
+      value: sails.config.timekeepingdead || 0,
+      type: 'integer',
+      category: 'cluster',
+      title: 'Time keeping dead torrents',
+      help: 'Integer (in seconds)',
+      desc: 'Time keeping dead torrents in seconds (Only when <span class="inline-pseudobox">Remove dead \
+        torrents</span> is enabled). 0 = do not keep dead torrents, X = time in seconds.'
+    },
     indexfiles: {
       key: 'indexfiles',
       value: sails.config.indexfiles || false,
