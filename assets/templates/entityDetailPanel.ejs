@@ -161,7 +161,10 @@
         </div>
 
         <div class="cell col-sm-5 box-default">
-          <span class="plastic-tag small center shadow"><%= Helpers.formatBigNumber(service['items-processed']) %> / <%= Helpers.formatBigNumber(service['items-served']) %> (<%= Helpers.formatBigNumber(service['idle']) %>)</span>
+          <span class="plastic-tag small center shadow"><%= Helpers.formatBigNumber(service['items-processed']) %> /
+            <%= Helpers.formatBigNumber(((service['force-idle'] || false) ? service['items-served'] - service['force-idle'] : service['items-served'])) %>
+            (<%= Helpers.formatBigNumber(service['idle']) + ((service['force-idle'] || false) ? ' + ' + Helpers.formatBigNumber(service['force-idle']) : '') %>)
+          </span>
         </div>
 
         <div class="cell col-sm-2 box-default">
