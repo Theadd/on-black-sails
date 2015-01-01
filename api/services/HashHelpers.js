@@ -164,7 +164,7 @@ exports.getDeadParameters = function (current, updated, foundDead) {
       if (updated.deaths > current.deaths) {
         if ((new Date(updated.deadSince)) < (new Date(current.deadSince))) {
           params.deaths = updated.deaths
-          params.deadSince = updated.deadSince
+          params.deadSince = new Date(updated.deadSince)
         } else {
           params.deaths = current.deaths + 1
         }
@@ -195,7 +195,7 @@ exports.getDeadParameters = function (current, updated, foundDead) {
         // current ALIVE, updated DEAD
         if ((new Date(updated.deadSince)) < (new Date(current.peersUpdatedAt))) {
           params.deaths = updated.deaths
-          params.deadSince = updated.deadSince
+          params.deadSince = new Date(updated.deadSince)
         } else {
           // COMMENT: <updated> is wrong!
         }
@@ -216,7 +216,7 @@ exports.getDeadParameters = function (current, updated, foundDead) {
       if (updated.deaths || 0) {
         // current UNDEFINED, updated DEAD
         params.deaths = updated.deaths
-        params.deadSince = updated.deadSince
+        params.deadSince = new Date(updated.deadSince)
       } else {
         //current UNDEFINED, updated ALIVE or UNDEFINED
         if (typeof updated.deaths !== "undefined") {
