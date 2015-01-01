@@ -247,6 +247,9 @@ Settings.prototype.get = function (prop) {
       case 'removedead':
         value = self._config.removedead.value
         break
+      case 'timekeepingdead':
+        value = self._config.timekeepingdead.value
+        break
       case 'indexfiles':
         value = self._config.indexfiles.value
         break
@@ -320,6 +323,9 @@ Settings.prototype.set = function (prop, value) {
       break
     case 'removedead':
       self._config.removedead.value = Boolean(JSON.parse(value))
+      break
+    case 'timekeepingdead':
+      self._config.timekeepingdead.value = Number(value)
       break
     case 'indexfiles':
       self._config.indexfiles.value = Boolean(JSON.parse(value))
