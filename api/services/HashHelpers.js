@@ -103,7 +103,7 @@ exports.merge = function (item, callback) {
         if (isMostUpdated(entries[0], item)) {
           if (typeof item.seeders !== "undefined" && Settings.get('removedead') && item.seeders == 0 && item.leechers == 0) {
             //Remove dead torrent
-            HashHelpers.remove(entries[0].uuid)
+            HashHelpers.remove(entries[0].uuid) //TODO: HashHelpers.getDeadParameters()
             return callback(null, 'deadmarked')
           } else {
             var uuid = item.uuid
@@ -168,3 +168,107 @@ exports.remove = function (uuid) {
       })
   })
 }
+
+exports.getDeadParameters = function (current, updated, foundDead) {
+  var params = {}
+
+  current = current || {}
+  updated = updated || {}
+  foundDead = foundDead || null
+
+  if (current.deaths || 0) {
+    // current DEAD
+    if (updated.deaths || 0) {
+      // current DEAD, updated DEAD
+      if (updated.deaths > current.deaths) {
+        if ((new Date(updated.deadSince)) < (new Date(current.deadSince))) {
+          params.deaths = updated.deaths
+          params.deadSince = updated.deadSince
+        } else {
+          params.deaths = current.deaths + 1
+        }
+      } else {
+        params.deaths = current.deaths + 1
+      }
+    } else {
+      // current DEAD, updated ALIVE or UNDEFINED
+      if (typeof updated.deaths !== "undefined") {
+        // current DEAD, updated ALIVE
+        if ((new Date(updated.peersUpdatedAt)) < (new Date(current.deadSince))) {
+          params.deaths = 0
+        }
+      } else {
+        // current DEAD, updated UNDEFINED
+        if (foundDead == true) {
+          params.deaths = current.deaths + 1
+        } else if (foundDead == false) {
+          params.deaths = 0
+        }
+      }
+    }
+  } else {
+    // current ALIVE or UNDEFINED
+    if (typeof current.deaths !== "undefined") {
+      // current ALIVE
+      if (updated.deaths || 0) {
+        // current ALIVE, updated DEAD
+        if ((new Date(updated.deadSince)) < (new Date(current.peersUpdatedAt))) {
+          params.deaths = updated.deaths
+          params.deadSince = updated.deadSince
+        } else {
+          // COMMENT: <updated> is wrong!
+        }
+      } else {
+        // current ALIVE, updated ALIVE or UNDEFINED
+        if (typeof updated.deaths !== "undefined") {
+          // current ALIVE, updated ALIVE
+        } else {
+          // current ALIVE, updated UNDEFINED
+          if (foundDead == true) {
+            params.deaths = 1
+            params.deadSince = new Date()
+          }
+        }
+      }
+    } else {
+      // current UNDEFINED
+      if (updated.deaths || 0) {
+        // current UNDEFINED, updated DEAD
+        params.deaths = updated.deaths
+        params.deadSince = updated.deadSince
+      } else {
+        //current UNDEFINED, updated ALIVE or UNDEFINED
+        if (typeof updated.deaths !== "undefined") {
+          // current UNDEFINED, updated ALIVE
+          params.deaths = 0
+        } else {
+          // current UNDEFINED, updated UNDEFINED
+          if (foundDead == true) {
+            params.deaths = 1
+            params.deadSince = new Date()
+          } else if (foundDead == false) {
+            params.deaths = 0
+          }
+        }
+      }
+    }
+  }
+
+  return params
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

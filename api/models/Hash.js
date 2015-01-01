@@ -109,6 +109,15 @@ module.exports = {
       type: 'datetime'
     },
 
+    deaths: {
+      type: 'integer'//,
+      //defaultsTo: 0
+    },
+
+    deadSince: {
+      type: 'datetime'
+    },
+
     toJSON: function() {
       var obj = this.toObject();
       obj.category = obj.category.toLowerCase();
