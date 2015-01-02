@@ -183,18 +183,31 @@ module.exports = {
         interval: 300000,     //5min
         target: 'tracker',    //add items to TrackerService queue (REQUIRED).
         limit: 120,
+        startAt: new Date(0),
+        restart: false,
         prioritize: false,     //prioritize items in the queue (OPTIONAL).
         skipRecentPool: false, //do not check service recent pool if items already exist (OPTIONAL).
         display: 'Keep TrackerService Busy',
-        desc: 'Add items to TrackerService queue.',
-        tooltip: 'Adds items to TrackerService queue.'
+        desc: 'Add items older than 24h to TrackerService queue.',
+        tooltip: '<strong>Requires Index</strong>: <pre>db.hash.ensureIndex({downloaded: 1, createdAt: 1})</pre>'
       }
     },
     query: function(options, callback) {
-      Hash.find({})
-        .sort('peersUpdatedAt ASC')
+      if (options.restart) {
+        options.restart = false
+        options.startAt = new Date(0)
+      }
+
+      Hash.find({ downloaded: true, createdAt: { '>=': options.startAt } })
+        .sort('createdAt ASC')
         .limit(options.limit)
         .exec(callback)
+    },
+    filter: function(entry, options) {
+      options.startAt = (entry.createdAt > options.startAt) ? entry.createdAt : options.startAt
+      options.restart = (options.startAt.getTime() > (new Date().getTime() - 86400000))
+
+      return true
     }
   }
 }
