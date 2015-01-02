@@ -34,6 +34,11 @@ module.exports.setup = function() {
   self._stats['items-retry-fail'] = 0
   self._stats['working-pool-size'] = 0
   self._stats['force-idle'] = 0
+  self._stats['empty-events'] = 0
+  self._stats['empty-busy'] = 0
+  self._stats['empty-not-busy'] = 0
+  self._stats['empty-set-busy'] = 0
+  self._stats['empty-unset-busy'] = 0
   self._stats['interval'] = CommandLineHelpers.config.tracker.interval
   self._stats['host'] = CommandLineHelpers.config.tracker.host
   self._stats['port'] = CommandLineHelpers.config.tracker.port
@@ -51,13 +56,19 @@ module.exports.setup = function() {
   })
 
   self.on('empty', function() {
+    ++self._stats['empty-events']
     if (!self._isEmptyBusy) {
+      ++self._stats['empty-not-busy']
       if (self.config('onempty') != false) {
         self._isEmptyBusy = true
+        ++self._stats['empty-set-busy']
         ServiceQueueModel.runOnce(self.config('onempty'), {}, function () {
           self._isEmptyBusy = false
+          ++self._stats['empty-unset-busy']
         })
       }
+    } else {
+      ++self._stats['empty-busy']
     }
   })
 }

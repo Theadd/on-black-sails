@@ -2,7 +2,7 @@
  * Created by Theadd on 21/09/2014.
  */
 
-var extend = require('node.extend');
+var extend = require('node.extend')
 
 exports.run = function (modelName, opts) {
   opts = opts || {}
