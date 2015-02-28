@@ -54,7 +54,7 @@ exports.run = function() {
 
   if (CommandLineHelpers.config.metadata.active) {
     MetadataService.server()
-    MetadataService.start()
+    MetadataService.run()
   }
 
   if (CommandLineHelpers.config.status.active) {

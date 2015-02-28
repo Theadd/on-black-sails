@@ -2,7 +2,7 @@
  * Created by Theadd on 7/26/14.
  */
 
-var TrackerClient = require('bittorrent-tracker-scrape')
+var BittorrentWorkers = require('bittorrent-workers')
 var extend = require('node.extend')
 
 module.exports = new (require('ipc-service').Service)()
@@ -78,7 +78,7 @@ module.exports.updatePeersOf = function(hash) {
       if (!err && entries.length) {
         ++self._stats['working-pool-size']
 
-        new TrackerClient(hash, entries[0].trackers, {}, function (err, res) {
+        new BittorrentWorkers.Scraper(hash, entries[0].trackers, {}, function (err, res) {
           ++self._stats['items-processed']
           --self._stats['working-pool-size']
           if (!err) {
