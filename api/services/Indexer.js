@@ -30,11 +30,15 @@ exports.run = function() {
 
   if (CommandLineHelpers.config.index.kickass.active) {
     if (CommandLineHelpers.config.index.kickass.full) {
-      url = 'http://kickass.so/dailydump.txt.gz'
+      //url = 'http://kickass.so/dailydump.txt.gz'
+      url = 'http://kat.cr/dailydump.txt.gz'
+      //url = 'https://kat.cr/dailydump.txt.gz'
       Indexer.indexerStats[url] = extend(true, {}, entryDefaultStats)
       createTask(url, 0, indexSiteAPI)
     } else {
-      url = 'http://kickass.so/hourlydump.txt.gz'
+      //url = 'http://kickass.so/hourlydump.txt.gz'
+      url = 'http://kat.cr/hourlydump.txt.gz'
+      //url = 'https://kat.cr/hourlydump.txt.gz'
       Indexer.indexerStats[url] = extend(true, {}, entryDefaultStats)
       createTask(url, 1800000, indexSiteAPI) //30min = 1800000
     }
